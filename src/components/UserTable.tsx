@@ -29,7 +29,7 @@ const UserTable = () => {
   const endIdx = startIdx + USERS_PER_PAGE;
   const currentUsers = users.slice(startIdx, endIdx);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputPage(e.target.value.replace(/[^0-9]/g, ""));
   };
 
@@ -41,7 +41,7 @@ const UserTable = () => {
     setInputPage(page.toString());
   };
 
-  const handleInputKeyDown = (e) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleInputBlur();
     }
