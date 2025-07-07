@@ -3,8 +3,7 @@ import React from "react";
 const Sidebar = () => (
   <aside className="sidebar">
     <div className="sidebar-header">
-      <span className="sidebar-logo">YCM360</span>
-      <span className="sidebar-version">v48</span>
+      <img src="/logo-ycm360.png" alt="YCM360 Logo" className="sidebar-logo-img" />
     </div>
     <nav className="sidebar-nav">
       <div className="sidebar-section">
