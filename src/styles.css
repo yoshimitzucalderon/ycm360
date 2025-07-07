@@ -214,13 +214,28 @@ body {
   border: 1px solid #e5e7eb;
   border-radius: 4px;
   padding: 2px 10px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  color: #10b981;
-  transition: background 0.2s;
+  color: #bdbdbd;
+  transition: background 0.2s, color 0.2s;
 }
-.user-table-pagination button:hover {
-  background: #e6f9f2;
+.user-table-pagination button:disabled {
+  color: #e0e0e0;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+.user-table-pagination button:not(:disabled):hover {
+  background: #ececec;
+  color: #10b981;
+}
+.user-table-pagination input[type="text"] {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 0;
+  font-size: 1rem;
+  color: #444;
+  background: #fff;
+  margin: 0 2px;
 }
 
 .right-panel {
