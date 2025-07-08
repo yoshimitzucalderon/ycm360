@@ -331,136 +331,80 @@ body {
 
 .user-table-container {
   background: #fff;
-  margin: 24px 32px;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   border: 1px solid #e5e7eb;
   padding-bottom: 12px;
+  overflow: hidden;
 }
-.user-table-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 24px 8px 24px;
-}
-.user-table-filter-btn,
-.user-table-sort-btn {
-  background: #f7f8fa;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 1rem;
-  color: #10b981;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.user-table-filter-btn:hover,
-.user-table-sort-btn:hover {
-  background: #e6f9f2;
-  color: #059669;
-}
-
-.table-filter, .table-sort {
-  background: #fff;
-  border: 1px solid #f1f5f9;
-  border-radius: 6px;
-  margin: 0 8px 8px 8px;
-  padding: 10px 10px 6px 10px;
-  box-shadow: none;
-}
-.table-filter-row {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  margin-bottom: 2px;
-  font-size: 0.97rem;
-}
-.table-filter-controls select,
-.table-filter-controls input,
-.table-sort-controls select {
-  padding: 4px 0 4px 0;
-  border: none;
-  border-bottom: 1.2px solid #e2e8f0;
-  border-radius: 0;
-  background: #fff;
-  font-size: 1rem;
-  color: #222;
-  outline: none;
-  box-shadow: none;
-  margin-right: 8px;
-  min-width: 90px;
-  transition: border-color 0.2s;
-}
-.table-filter-controls input::placeholder {
-  color: #bdbdbd;
-  opacity: 1;
-  font-weight: 400;
-}
-.table-filter-controls select:focus,
-.table-filter-controls input:focus,
-.table-sort-controls select:focus {
-  border-bottom: 1.2px solid #10b981;
-}
-.table-filter-add, .table-sort-apply, .table-filter-apply {
-  padding: 3px 8px;
-  font-size: 13px;
-  min-width: 0;
-  border-radius: 3px;
-  margin-right: 4px;
-}
-.table-filter-add:last-child, .table-sort-apply:last-child, .table-filter-apply:last-child {
-  margin-right: 0;
-}
-.table-filter-actions, .table-sort-controls {
-  gap: 4px;
-}
-
 .table-wrapper {
   width: 100%;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 520px;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-
-.table-container {
-  padding: 16px 0 0 0;
-}
-
 .user-table {
   min-width: 900px;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   table-layout: fixed;
 }
-
 .user-table th, .user-table td {
-  padding: 6px 12px;
+  padding: 8px 12px;
   text-align: left;
   border-bottom: 1px solid #f1f1f1;
   white-space: nowrap;
   font-size: 14px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  height: 32px;
+  font-family: 'Inter', sans-serif;
+  height: 36px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 1px;
+  background: #fff;
 }
-
-.user-table th:not(:last-child) {
+.user-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+.user-table th:not(:last-child),
+.user-table td:not(:last-child) {
   border-right: 1px solid #e5e7eb;
 }
-
-.user-table th {
-  background: #f8fafc;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
+.user-table tbody tr:hover {
+  background: #f3f4f6;
+}
+.user-table tr.selected {
+  background: #e6f9f2;
+}
+.user-table input[type="checkbox"] {
+  accent-color: #10b981;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+.user-table::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.user-table::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+.user-table::-webkit-scrollbar-track {
+  background: #fff;
 }
 
 .user-table .col-resizer {
@@ -499,10 +443,6 @@ body {
 
 .user-table tr:last-child td {
   border-bottom: none;
-}
-
-.user-table tbody tr:hover {
-  background: #f3f4f6;
 }
 
 .user-table .highlight {
