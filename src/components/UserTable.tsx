@@ -5,6 +5,7 @@ import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus } from 'lucide-react';
+import { RiArrowDownSLine } from 'react-icons/ri';
 
 const columns: TableColumn[] = [
   { key: "name", label: "Proveedor" },
@@ -388,17 +389,17 @@ const UserTable = () => {
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
                     className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
-                    style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150 }}
+                    style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150, paddingRight: 28 }}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}>
                       {col.label}
-                      <span
-                        className="sort-arrow-down"
-                        onClick={e => handleSortMenu(e, col.key)}
-                        style={{ cursor: 'pointer', userSelect: 'none' }}
-                      >
-                        ▼
-                      </span>
+                    </span>
+                    <span
+                      className="sort-arrow-down"
+                      onClick={e => handleSortMenu(e, col.key)}
+                      style={{ cursor: 'pointer', userSelect: 'none', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}
+                    >
+                      <RiArrowDownSLine size={18} color={sort && sort.column === col.key ? 'var(--sidebar-accent)' : '#cbd5e1'} />
                     </span>
                     {/* Menú contextual de sort */}
                     {sortMenu.colKey === col.key && sortMenu.anchor && (
