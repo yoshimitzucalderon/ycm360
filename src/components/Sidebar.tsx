@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import * as React from "react";
+import { useState } from "react";
 import { FaDollarSign, FaCog, FaStore, FaBullhorn, FaUser, FaHome, FaFolderOpen, FaRegFileAlt, FaUsers, FaShareAlt } from "react-icons/fa";
 import { IconType } from "react-icons";
 
@@ -39,14 +40,14 @@ const Sidebar = () => {
           <div className="sidebar-section-title">DASHBOARDS</div>
           <ul>
             {dashboards.map((item) => {
-              const Icon: IconType = item.icon;
+              const Icon = item.icon;
               return (
                 <li
                   key={item.name}
                   className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
                   onClick={() => handleItemClick(item.name)}
                 >
-                  <span className="icon"><Icon /></span>
+                  <span className="icon">{React.createElement(Icon)}</span>
                   <span className="sidebar-text">{item.name}</span>
                 </li>
               );
@@ -57,14 +58,14 @@ const Sidebar = () => {
           <div className="sidebar-section-title">PAGES</div>
           <ul>
             {pages.map((item) => {
-              const Icon: IconType = item.icon;
+              const Icon = item.icon;
               return (
                 <li
                   key={item.name}
                   className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
                   onClick={() => handleItemClick(item.name)}
                 >
-                  <span className="icon"><Icon /></span>
+                  <span className="icon">{React.createElement(Icon)}</span>
                   <span className="sidebar-text">{item.name}</span>
                 </li>
               );
