@@ -27,7 +27,11 @@ const iconMap = {
   Cog
 };
 
-const menuBlocks = [
+const menuBlocks: {
+  key: string;
+  label: string;
+  icon: keyof typeof iconMap;
+}[][] = [
   [
     { key: 'dashboards', label: 'Dashboards', icon: 'LayoutDashboard' },
     { key: 'administracion', label: 'Administración', icon: 'Users' },
@@ -47,7 +51,17 @@ const menuBlocks = [
   ]
 ];
 
-const SidebarItem = ({ item, isActive, onClick }) => {
+type SidebarItemProps = {
+  item: {
+    key: string;
+    label: string;
+    icon: keyof typeof iconMap;
+  };
+  isActive: boolean;
+  onClick: () => void;
+};
+
+const SidebarItem: React.FC<SidebarItemProps> = ({ item, isActive, onClick }) => {
   const Icon = iconMap[item.icon];
   return (
     <div

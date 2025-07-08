@@ -131,37 +131,45 @@ const UserTable = () => {
 
       let query = supabase.from('erp_proveedor_alta_de_proveedor').select('*');
 
-      // Construir filtros AND/OR
+      // Construir filtros AND/OR mejorado
       if (filters.length > 0) {
-        let andFilters: TableFilterType[] = [];
-        let orFilters: TableFilterType[] = [];
-        filters.forEach((filter, idx) => {
-          if (idx === 0 || filter.logicalOperator === 'AND') {
-            andFilters.push(filter);
-          } else if (filter.logicalOperator === 'OR') {
-            orFilters.push(filter);
-          }
-        });
-
-        // Aplica filtros AND
-        andFilters.forEach(f => {
-          const dbColumn = columnMap[f.column] || f.column;
-          if (f.operator === '=')
-            query = query.eq(dbColumn, f.value);
-          else if (f.operator === 'like' || f.operator === 'ilike')
-            query = query[f.operator](dbColumn, `%${f.value}%`);
-          else
-            query = query.filter(dbColumn, f.operator, f.value);
-        });
-
-        // Aplica filtros OR (si hay)
-        if (orFilters.length > 0) {
-          const orString = orFilters.map(f => {
+        const allOr = filters.every((f, idx) => idx === 0 || f.logicalOperator === 'OR');
+        if (allOr) {
+          // Todos los filtros son OR
+          const orString = filters.map(f => {
             const dbColumn = columnMap[f.column] || f.column;
             const op = opMap[f.operator] || f.operator;
             return `${dbColumn}.${op}.${f.value}`;
           }).join(',');
           query = query.or(orString);
+        } else {
+          // Aplica los AND primero, luego los OR
+          let andFilters: TableFilterType[] = [];
+          let orFilters: TableFilterType[] = [];
+          filters.forEach((filter, idx) => {
+            if (idx === 0 || filter.logicalOperator === 'AND') {
+              andFilters.push(filter);
+            } else if (filter.logicalOperator === 'OR') {
+              orFilters.push(filter);
+            }
+          });
+          andFilters.forEach(f => {
+            const dbColumn = columnMap[f.column] || f.column;
+            if (f.operator === '=')
+              query = query.eq(dbColumn, f.value);
+            else if (f.operator === 'like' || f.operator === 'ilike')
+              query = query[f.operator](dbColumn, `%${f.value}%`);
+            else
+              query = query.filter(dbColumn, f.operator, f.value);
+          });
+          if (orFilters.length > 0) {
+            const orString = orFilters.map(f => {
+              const dbColumn = columnMap[f.column] || f.column;
+              const op = opMap[f.operator] || f.operator;
+              return `${dbColumn}.${op}.${f.value}`;
+            }).join(',');
+            query = query.or(orString);
+          }
         }
       }
 
