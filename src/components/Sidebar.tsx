@@ -81,7 +81,9 @@ const SidebarMenu = () => {
   const [activeItem, setActiveItem] = useState('dashboards');
   return (
     <nav className="sidebar">
-      {/* Logo eliminado para evitar duplicado */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '24px 0 8px 0' }}>
+        <YCM360Logo />
+      </div>
       {menuBlocks.map((block, blockIndex) => (
         <div key={blockIndex} className="sidebar-block">
           {block.map((item) => (
