@@ -1,74 +1,85 @@
-import React, { useState } from "react";
-import { FaDollarSign, FaCog, FaStore, FaBullhorn, FaUser, FaHome, FaFolderOpen, FaRegFileAlt, FaUsers, FaShareAlt } from "react-icons/fa";
-import { IconType } from "react-icons";
+import React, { useState } from 'react';
+import {
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  Briefcase,
+  TrendingUp,
+  ListTodo,
+  CalendarDays,
+  Files,
+  BellRing,
+  MessagesSquare,
+  Cog
+} from 'lucide-react';
 
-const dashboards: { name: string; icon: IconType }[] = [
-  { name: "Finanzas", icon: FaDollarSign },
-  { name: "Administración", icon: FaCog },
-  { name: "Comercialización", icon: FaStore },
-  { name: "Marketing", icon: FaBullhorn },
+const iconMap = {
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  Briefcase,
+  TrendingUp,
+  ListTodo,
+  CalendarDays,
+  Files,
+  BellRing,
+  MessagesSquare,
+  Cog
+};
+
+const menuBlocks = [
+  [
+    { key: 'dashboards', label: 'Dashboards', icon: 'LayoutDashboard' },
+    { key: 'administracion', label: 'Administración', icon: 'Users' },
+    { key: 'finanzas', label: 'Finanzas', icon: 'CreditCard' },
+    { key: 'proyectos', label: 'Proyectos', icon: 'Briefcase' }
+  ],
+  [
+    { key: 'reportes', label: 'Reportes', icon: 'TrendingUp' },
+    { key: 'tareas', label: 'Tareas', icon: 'ListTodo' },
+    { key: 'calendario', label: 'Calendario', icon: 'CalendarDays' },
+    { key: 'documentos', label: 'Documentos', icon: 'Files' }
+  ],
+  [
+    { key: 'notificaciones', label: 'Notificaciones', icon: 'BellRing' },
+    { key: 'chat', label: 'Chat', icon: 'MessagesSquare' },
+    { key: 'configuracion', label: 'Configuración', icon: 'Cog' }
+  ]
 ];
 
-const pages: { name: string; icon: IconType }[] = [
-  { name: "User Profile", icon: FaUser },
-  { name: "Overview", icon: FaHome },
-  { name: "Projects", icon: FaFolderOpen },
-  { name: "Campaigns", icon: FaBullhorn },
-  { name: "Documents", icon: FaRegFileAlt },
-  { name: "Followers", icon: FaUsers },
-  { name: "Account", icon: FaCog },
-  { name: "Social", icon: FaShareAlt },
-];
-
-const Sidebar = () => {
-  const [selectedItem, setSelectedItem] = useState("Finanzas");
-
-  const handleItemClick = (itemName: string) => {
-    setSelectedItem(itemName);
-  };
-
+const SidebarItem = ({ item, isActive, onClick }) => {
+  const Icon = iconMap[item.icon];
   return (
-    <aside className="sidebar">
-      <nav className="sidebar-nav">
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">DASHBOARDS</div>
-          <ul>
-            {dashboards.map((item) => {
-              const Icon = item.icon as React.ElementType;
-              return (
-                <li
-                  key={item.name}
-                  className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
-                  onClick={() => handleItemClick(item.name)}
-                >
-                  <span className="icon"><Icon /></span>
-                  <span className="sidebar-text">{item.name}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">PAGES</div>
-          <ul>
-            {pages.map((item) => {
-              const Icon = item.icon as React.ElementType;
-              return (
-                <li
-                  key={item.name}
-                  className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
-                  onClick={() => handleItemClick(item.name)}
-                >
-                  <span className="icon"><Icon /></span>
-                  <span className="sidebar-text">{item.name}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </nav>
-    </aside>
+    <div
+      className={`sidebar-item${isActive ? ' active' : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+    >
+      <Icon className="sidebar-icon" />
+      <span className="sidebar-text">{item.label}</span>
+    </div>
   );
 };
 
-export default Sidebar;
+const SidebarMenu = () => {
+  const [activeItem, setActiveItem] = useState('dashboards');
+  return (
+    <nav className="sidebar">
+      {menuBlocks.map((block, blockIndex) => (
+        <div key={blockIndex} className="sidebar-block">
+          {block.map((item) => (
+            <SidebarItem
+              key={item.key}
+              item={item}
+              isActive={activeItem === item.key}
+              onClick={() => setActiveItem(item.key)}
+            />
+          ))}
+        </div>
+      ))}
+    </nav>
+  );
+};
+
+export default SidebarMenu;

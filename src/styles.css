@@ -1,8 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #64748b;
+  --sidebar-text-active: #0f172a;
+  --sidebar-hover: #f8fafc;
+  --sidebar-active: #f0fdf4;
+  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #22c55e;
+}
+
+/* Tipografía global estilo Supabase */
+* {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
 body {
-  margin: 0;
-  font-family: 'Inter', 'Roboto', Arial, sans-serif;
-  background: #f7f8fa;
-  color: #222;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  gap: 20px;
+  padding: 16px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  height: 100vh;
+}
+
+.sidebar-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 12px;
+  position: relative;
+}
+
+.sidebar-block:not(:last-child)::after {
+  content: '';
+  height: 1px;
+  background-color: var(--sidebar-border);
+  margin: 16px 12px;
+  opacity: 0.6;
+  display: block;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  gap: 12px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.sidebar-item.active {
+  background-color: var(--sidebar-active);
+  border-left: 2px solid var(--sidebar-accent);
+  padding-left: 10px;
+}
+
+.sidebar-item.active .sidebar-icon {
+  color: var(--sidebar-accent);
+}
+
+.sidebar-item.active .sidebar-text {
+  color: var(--sidebar-text-active);
+  font-weight: 600;
+}
+
+.sidebar-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+  color: var(--sidebar-text);
+  transition: color 0.15s ease;
+}
+
+.sidebar-text {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  color: var(--sidebar-text);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: inherit;
 }
 
 .app-layout {
@@ -11,14 +105,6 @@ body {
   background: #f7f8fa;
 }
 
-.sidebar {
-  width: 220px;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  padding: 0 0 24px 0;
-}
 .sidebar-header {
   display: flex;
   align-items: center;
