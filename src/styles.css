@@ -315,86 +315,85 @@ body {
 }
 
 .table-filter, .table-sort {
-  background: #f7f8fa;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  margin: 0 24px 16px 24px;
-  padding: 18px 18px 12px 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-.table-filter-list, .table-sort-controls {
-  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  margin: 0 8px 8px 8px;
+  padding: 10px 10px 6px 10px;
+  box-shadow: none;
 }
 .table-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin-bottom: 4px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 2px;
   font-size: 0.97rem;
-}
-.table-filter-remove {
-  background: none;
-  border: none;
-  color: #e53e3e;
-  font-size: 1.1rem;
-  cursor: pointer;
-  margin-left: 8px;
-}
-.table-filter-controls, .table-sort-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 .table-filter-controls select,
 .table-filter-controls input,
 .table-sort-controls select {
-  padding: 6px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 4px 0 4px 0;
+  border: none;
+  border-bottom: 1.2px solid #e2e8f0;
+  border-radius: 0;
   background: #fff;
+  font-size: 1rem;
+  color: #222;
+  outline: none;
+  box-shadow: none;
+  margin-right: 8px;
+  min-width: 90px;
+  transition: border-color 0.2s;
+}
+.table-filter-controls input::placeholder {
+  color: #bdbdbd;
+  opacity: 1;
+  font-weight: 400;
+}
+.table-filter-controls select:focus,
+.table-filter-controls input:focus,
+.table-sort-controls select:focus {
+  border-bottom: 1.2px solid #10b981;
 }
 .table-filter-add, .table-sort-apply {
   background: #10b981;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-size: 0.98rem;
+  min-width: 0;
+  box-shadow: none;
 }
 .table-filter-add:hover, .table-sort-apply:hover {
   background: #059669;
 }
-.table-filter-actions, .table-sort-controls {
-  margin-top: 10px;
-  gap: 8px;
-}
 .table-filter-clear, .table-sort-clear {
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-right: 8px;
+  color: #bdbdbd;
+  font-size: 0.98rem;
+  margin-right: 6px;
   text-decoration: underline;
+  padding: 0;
 }
 .table-filter-apply {
   background: #10b981;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-size: 0.98rem;
+  min-width: 0;
+  box-shadow: none;
 }
 .table-filter-apply:hover {
   background: #059669;
+}
+.table-filter-list, .table-sort-controls {
+  margin-bottom: 6px;
+}
+.table-filter-actions, .table-sort-controls {
+  margin-top: 4px;
+  gap: 6px;
 }
 
 .table-wrapper {
