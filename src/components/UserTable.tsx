@@ -197,18 +197,18 @@ const UserTable = () => {
     fetchData();
   }, [filters]);
 
-  // Paginación
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-  const paginatedData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  // Filtrado por búsqueda en todas las columnas activas
-  const filteredBySearch = paginatedData.filter((row) => {
+  // Filtrado por búsqueda en todas las columnas activas (sobre todos los datos filtrados)
+  const searchedData = filteredData.filter((row) => {
     if (!search.trim()) return true;
     return columns.some(col => {
       const value = row[col.key];
       return value && value.toString().toLowerCase().includes(search.toLowerCase());
     });
   });
+
+  // Paginación sobre el resultado de la búsqueda
+  const totalPages = Math.ceil(searchedData.length / PAGE_SIZE);
+  const paginatedData = searchedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Handlers para filtros y ordenamiento
   const handleApplyFilter = () => setPage(1);
@@ -302,7 +302,7 @@ const UserTable = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredBySearch.map((user, idx) => (
+              {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
                   <td>{user.name}</td>
@@ -320,7 +320,7 @@ const UserTable = () => {
           page={page}
           setPage={setPage}
           totalPages={totalPages}
-          totalItems={filteredData.length}
+          totalItems={searchedData.length}
           pageSize={PAGE_SIZE}
         />
       </div>
