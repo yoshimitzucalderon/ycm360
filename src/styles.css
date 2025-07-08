@@ -63,8 +63,13 @@ body {
   font-size: 1rem;
   margin-bottom: 2px;
   transition: background 0.2s, color 0.2s;
+  background: transparent;
 }
-.sidebar-section li.active, .sidebar-section li:hover {
+.sidebar-section li:hover {
+  background: #f0fdfa;
+  color: #10b981;
+}
+.sidebar-section li.active {
   background: #e6f9f2;
   color: #10b981;
   font-weight: 600;
