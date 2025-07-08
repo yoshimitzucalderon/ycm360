@@ -157,6 +157,20 @@ const buildSupabaseQuery = (baseQuery: any, filters: TableFilterType[]) => {
   }
 };
 
+const ORIGINAL_COLUMNS = columns; // Asume que 'columns' es el array original importado o definido arriba
+
+const getStoredColumnOrder = () => {
+  try {
+    const stored = localStorage.getItem('columnOrder');
+    if (stored) {
+      const keys = JSON.parse(stored);
+      // Reconstruir columnas según el orden guardado
+      return keys.map((k: string) => ORIGINAL_COLUMNS.find(c => c.key === k)).filter(Boolean);
+    }
+  } catch {}
+  return ORIGINAL_COLUMNS;
+};
+
 const UserTable = () => {
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
@@ -167,6 +181,7 @@ const UserTable = () => {
   const [search, setSearch] = useState("");
   const [colWidths, setColWidths] = useState<{ [key: string]: number }>({});
   const tableRef = useRef<HTMLTableElement>(null);
+  const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
 
   const {
     data: filteredData,
@@ -177,6 +192,15 @@ const UserTable = () => {
     clearFilters,
     clearSort
   } = useTableData(data, columns);
+
+  // Persistir orden en localStorage
+  useEffect(() => {
+    localStorage.setItem('columnOrder', JSON.stringify(columnOrder.map(c => c.key)));
+  }, [columnOrder]);
+
+  // Restaurar columnas
+  const isOrderModified = columnOrder.map(c => c.key).join(',') !== ORIGINAL_COLUMNS.map(c => c.key).join(',');
+  const handleRestoreColumns = () => setColumnOrder(ORIGINAL_COLUMNS);
 
   // Fetch de Supabase con filtros AND/OR
   useEffect(() => {
@@ -243,6 +267,24 @@ const UserTable = () => {
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  // Drag and drop handlers
+  const dragCol = useRef<string | null>(null);
+  const handleDragStart = (colKey: string) => { dragCol.current = colKey; };
+  const handleDragOver = (e: React.DragEvent, overKey: string) => { e.preventDefault(); };
+  const handleDrop = (e: React.DragEvent, dropKey: string) => {
+    e.preventDefault();
+    const fromKey = dragCol.current;
+    if (!fromKey || fromKey === dropKey) return;
+    const fromIdx = columnOrder.findIndex(c => c.key === fromKey);
+    const toIdx = columnOrder.findIndex(c => c.key === dropKey);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const newOrder = [...columnOrder];
+    const [removed] = newOrder.splice(fromIdx, 1);
+    newOrder.splice(toIdx, 0, removed);
+    setColumnOrder(newOrder);
+    dragCol.current = null;
+  };
+
   return (
     <div className="table-container">
       <div className="table-wrapper">
@@ -270,6 +312,11 @@ const UserTable = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
+            {isOrderModified && (
+              <button className="restore-columns-btn" onClick={handleRestoreColumns}>
+                Restaurar columnas
+              </button>
+            )}
           </div>
           <div className="controls-right">
             <button className="btn btn-primary">
@@ -305,9 +352,13 @@ const UserTable = () => {
             <thead>
               <tr>
                 <th></th>
-                {columns.map(col => (
+                {columnOrder.map(col => (
                   <th
                     key={col.key}
+                    draggable
+                    onDragStart={() => handleDragStart(col.key)}
+                    onDragOver={e => handleDragOver(e, col.key)}
+                    onDrop={e => handleDrop(e, col.key)}
                     onClick={() => handleHeaderClick(col.key)}
                     className="user-table-header-cell"
                     style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150 }}
@@ -332,7 +383,7 @@ const UserTable = () => {
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
-                  {columns.map(col => (
+                  {columnOrder.map(col => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
                 </tr>
