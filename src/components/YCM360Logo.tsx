@@ -4,7 +4,7 @@ const YCM360Logo = () => {
   return (
     <div className="flex items-center" style={{ padding: 0 }}>
       {/* Circular logo part */}
-      <span className="flex items-center" style={{ marginRight: '6px' }}>
+      <span className="flex items-center" style={{ marginRight: '6px', position: 'relative', top: '3px' }}>
         <svg width="22" height="22" viewBox="0 0 80 80">
           <circle
             cx="40"
