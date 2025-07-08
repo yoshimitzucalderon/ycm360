@@ -12,6 +12,7 @@ import {
   MessagesSquare,
   Cog
 } from 'lucide-react';
+import YCM360Logo from './YCM360Logo';
 
 const iconMap = {
   LayoutDashboard,
@@ -80,6 +81,9 @@ const SidebarMenu = () => {
   const [activeItem, setActiveItem] = useState('dashboards');
   return (
     <nav className="sidebar">
+      <div style={{ margin: '24px 0 12px 0', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <YCM360Logo />
+      </div>
       {menuBlocks.map((block, blockIndex) => (
         <div key={blockIndex} className="sidebar-block">
           {block.map((item) => (
