@@ -286,7 +286,7 @@ const UserTable = () => {
             <thead>
               <tr>
                 <th></th>
-                {columns.slice(0, 4).map(col => (
+                {columns.map(col => (
                   <th
                     key={col.key}
                     onClick={() => handleHeaderClick(col.key)}
@@ -305,10 +305,9 @@ const UserTable = () => {
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
-                  <td>{user.name}</td>
-                  <td>{user.company}</td>
-                  <td>{user.rfc}</td>
-                  <td>{user.giro}</td>
+                  {columns.map(col => (
+                    <td key={col.key}>{user[col.key]}</td>
+                  ))}
                 </tr>
               ))}
             </tbody>
