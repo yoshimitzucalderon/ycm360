@@ -275,8 +275,8 @@ const UserTable = () => {
     e.preventDefault();
     const fromKey = dragCol.current;
     if (!fromKey || fromKey === dropKey) return;
-    const fromIdx = columnOrder.findIndex(c => c.key === fromKey);
-    const toIdx = columnOrder.findIndex(c => c.key === dropKey);
+    const fromIdx = columnOrder.findIndex((c: TableColumn) => c.key === fromKey);
+    const toIdx = columnOrder.findIndex((c: TableColumn) => c.key === dropKey);
     if (fromIdx === -1 || toIdx === -1) return;
     const newOrder = [...columnOrder];
     const [removed] = newOrder.splice(fromIdx, 1);
