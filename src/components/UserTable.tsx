@@ -5,8 +5,10 @@ import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus } from 'lucide-react';
-import { RiArrowDownSLine } from 'react-icons/ri';
+import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
+const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
+const ArrowDownLineIcon = RiArrowDownLine as React.ElementType;
 
 const columns: TableColumn[] = [
   { key: "name", label: "Proveedor" },
@@ -409,13 +411,13 @@ const UserTable = () => {
                           className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'asc' ? ' active' : ''}`}
                           onClick={() => handleSortOption(col.key, 'asc')}
                         >
-                          <span style={{ fontSize: 15 }}>↑</span> Ordenar ascendente
+                          <ArrowUpLineIcon size={18} style={{ marginRight: 6 }} /> Ordenar ascendente
                         </button>
                         <button
                           className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'desc' ? ' active' : ''}`}
                           onClick={() => handleSortOption(col.key, 'desc')}
                         >
-                          <span style={{ fontSize: 15 }}>↓</span> Ordenar descendente
+                          <ArrowDownLineIcon size={18} style={{ marginRight: 6 }} /> Ordenar descendente
                         </button>
                       </div>
                     )}
