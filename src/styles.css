@@ -95,7 +95,7 @@ body {
 .sidebar-item.active {
   background-color: #cceafe;
   color: #0b3a5e;
-  font-weight: 500;
+  font-weight: 400;
   border-left: none;
   border-radius: 999px;
   padding: 4px 14px;
