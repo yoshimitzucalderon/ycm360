@@ -383,7 +383,13 @@ body {
   background: #059669;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .user-table {
+  min-width: 900px; /* Ajusta según la cantidad de columnas */
   width: 100%;
   border-collapse: collapse;
   margin: 0 0 8px 0;
