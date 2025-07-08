@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useTableData, TableColumn } from "../hooks/useTableData";
+import { useTableData, TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
@@ -71,25 +71,6 @@ const UserTable = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch de Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      const { data: proveedores, error } = await supabase
-        .from('erp_proveedor_alta_de_proveedor')
-        .select("*");
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      setData((proveedores || []).map(mapProveedor));
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
-
   const {
     data: filteredData,
     filters,
@@ -99,6 +80,55 @@ const UserTable = () => {
     clearFilters,
     clearSort
   } = useTableData(data, columns);
+
+  // Fetch de Supabase con filtros AND/OR
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      let query = supabase.from('erp_proveedor_alta_de_proveedor').select('*');
+
+      // Construir filtros AND/OR
+      if (filters.length > 0) {
+        let andFilters: TableFilterType[] = [];
+        let orFilters: TableFilterType[] = [];
+        filters.forEach((filter, idx) => {
+          if (idx === 0 || filter.logicalOperator === 'AND') {
+            andFilters.push(filter);
+          } else if (filter.logicalOperator === 'OR') {
+            orFilters.push(filter);
+          }
+        });
+
+        // Aplica filtros AND
+        andFilters.forEach(f => {
+          if (f.operator === '=')
+            query = query.eq(f.column, f.value);
+          else if (f.operator === 'like' || f.operator === 'ilike')
+            query = query[f.operator](f.column, `%${f.value}%`);
+          else
+            query = query.filter(f.column, f.operator, f.value);
+        });
+
+        // Aplica filtros OR (si hay)
+        if (orFilters.length > 0) {
+          const orString = orFilters.map(f => `${f.column}.${f.operator}.${f.value}`).join(',');
+          query = query.or(orString);
+        }
+      }
+
+      const { data: proveedores, error } = await query;
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+      setData((proveedores || []).map(mapProveedor));
+      setLoading(false);
+    };
+    fetchData();
+  }, [filters]);
 
   // Paginación
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
