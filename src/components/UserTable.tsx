@@ -195,7 +195,7 @@ const UserTable = () => {
 
   // Persistir orden en localStorage
   useEffect(() => {
-    localStorage.setItem('columnOrder', JSON.stringify(columnOrder.map(c => c.key)));
+    localStorage.setItem('columnOrder', JSON.stringify(columnOrder.map((c: TableColumn) => c.key)));
   }, [columnOrder]);
 
   // Restaurar columnas
