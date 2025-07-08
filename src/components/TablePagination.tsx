@@ -1,7 +1,15 @@
 import React from 'react';
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 
-const TablePagination = ({ page, setPage, totalPages, totalItems, pageSize }) => {
+type TablePaginationProps = {
+  page: number;
+  setPage: (page: number) => void;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+};
+
+const TablePagination: React.FC<TablePaginationProps> = ({ page, setPage, totalPages, totalItems, pageSize }) => {
   return (
     <div className="pagination-controls">
       <button
