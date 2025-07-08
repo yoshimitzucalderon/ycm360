@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import { TableColumn, TableSort } from "../hooks/useTableData";
+import { TableColumn, TableSort as TableSortType } from "../hooks/useTableData";
 
 type Props = {
   columns: TableColumn[];
-  sort: TableSort | null;
-  setSort: (sort: TableSort | null) => void;
+  sort: TableSortType | null;
+  setSort: (sort: TableSortType | null) => void;
   onApply: () => void;
   onClear: () => void;
 };
 
 const TableSort: React.FC<Props> = ({ columns, sort, setSort, onApply, onClear }) => {
-  const [localSort, setLocalSort] = useState<TableSort>(sort || { column: "", direction: "asc" });
+  const [localSort, setLocalSort] = useState<TableSortType>(sort || { column: "", direction: "asc" });
 
   const handleApply = () => {
     if (localSort.column) setSort(localSort);
