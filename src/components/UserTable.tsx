@@ -319,7 +319,7 @@ const UserTable = () => {
             )}
           </div>
           <div className="controls-right">
-            <button className="btn btn-primary">
+            <button className="btn-minimal">
               <Plus className="btn-icon" />
               Agregar Proveedor
             </button>
