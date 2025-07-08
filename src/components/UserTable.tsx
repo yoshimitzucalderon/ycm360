@@ -64,6 +64,19 @@ const columnMap: Record<string, string> = {
   deletedAt: 'deleted_at',
 };
 
+// Mapeo de operadores para Supabase .or()
+const opMap: Record<string, string> = {
+  '=': 'eq',
+  '>': 'gt',
+  '<': 'lt',
+  '>=': 'gte',
+  '<=': 'lte',
+  'like': 'like',
+  'ilike': 'ilike',
+  'in': 'in',
+  'is': 'is',
+};
+
 const mapProveedor = (row: any) => ({
   name: row.proveedor,
   company: row.proveedor_nombre_comercial,
@@ -145,7 +158,8 @@ const UserTable = () => {
         if (orFilters.length > 0) {
           const orString = orFilters.map(f => {
             const dbColumn = columnMap[f.column] || f.column;
-            return `${dbColumn}.${f.operator}.${f.value}`;
+            const op = opMap[f.operator] || f.operator;
+            return `${dbColumn}.${op}.${f.value}`;
           }).join(',');
           query = query.or(orString);
         }
