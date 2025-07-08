@@ -735,3 +735,20 @@ body {
   background: #f3f4f6;
   color: var(--sidebar-accent);
 }
+
+.search-input {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 7px 14px;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  color: #222;
+  box-shadow: none;
+}
+.search-input:focus {
+  border: 1.5px solid var(--sidebar-accent);
+  box-shadow: 0 0 0 2px #bbf7d0;
+  background: #fff;
+}
