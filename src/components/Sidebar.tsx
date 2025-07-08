@@ -29,11 +29,6 @@ const Sidebar = () => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">
-        <a href="#" onClick={() => setSelectedItem("Finanzas")}> {/* Simula navegación al dashboard */}
-          <img src="/logo-ycm360.png" alt="YCM360 Logo" className="sidebar-logo-img" />
-        </a>
-      </div>
       <nav className="sidebar-nav">
         <div className="sidebar-section">
           <div className="sidebar-section-title">DASHBOARDS</div>

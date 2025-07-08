@@ -1,94 +1,140 @@
 import React, { useState } from "react";
+import { useTableData, TableColumn } from "../hooks/useTableData";
+import TableFilter from "./TableFilter";
+import TableSort from "./TableSort";
+import TablePagination from "./TablePagination";
 
-const users = [
-  { name: "Natali Craig", email: "smith@kpmg.com", date: "Just now", company: "KPMG Consulting Services" },
-  { name: "Proveedor 2", email: "proveedor2@empresa.com", date: "2 days ago", company: "Empresa Comercial 2" },
-  { name: "Proveedor 3", email: "proveedor3@empresa.com", date: "3 days ago", company: "Empresa Comercial 3" },
-  { name: "Proveedor 4", email: "proveedor4@empresa.com", date: "3 days ago", company: "Empresa Comercial 4" },
-  { name: "Proveedor 5", email: "proveedor5@empresa.com", date: "5 days ago", company: "Empresa Comercial 5" },
-  { name: "Proveedor 6", email: "proveedor6@empresa.com", date: "6 days ago", company: "Empresa Comercial 6" },
-  { name: "Proveedor 7", email: "proveedor7@empresa.com", date: "7 days ago", company: "Empresa Comercial 7" },
-  { name: "Proveedor 8", email: "proveedor8@empresa.com", date: "8 days ago", company: "Empresa Comercial 8" },
-  // Simular más usuarios para varias páginas
-  ...Array.from({ length: 32 }, (_, i) => ({
-    name: `Proveedor ${i + 9}`,
-    email: `proveedor${i + 9}@empresa.com`,
-    date: `${i + 9} days ago`,
-    company: `Empresa Comercial ${i + 9}`
+const columns: TableColumn[] = [
+  { key: "name", label: "Proveedor" },
+  { key: "email", label: "Email" },
+  { key: "date", label: "Fecha de creación" },
+  { key: "company", label: "Proveedor nombre comercial" },
+  { key: "rfc", label: "RFC" },
+  { key: "giro", label: "Giro de la empresa" },
+  { key: "id", label: "Id" },
+  { key: "servicio", label: "Servicio que brinda" },
+  { key: "moneda", label: "Moneda" },
+  { key: "nacionalidad", label: "Nacionalidad" },
+  { key: "banco", label: "Banco" },
+  { key: "cuenta", label: "Cuenta bancaria" },
+  { key: "clabe", label: "Clabe interbancaria" },
+  { key: "anexos", label: "Anexos" },
+  { key: "responsableLegal", label: "Responsable legal" },
+  { key: "direccionLegal", label: "Dirección responsable legal" },
+  { key: "correoLegal", label: "Correo electrónico responsable legal" },
+  { key: "telefonoLegal", label: "Teléfono responsable legal" },
+  { key: "responsableAdmin", label: "Responsable administrativo" },
+];
+
+const initialData = [
+  { name: "Natali Craig", email: "smith@kpmg.com", date: "Just now", company: "KPMG Consulting Services", rfc: "KMP850101ABC", giro: "Consultoría", id: "1", servicio: "Auditoría", moneda: "MXN", nacionalidad: "México", banco: "BBVA", cuenta: "1234567890", clabe: "123456789012345678", anexos: "Contrato.pdf", responsableLegal: "Juan Pérez", direccionLegal: "Av. Reforma 123", correoLegal: "juan@kpmg.com", telefonoLegal: "555-1234", responsableAdmin: "María García" },
+  ...Array.from({ length: 39 }, (_, i) => ({
+    name: `Proveedor ${i + 2}`,
+    email: `proveedor${i + 2}@empresa.com`,
+    date: `${i + 2} days ago`,
+    company: `Empresa Comercial ${i + 2}`,
+    rfc: `RFC${i + 2}`,
+    giro: "Servicios",
+    id: `${i + 2}`,
+    servicio: "Consultoría",
+    moneda: "MXN",
+    nacionalidad: "México",
+    banco: "BBVA",
+    cuenta: `12345678${i + 2}`,
+    clabe: `1234567890123456${i + 2}`,
+    anexos: "Contrato.pdf",
+    responsableLegal: `Responsable ${i + 2}`,
+    direccionLegal: `Calle ${i + 2}", Ciudad` ,
+    correoLegal: `legal${i + 2}@empresa.com`,
+    telefonoLegal: `555-12${i + 2}`,
+    responsableAdmin: `Admin ${i + 2}`
   }))
 ];
 
-const USERS_PER_PAGE = 8;
-const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+const PAGE_SIZE = 8;
 
 const UserTable = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [inputPage, setInputPage] = useState("1");
+  const [page, setPage] = useState(1);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSort, setShowSort] = useState(false);
+  const {
+    data,
+    filters,
+    setFilters,
+    sort,
+    setSort,
+    clearFilters,
+    clearSort
+  } = useTableData(initialData, columns);
 
-  const startIdx = (currentPage - 1) * USERS_PER_PAGE;
-  const endIdx = startIdx + USERS_PER_PAGE;
-  const currentUsers = users.slice(startIdx, endIdx);
+  // Paginación
+  const totalPages = Math.ceil(data.length / PAGE_SIZE);
+  const paginatedData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputPage(e.target.value.replace(/[^0-9]/g, ""));
-  };
+  // Handlers para filtros y ordenamiento
+  const handleApplyFilter = () => setPage(1);
+  const handleApplySort = () => setPage(1);
 
-  const handleInputBlur = () => {
-    let page = parseInt(inputPage, 10);
-    if (isNaN(page) || page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    setCurrentPage(page);
-    setInputPage(page.toString());
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleInputBlur();
+  // Ordenamiento rápido por header
+  const handleHeaderClick = (colKey: string) => {
+    if (sort && sort.column === colKey) {
+      setSort({ column: colKey, direction: sort.direction === "asc" ? "desc" : "asc" });
+    } else {
+      setSort({ column: colKey, direction: "asc" });
     }
-  };
-
-  const goToFirst = () => {
-    setCurrentPage(1);
-    setInputPage("1");
-  };
-  const goToLast = () => {
-    setCurrentPage(totalPages);
-    setInputPage(totalPages.toString());
-  };
-  const goToPrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      setInputPage((currentPage - 1).toString());
-    }
-  };
-  const goToNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      setInputPage((currentPage + 1).toString());
-    }
+    setPage(1);
   };
 
   return (
     <div className="user-table-container">
       <div className="user-table-header">
+        <button onClick={() => setShowFilter(f => !f)} className="user-table-filter-btn">&#x1F50D; Filter</button>
+        <button onClick={() => setShowSort(s => !s)} className="user-table-sort-btn">&#x21C5; Sort</button>
         <input type="text" placeholder="Search" className="user-table-search" />
         <button className="user-table-add">Agregar Proveedor</button>
       </div>
+      {showFilter && (
+        <TableFilter
+          columns={columns}
+          filters={filters}
+          setFilters={setFilters}
+          onApply={handleApplyFilter}
+          onClear={clearFilters}
+        />
+      )}
+      {showSort && (
+        <TableSort
+          columns={columns}
+          sort={sort}
+          setSort={setSort}
+          onApply={handleApplySort}
+          onClear={clearSort}
+        />
+      )}
       <table className="user-table">
         <thead>
           <tr>
             <th></th>
-            <th>Proveedor</th>
-            <th>Email</th>
-            <th>Fecha de registro</th>
-            <th>Proveedor nombre comercial</th>
+            {columns.slice(0, 4).map(col => (
+              <th
+                key={col.key}
+                onClick={() => handleHeaderClick(col.key)}
+                className="user-table-header-cell"
+                style={{ cursor: "pointer" }}
+              >
+                {col.label}
+                {sort && sort.column === col.key && (
+                  <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
+                )}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {currentUsers.map((user, idx) => (
-            <tr key={startIdx + idx}>
+          {paginatedData.map((user, idx) => (
+            <tr key={user.id || idx}>
               <td><input type="checkbox" /></td>
-              <td className={startIdx + idx === 0 ? "highlight" : ""}>{user.name}</td>
+              <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.date}</td>
               <td>{user.company}</td>
@@ -96,25 +142,13 @@ const UserTable = () => {
           ))}
         </tbody>
       </table>
-      <div className="user-table-footer">
-        <span>Registros del {startIdx + 1} al {Math.min(endIdx, users.length)} de {users.length}</span>
-        <div className="user-table-pagination">
-          <button onClick={goToFirst} disabled={currentPage === 1} title="Primera página">⏮️</button>
-          <button onClick={goToPrev} disabled={currentPage === 1} title="Anterior">◀️</button>
-          <span>Página</span>
-          <input
-            type="text"
-            value={inputPage}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            onKeyDown={handleInputKeyDown}
-            style={{ width: 36, textAlign: "center" }}
-          />
-          <span>de {totalPages}</span>
-          <button onClick={goToNext} disabled={currentPage === totalPages} title="Siguiente">▶️</button>
-          <button onClick={goToLast} disabled={currentPage === totalPages} title="Última página">⏭️</button>
-        </div>
-      </div>
+      <TablePagination
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+        totalItems={data.length}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 };
