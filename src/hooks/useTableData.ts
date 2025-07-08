@@ -24,7 +24,7 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   const filteredData = useMemo(() => {
     return initialData.filter((row) => {
       return filters.every((filter) => {
-        const value = String(row[filter.column] ?? "").toLowerCase();
+        const value = String((row as Record<string, any>)[filter.column] ?? "").toLowerCase();
         const filterValue = filter.value.toLowerCase();
         switch (filter.operator) {
           case "=":
@@ -59,8 +59,8 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   const sortedData = useMemo(() => {
     if (!sort) return filteredData;
     return [...filteredData].sort((a, b) => {
-      const aValue = String(a[sort.column] ?? "").toLowerCase();
-      const bValue = String(b[sort.column] ?? "").toLowerCase();
+      const aValue = String((a as Record<string, any>)[sort.column] ?? "").toLowerCase();
+      const bValue = String((b as Record<string, any>)[sort.column] ?? "").toLowerCase();
       if (aValue < bValue) return sort.direction === "asc" ? -1 : 1;
       if (aValue > bValue) return sort.direction === "asc" ? 1 : -1;
       return 0;
