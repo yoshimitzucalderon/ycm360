@@ -35,6 +35,35 @@ const columns: TableColumn[] = [
 
 const PAGE_SIZE = 8;
 
+// Mapeo de columnas frontend -> backend
+const columnMap: Record<string, string> = {
+  name: 'proveedor',
+  company: 'proveedor_nombre_comercial',
+  rfc: 'rfc',
+  giro: 'giro_de_la_empresa',
+  servicio: 'servicio_que_brinda',
+  moneda: 'moneda',
+  nacionalidad: 'nacionalidad',
+  banco: 'banco',
+  cuenta: 'cuenta_bancaria',
+  clabe: 'clabe_interbancaria',
+  anexos: 'anexos_expediente_proveedor',
+  responsableLegal: 'nombre_completo_responsable_legal',
+  direccionLegal: 'direccion_responsable_legal',
+  correoLegal: 'correo_electronico_responsable_legal',
+  telefonoLegal: 'telefono responsable legal',
+  responsableAdmin: 'nombre_completo_responsable_administrativo',
+  correoAdmin: 'correo_electronico_responsable_administrativo',
+  telefonoAdmin: 'telefono_responsable_administrativo',
+  id: 'id',
+  date: 'created_at',
+  createdBy: 'created_by',
+  updatedAt: 'updated_at',
+  updatedBy: 'updated_by',
+  deletedBy: 'deleted_by',
+  deletedAt: 'deleted_at',
+};
+
 const mapProveedor = (row: any) => ({
   name: row.proveedor,
   company: row.proveedor_nombre_comercial,
@@ -103,17 +132,21 @@ const UserTable = () => {
 
         // Aplica filtros AND
         andFilters.forEach(f => {
+          const dbColumn = columnMap[f.column] || f.column;
           if (f.operator === '=')
-            query = query.eq(f.column, f.value);
+            query = query.eq(dbColumn, f.value);
           else if (f.operator === 'like' || f.operator === 'ilike')
-            query = query[f.operator](f.column, `%${f.value}%`);
+            query = query[f.operator](dbColumn, `%${f.value}%`);
           else
-            query = query.filter(f.column, f.operator, f.value);
+            query = query.filter(dbColumn, f.operator, f.value);
         });
 
         // Aplica filtros OR (si hay)
         if (orFilters.length > 0) {
-          const orString = orFilters.map(f => `${f.column}.${f.operator}.${f.value}`).join(',');
+          const orString = orFilters.map(f => {
+            const dbColumn = columnMap[f.column] || f.column;
+            return `${dbColumn}.${f.operator}.${f.value}`;
+          }).join(',');
           query = query.or(orString);
         }
       }
