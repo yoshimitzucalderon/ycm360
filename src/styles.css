@@ -118,13 +118,13 @@ body {
 
 .sidebar-text {
   font-size: 14px;
-  font-weight: 500;
+  font-family: inherit;
+  font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1.4;
   color: var(--sidebar-text);
   transition: all 0.15s ease;
   white-space: nowrap;
-  font-family: inherit;
 }
 
 .app-layout {
