@@ -355,45 +355,18 @@ body {
 .table-sort-controls select:focus {
   border-bottom: 1.2px solid #10b981;
 }
-.table-filter-add, .table-sort-apply {
-  background: #10b981;
-  color: #fff;
-  border: none;
-  border-radius: 3px;
-  padding: 5px 12px;
-  font-size: 0.98rem;
+.table-filter-add, .table-sort-apply, .table-filter-apply {
+  padding: 3px 8px;
+  font-size: 13px;
   min-width: 0;
-  box-shadow: none;
-}
-.table-filter-add:hover, .table-sort-apply:hover {
-  background: #059669;
-}
-.table-filter-clear, .table-sort-clear {
-  color: #bdbdbd;
-  font-size: 0.98rem;
-  margin-right: 6px;
-  text-decoration: underline;
-  padding: 0;
-}
-.table-filter-apply {
-  background: #10b981;
-  color: #fff;
-  border: none;
   border-radius: 3px;
-  padding: 5px 12px;
-  font-size: 0.98rem;
-  min-width: 0;
-  box-shadow: none;
+  margin-right: 4px;
 }
-.table-filter-apply:hover {
-  background: #059669;
-}
-.table-filter-list, .table-sort-controls {
-  margin-bottom: 6px;
+.table-filter-add:last-child, .table-sort-apply:last-child, .table-filter-apply:last-child {
+  margin-right: 0;
 }
 .table-filter-actions, .table-sort-controls {
-  margin-top: 4px;
-  gap: 6px;
+  gap: 4px;
 }
 
 .table-wrapper {
