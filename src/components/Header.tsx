@@ -1,5 +1,4 @@
 import React from "react";
-import YCM360Logo from "./YCM360Logo";
 import { FaBell, FaUserCircle } from "react-icons/fa";
 
 const BellIcon = FaBell as React.ElementType;
@@ -8,7 +7,7 @@ const UserIcon = FaUserCircle as React.ElementType;
 const Header = () => (
   <header className="header">
     <div className="header-left">
-      <YCM360Logo />
+      {/* Logo eliminado, solo iconos o contenido adicional aquí si se requiere */}
     </div>
     <div className="header-center">
       <input className="header-search" type="text" placeholder="Search" />
