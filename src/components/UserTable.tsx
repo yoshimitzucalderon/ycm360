@@ -199,7 +199,7 @@ const UserTable = () => {
   }, [columnOrder]);
 
   // Restaurar columnas
-  const isOrderModified = columnOrder.map(c => c.key).join(',') !== ORIGINAL_COLUMNS.map(c => c.key).join(',');
+  const isOrderModified = columnOrder.map((c: TableColumn) => c.key).join(',') !== ORIGINAL_COLUMNS.map((c: TableColumn) => c.key).join(',');
   const handleRestoreColumns = () => setColumnOrder(ORIGINAL_COLUMNS);
 
   // Fetch de Supabase con filtros AND/OR
