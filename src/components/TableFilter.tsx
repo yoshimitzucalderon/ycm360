@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
+import { X } from 'lucide-react';
 
 const OPERATORS = [
   { value: "=", label: "=" },
@@ -53,7 +54,7 @@ const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, o
       <div className="table-filter-list">
         {filters.length === 0 && <div className="table-filter-empty">No filters applied to this view</div>}
         {filters.map((filter, idx) => (
-          <div className="table-filter-row" key={idx}>
+          <div className="filter-chip table-filter-row" key={idx}>
             {idx > 0 && (
               <button
                 className={`table-filter-toggle ${filter.logicalOperator?.toLowerCase()}`}
@@ -63,10 +64,10 @@ const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, o
                 {filter.logicalOperator || 'AND'}
               </button>
             )}
-            <span>{columns.find(c => c.key === filter.column)?.label || filter.column}</span>
-            <span>{filter.operator}</span>
-            <span>{filter.value}</span>
-            <button onClick={() => removeFilter(idx)} className="table-filter-remove">×</button>
+            <span className="filter-text">{columns.find(c => c.key === filter.column)?.label || filter.column} {filter.operator} {filter.value}</span>
+            <button onClick={() => removeFilter(idx)} className="filter-remove">
+              <X className="action-icon" />
+            </button>
           </div>
         ))}
       </div>

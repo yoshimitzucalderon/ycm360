@@ -4,6 +4,7 @@ import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
+import { Filter, ArrowUpDown, Plus } from 'lucide-react';
 
 const columns: TableColumn[] = [
   { key: "name", label: "Proveedor" },
@@ -105,6 +106,57 @@ const mapProveedor = (row: any) => ({
   deletedAt: row.deleted_at,
 });
 
+// Helper para aplicar un filtro AND
+const applyFilter = (query: any, filter: TableFilterType) => {
+  const dbColumn = columnMap[filter.column] || filter.column;
+  const op = opMap[filter.operator] || filter.operator;
+  switch (op) {
+    case 'eq':
+      return query.eq(dbColumn, filter.value);
+    case 'gt':
+      return query.gt(dbColumn, filter.value);
+    case 'gte':
+      return query.gte(dbColumn, filter.value);
+    case 'lt':
+      return query.lt(dbColumn, filter.value);
+    case 'lte':
+      return query.lte(dbColumn, filter.value);
+    case 'like':
+      return query.like(dbColumn, `%${filter.value}%`);
+    case 'ilike':
+      return query.ilike(dbColumn, `%${filter.value}%`);
+    case 'in':
+      return query.in(dbColumn, filter.value.split(',').map((v: string) => v.trim()));
+    case 'is':
+      return query.is(dbColumn, null);
+    default:
+      return query;
+  }
+};
+
+// Helper para construir la query de Supabase con filtros AND/OR
+const buildSupabaseQuery = (baseQuery: any, filters: TableFilterType[]) => {
+  if (filters.length === 0) return baseQuery;
+
+  // Si hay al menos un OR, agrupa todos los filtros en .or()
+  const hasOr = filters.some((f, idx) => idx > 0 && f.logicalOperator === 'OR');
+  if (hasOr) {
+    const orString = filters.map(f => {
+      const dbColumn = columnMap[f.column] || f.column;
+      const op = opMap[f.operator] || f.operator;
+      return `${dbColumn}.${op}.${f.value}`;
+    }).join(',');
+    return baseQuery.or(orString);
+  } else {
+    // Todos los filtros son AND
+    let query = baseQuery;
+    filters.forEach(f => {
+      query = applyFilter(query, f);
+    });
+    return query;
+  }
+};
+
 const UserTable = () => {
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
@@ -129,49 +181,8 @@ const UserTable = () => {
       setLoading(true);
       setError(null);
 
-      let query = supabase.from('erp_proveedor_alta_de_proveedor').select('*');
-
-      // Construir filtros AND/OR mejorado
-      if (filters.length > 0) {
-        const allOr = filters.every((f, idx) => idx === 0 || f.logicalOperator === 'OR');
-        if (allOr) {
-          // Todos los filtros son OR
-          const orString = filters.map(f => {
-            const dbColumn = columnMap[f.column] || f.column;
-            const op = opMap[f.operator] || f.operator;
-            return `${dbColumn}.${op}.${f.value}`;
-          }).join(',');
-          query = query.or(orString);
-        } else {
-          // Aplica los AND primero, luego los OR
-          let andFilters: TableFilterType[] = [];
-          let orFilters: TableFilterType[] = [];
-          filters.forEach((filter, idx) => {
-            if (idx === 0 || filter.logicalOperator === 'AND') {
-              andFilters.push(filter);
-            } else if (filter.logicalOperator === 'OR') {
-              orFilters.push(filter);
-            }
-          });
-          andFilters.forEach(f => {
-            const dbColumn = columnMap[f.column] || f.column;
-            if (f.operator === '=')
-              query = query.eq(dbColumn, f.value);
-            else if (f.operator === 'like' || f.operator === 'ilike')
-              query = query[f.operator](dbColumn, `%${f.value}%`);
-            else
-              query = query.filter(dbColumn, f.operator, f.value);
-          });
-          if (orFilters.length > 0) {
-            const orString = orFilters.map(f => {
-              const dbColumn = columnMap[f.column] || f.column;
-              const op = opMap[f.operator] || f.operator;
-              return `${dbColumn}.${op}.${f.value}`;
-            }).join(',');
-            query = query.or(orString);
-          }
-        }
-      }
+      let baseQuery = supabase.from('erp_proveedor_alta_de_proveedor').select('*');
+      let query = buildSupabaseQuery(baseQuery, filters);
 
       const { data: proveedores, error } = await query;
       if (error) {
@@ -205,10 +216,29 @@ const UserTable = () => {
 
   return (
     <div className="user-table-container">
-      <div className="user-table-header">
-        <button onClick={() => setShowFilter(f => !f)} className="user-table-filter-btn">&#x1F50D; Filter</button>
-        <button onClick={() => setShowSort(s => !s)} className="user-table-sort-btn">&#x21C5; Sort</button>
-        <button className="user-table-add">Agregar Proveedor</button>
+      <div className="user-table-header table-controls">
+        <div className="controls-left">
+          <button
+            className={`action-button${showFilter ? ' active' : ''}`}
+            onClick={() => setShowFilter(f => !f)}
+          >
+            <Filter className="action-icon" />
+            Filter
+          </button>
+          <button
+            className={`action-button${showSort ? ' active' : ''}`}
+            onClick={() => setShowSort(s => !s)}
+          >
+            <ArrowUpDown className="action-icon" />
+            Sort
+          </button>
+        </div>
+        <div className="controls-right">
+          <button className="action-button primary">
+            <Plus className="action-icon" />
+            Agregar Proveedor
+          </button>
+        </div>
       </div>
       {showFilter && (
         <TableFilter

@@ -1,37 +1,40 @@
-import React from "react";
+import React from 'react';
+import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 
-type Props = {
-  page: number;
-  setPage: (page: number) => void;
-  totalPages: number;
-  totalItems: number;
-  pageSize: number;
-};
-
-const TablePagination: React.FC<Props> = ({ page, setPage, totalPages, totalItems, pageSize }) => {
-  const startIdx = (page - 1) * pageSize + 1;
-  const endIdx = Math.min(page * pageSize, totalItems);
-
+const TablePagination = ({ page, setPage, totalPages, totalItems, pageSize }) => {
   return (
-    <div className="user-table-footer">
-      <span>Registros del {startIdx} al {endIdx} de {totalItems}</span>
-      <div className="user-table-pagination">
-        <button onClick={() => setPage(1)} disabled={page === 1} title="Primera página">⏮️</button>
-        <button onClick={() => setPage(page - 1)} disabled={page === 1} title="Anterior">◀️</button>
-        <span>Página</span>
-        <input
-          type="text"
-          value={page}
-          onChange={e => {
-            const val = parseInt(e.target.value, 10);
-            if (!isNaN(val) && val >= 1 && val <= totalPages) setPage(val);
-          }}
-          style={{ width: 36, textAlign: "center" }}
-        />
-        <span>de {totalPages}</span>
-        <button onClick={() => setPage(page + 1)} disabled={page === totalPages} title="Siguiente">▶️</button>
-        <button onClick={() => setPage(totalPages)} disabled={page === totalPages} title="Última página">⏭️</button>
-      </div>
+    <div className="pagination-controls">
+      <button
+        className="pagination-button"
+        onClick={() => setPage(1)}
+        disabled={page === 1}
+      >
+        <ChevronsLeft className="pagination-icon" />
+      </button>
+      <button
+        className="pagination-button"
+        onClick={() => setPage(page - 1)}
+        disabled={page === 1}
+      >
+        <ChevronLeft className="pagination-icon" />
+      </button>
+      <span className="pagination-info">
+        Página {page} de {totalPages}
+      </span>
+      <button
+        className="pagination-button"
+        onClick={() => setPage(page + 1)}
+        disabled={page === totalPages}
+      >
+        <ChevronRight className="pagination-icon" />
+      </button>
+      <button
+        className="pagination-button"
+        onClick={() => setPage(totalPages)}
+        disabled={page === totalPages}
+      >
+        <ChevronsRight className="pagination-icon" />
+      </button>
     </div>
   );
 };
