@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useTableData, TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
@@ -165,6 +165,8 @@ const UserTable = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [colWidths, setColWidths] = useState<{ [key: string]: number }>({});
+  const tableRef = useRef<HTMLTableElement>(null);
 
   const {
     data: filteredData,
@@ -222,6 +224,23 @@ const UserTable = () => {
       setSort({ column: colKey, direction: "asc" });
     }
     setPage(1);
+  };
+
+  // Handler para resize
+  const handleMouseDown = (e: React.MouseEvent, colKey: string) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = colWidths[colKey] || 150;
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(60, startWidth + moveEvent.clientX - startX);
+      setColWidths((prev) => ({ ...prev, [colKey]: newWidth }));
+    };
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
   };
 
   return (
@@ -282,7 +301,7 @@ const UserTable = () => {
         ) : error ? (
           <div style={{ color: "red", padding: 24 }}>{error}</div>
         ) : (
-          <table className="user-table">
+          <table className="user-table" ref={tableRef}>
             <thead>
               <tr>
                 <th></th>
@@ -291,12 +310,20 @@ const UserTable = () => {
                     key={col.key}
                     onClick={() => handleHeaderClick(col.key)}
                     className="user-table-header-cell"
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150 }}
                   >
-                    {col.label}
-                    {sort && sort.column === col.key && (
-                      <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
-                    )}
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {col.label}
+                      <span className="sort-arrows">
+                        <span className={`sort-arrow${sort && sort.column === col.key && sort.direction === 'asc' ? ' active' : ''}`}>▲</span>
+                        <span className={`sort-arrow${sort && sort.column === col.key && sort.direction === 'desc' ? ' active' : ''}`}>▼</span>
+                      </span>
+                    </span>
+                    {/* Resizer minimalista */}
+                    <div
+                      className="col-resizer"
+                      onMouseDown={e => handleMouseDown(e, col.key)}
+                    />
                   </th>
                 ))}
               </tr>
@@ -306,7 +333,7 @@ const UserTable = () => {
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
                   {columns.map(col => (
-                    <td key={col.key}>{user[col.key]}</td>
+                    <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
                 </tr>
               ))}
