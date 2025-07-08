@@ -26,13 +26,13 @@ body {
   padding: 28px 0 18px 0;
   height: 80px;
 }
-.sidebar-logo {
-  font-size: 1.3rem;
-  color: #10b981;
-}
-.sidebar-version {
-  font-size: 0.9rem;
-  color: #bdbdbd;
+.sidebar-logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  max-width: 140px;
+  cursor: pointer;
 }
 .sidebar-nav {
   flex: 1;
@@ -53,7 +53,7 @@ body {
   padding: 0;
   margin: 0;
 }
-.sidebar-section li {
+.sidebar-item {
   display: flex;
   align-items: center;
   padding: 8px 12px;
@@ -62,21 +62,33 @@ body {
   color: #444;
   font-size: 1rem;
   margin-bottom: 2px;
-  transition: background 0.2s, color 0.2s;
   background: transparent;
+  transition: background 0.2s, color 0.2s;
+  font-weight: 400;
 }
-.sidebar-section li:hover {
-  background: #f0fdfa;
+.sidebar-item .icon {
+  margin-right: 10px;
+  font-size: 1.15em;
+  display: flex;
+  align-items: center;
+}
+.sidebar-item .sidebar-text {
+  font-size: 1rem;
+}
+.sidebar-item:hover {
+  background: #f3f4f6;
   color: #10b981;
 }
-.sidebar-section li.active {
-  background: #e6f9f2;
-  color: #10b981;
+.sidebar-item.active {
+  background: #10b981;
+  color: #fff;
   font-weight: 600;
 }
-.sidebar-section .icon {
-  margin-right: 10px;
-  font-size: 1.1em;
+.sidebar-item.active .icon {
+  color: #fff;
+}
+.sidebar-item.active .sidebar-text {
+  color: #fff;
 }
 
 .main-content {
@@ -278,14 +290,6 @@ body {
   color: #bdbdbd;
   font-size: 0.92em;
   margin-left: 8px;
-}
-
-.sidebar-logo-img {
-  height: 48px;
-  width: auto;
-  display: block;
-  margin: 0 auto;
-  max-width: 140px;
 }
 
 @media (max-width: 1100px) {

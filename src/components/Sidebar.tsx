@@ -1,4 +1,23 @@
 import React, { useState } from "react";
+import { FaDollarSign, FaCog, FaStore, FaBullhorn, FaUser, FaHome, FaFolderOpen, FaRegFileAlt, FaUsers, FaShareAlt } from "react-icons/fa";
+
+const dashboards = [
+  { name: "Finanzas", icon: <FaDollarSign /> },
+  { name: "Administración", icon: <FaCog /> },
+  { name: "Comercialización", icon: <FaStore /> },
+  { name: "Marketing", icon: <FaBullhorn /> },
+];
+
+const pages = [
+  { name: "User Profile", icon: <FaUser /> },
+  { name: "Overview", icon: <FaHome /> },
+  { name: "Projects", icon: <FaFolderOpen /> },
+  { name: "Campaigns", icon: <FaBullhorn /> },
+  { name: "Documents", icon: <FaRegFileAlt /> },
+  { name: "Followers", icon: <FaUsers /> },
+  { name: "Account", icon: <FaCog /> },
+  { name: "Social", icon: <FaShareAlt /> },
+];
 
 const Sidebar = () => {
   const [selectedItem, setSelectedItem] = useState("Finanzas");
@@ -10,89 +29,39 @@ const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <img src="./logo-ycm360.png" alt="YCM360 Logo" className="sidebar-logo-img" />
+        <a href="#" onClick={() => setSelectedItem("Finanzas")}> {/* Simula navegación al dashboard */}
+          <img src="/logo-ycm360.png" alt="YCM360 Logo" className="sidebar-logo-img" />
+        </a>
       </div>
       <nav className="sidebar-nav">
         <div className="sidebar-section">
           <div className="sidebar-section-title">DASHBOARDS</div>
           <ul>
-            <li 
-              className={selectedItem === "Finanzas" ? "active" : ""}
-              onClick={() => handleItemClick("Finanzas")}
-            >
-              <span className="icon">$</span> Finanzas
-            </li>
-            <li 
-              className={selectedItem === "Administración" ? "active" : ""}
-              onClick={() => handleItemClick("Administración")}
-            >
-              <span className="icon">⚙️</span> Administración
-            </li>
-            <li 
-              className={selectedItem === "Comercialización" ? "active" : ""}
-              onClick={() => handleItemClick("Comercialización")}
-            >
-              <span className="icon">💼</span> Comercialización
-            </li>
-            <li 
-              className={selectedItem === "Marketing" ? "active" : ""}
-              onClick={() => handleItemClick("Marketing")}
-            >
-              <span className="icon">📈</span> Marketing
-            </li>
+            {dashboards.map((item) => (
+              <li
+                key={item.name}
+                className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
+                onClick={() => handleItemClick(item.name)}
+              >
+                <span className="icon">{item.icon}</span>
+                <span className="sidebar-text">{item.name}</span>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="sidebar-section">
           <div className="sidebar-section-title">PAGES</div>
           <ul>
-            <li 
-              className={selectedItem === "User Profile" ? "active" : ""}
-              onClick={() => handleItemClick("User Profile")}
-            >
-              <span className="icon">👤</span> User Profile
-            </li>
-            <li 
-              className={selectedItem === "Overview" ? "active" : ""}
-              onClick={() => handleItemClick("Overview")}
-            >
-              <span className="icon">🏠</span> Overview
-            </li>
-            <li 
-              className={selectedItem === "Projects" ? "active" : ""}
-              onClick={() => handleItemClick("Projects")}
-            >
-              <span className="icon">📁</span> Projects
-            </li>
-            <li 
-              className={selectedItem === "Campaigns" ? "active" : ""}
-              onClick={() => handleItemClick("Campaigns")}
-            >
-              <span className="icon">📢</span> Campaigns
-            </li>
-            <li 
-              className={selectedItem === "Documents" ? "active" : ""}
-              onClick={() => handleItemClick("Documents")}
-            >
-              <span className="icon">📄</span> Documents
-            </li>
-            <li 
-              className={selectedItem === "Followers" ? "active" : ""}
-              onClick={() => handleItemClick("Followers")}
-            >
-              <span className="icon">👥</span> Followers
-            </li>
-            <li 
-              className={selectedItem === "Account" ? "active" : ""}
-              onClick={() => handleItemClick("Account")}
-            >
-              <span className="icon">⚙️</span> Account
-            </li>
-            <li 
-              className={selectedItem === "Social" ? "active" : ""}
-              onClick={() => handleItemClick("Social")}
-            >
-              <span className="icon">💬</span> Social
-            </li>
+            {pages.map((item) => (
+              <li
+                key={item.name}
+                className={selectedItem === item.name ? "sidebar-item active" : "sidebar-item"}
+                onClick={() => handleItemClick(item.name)}
+              >
+                <span className="icon">{item.icon}</span>
+                <span className="sidebar-text">{item.name}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </nav>
