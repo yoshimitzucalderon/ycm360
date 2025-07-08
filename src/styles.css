@@ -28,6 +28,11 @@ body {
   min-width: 220px;
   background: #f8fafc;
   border-right: 1px solid var(--sidebar-border);
+  min-width: 256px;
+  max-width: 256px;
+  width: 256px;
+  font-size: 14px;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
 }
 .sidebar-logo-container {
   flex-shrink: 0;
