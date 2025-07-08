@@ -217,12 +217,26 @@ body {
   justify-content: center;
 }
 .header-search {
-  width: 320px;
-  padding: 8px 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  width: 220px;
+  padding: 6px 0 6px 0;
+  border: none;
+  border-bottom: 1.5px solid #e2e8f0;
+  border-radius: 0;
   font-size: 1rem;
-  background: #f7f8fa;
+  background: #fff;
+  color: #222;
+  outline: none;
+  transition: border-color 0.2s;
+  box-shadow: none;
+}
+.header-search::placeholder {
+  color: #bdbdbd;
+  opacity: 1;
+  font-weight: 400;
+}
+.header-search:focus {
+  border-bottom: 1.5px solid #10b981;
+  background: #fff;
 }
 .header-right {
   flex: 0 0 auto;
