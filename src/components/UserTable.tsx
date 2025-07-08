@@ -349,6 +349,12 @@ const UserTable = () => {
           <div style={{ color: "red", padding: 24 }}>{error}</div>
         ) : (
           <table className="user-table" ref={tableRef}>
+            <colgroup>
+              <col style={{ width: 40 }} /> {/* Para el checkbox */}
+              {columnOrder.map((col: TableColumn) => (
+                <col key={col.key} style={{ width: colWidths[col.key] || 150 }} />
+              ))}
+            </colgroup>
             <thead>
               <tr>
                 <th></th>
