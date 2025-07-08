@@ -2,6 +2,9 @@ import React from "react";
 import Logo from "./Logo";
 import { FaBell, FaUserCircle } from "react-icons/fa";
 
+const BellIcon = FaBell as React.ElementType;
+const UserIcon = FaUserCircle as React.ElementType;
+
 const Header = () => (
   <header className="header">
     <div className="header-left">
@@ -11,8 +14,8 @@ const Header = () => (
       <input className="header-search" type="text" placeholder="Search" />
     </div>
     <div className="header-right">
-      <span className="header-icon"><FaBell /></span>
-      <span className="header-icon"><FaUserCircle /></span>
+      <span className="header-icon"><BellIcon /></span>
+      <span className="header-icon"><UserIcon /></span>
     </div>
   </header>
 );
