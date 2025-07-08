@@ -22,7 +22,7 @@ body {
 }
 
 .sidebar {
-  background-color: var(--sidebar-bg);
+  background-color: #f8fafc;
   border-right: 1px solid var(--sidebar-border);
   gap: 20px;
   padding: 16px 0;
