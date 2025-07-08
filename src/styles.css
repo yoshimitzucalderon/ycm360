@@ -779,3 +779,49 @@ body {
   height: 18px;
   stroke-width: 2;
 }
+.sort-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 170px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  z-index: 10;
+  margin-top: 4px;
+  padding: 4px 0;
+}
+.sort-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #222;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sort-menu-option:hover, .sort-menu-option.active {
+  background: #f0fdf4;
+  color: var(--sidebar-accent);
+}
+.user-table th.sorted {
+  font-weight: 700;
+  color: var(--sidebar-accent);
+  background: #f8fafc;
+}
+.sort-arrow-down {
+  margin-left: 6px;
+  font-size: 13px;
+  color: #cbd5e1;
+  transition: color 0.2s;
+  vertical-align: middle;
+}
+.user-table th.sorted .sort-arrow-down {
+  color: var(--sidebar-accent);
+}

@@ -182,6 +182,7 @@ const UserTable = () => {
   const [colWidths, setColWidths] = useState<{ [key: string]: number }>({});
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
+  const [sortMenu, setSortMenu] = useState<{ colKey: string | null; anchor: HTMLElement | null }>({ colKey: null, anchor: null });
 
   const {
     data: filteredData,
@@ -201,6 +202,17 @@ const UserTable = () => {
   // Restaurar columnas
   const isOrderModified = columnOrder.map((c: TableColumn) => c.key).join(',') !== ORIGINAL_COLUMNS.map((c: TableColumn) => c.key).join(',');
   const handleRestoreColumns = () => setColumnOrder(ORIGINAL_COLUMNS);
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    if (!sortMenu.anchor) return;
+    const handleClick = (e: MouseEvent) => {
+      if (!(e.target instanceof Node)) return;
+      if (!sortMenu.anchor || !sortMenu.anchor.contains(e.target)) setSortMenu({ colKey: null, anchor: null });
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [sortMenu]);
 
   // Fetch de Supabase con filtros AND/OR
   useEffect(() => {
@@ -285,6 +297,16 @@ const UserTable = () => {
     dragCol.current = null;
   };
 
+  const handleSortMenu = (e: React.MouseEvent, colKey: string) => {
+    e.stopPropagation();
+    setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement });
+  };
+  const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
+    setSort({ column: colKey, direction });
+    setSortMenu({ colKey: null, anchor: null });
+    setPage(1);
+  };
+
   return (
     <div className="table-container">
       <div className="table-wrapper">
@@ -365,17 +387,36 @@ const UserTable = () => {
                     onDragStart={() => handleDragStart(col.key)}
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
-                    onClick={() => handleHeaderClick(col.key)}
-                    className="user-table-header-cell"
+                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
                     style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150 }}
                   >
                     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       {col.label}
-                      <span className="sort-arrows">
-                        <span className={`sort-arrow${sort && sort.column === col.key && sort.direction === 'asc' ? ' active' : ''}`}>▲</span>
-                        <span className={`sort-arrow${sort && sort.column === col.key && sort.direction === 'desc' ? ' active' : ''}`}>▼</span>
+                      <span
+                        className="sort-arrow-down"
+                        onClick={e => handleSortMenu(e, col.key)}
+                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                      >
+                        ▼
                       </span>
                     </span>
+                    {/* Menú contextual de sort */}
+                    {sortMenu.colKey === col.key && sortMenu.anchor && (
+                      <div className="sort-menu" style={{ left: 0, top: '100%' }}>
+                        <button
+                          className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'asc' ? ' active' : ''}`}
+                          onClick={() => handleSortOption(col.key, 'asc')}
+                        >
+                          <span style={{ fontSize: 15 }}>↑</span> Ordenar ascendente
+                        </button>
+                        <button
+                          className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'desc' ? ' active' : ''}`}
+                          onClick={() => handleSortOption(col.key, 'desc')}
+                        >
+                          <span style={{ fontSize: 15 }}>↓</span> Ordenar descendente
+                        </button>
+                      </div>
+                    )}
                     {/* Resizer minimalista */}
                     <div
                       className="col-resizer"
