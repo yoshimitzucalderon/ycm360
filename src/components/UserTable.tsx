@@ -77,8 +77,7 @@ const UserTable = () => {
       setLoading(true);
       setError(null);
       const { data: proveedores, error } = await supabase
-        .schema('erp')
-        .from('proveedor_alta_de_proveedor')
+        .from('erp_proveedor_alta_de_proveedor')
         .select("*");
       if (error) {
         setError(error.message);
