@@ -26,13 +26,26 @@ const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, o
 
   const addFilter = () => {
     if (newFilter.column && newFilter.operator) {
-      setFilters([...filters, newFilter]);
-      setNewFilter({ column: "", operator: "=", value: "" });
+      // El primer filtro no tiene operador lógico, los siguientes sí
+      setFilters([
+        ...filters,
+        {
+          ...newFilter,
+          logicalOperator: filters.length === 0 ? undefined : 'AND',
+        },
+      ]);
+      setNewFilter({ column: '', operator: '=', value: '' });
     }
   };
 
   const removeFilter = (idx: number) => {
     setFilters(filters.filter((_, i) => i !== idx));
+  };
+
+  const toggleLogicalOperator = (idx: number) => {
+    setFilters(filters.map((f, i) =>
+      i === idx ? { ...f, logicalOperator: f.logicalOperator === 'AND' ? 'OR' : 'AND' } : f
+    ));
   };
 
   return (
@@ -41,6 +54,15 @@ const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, o
         {filters.length === 0 && <div className="table-filter-empty">No filters applied to this view</div>}
         {filters.map((filter, idx) => (
           <div className="table-filter-row" key={idx}>
+            {idx > 0 && (
+              <button
+                className={`table-filter-toggle ${filter.logicalOperator?.toLowerCase()}`}
+                onClick={() => toggleLogicalOperator(idx)}
+                title={`Toggle to ${filter.logicalOperator === 'AND' ? 'OR' : 'AND'}`}
+              >
+                {filter.logicalOperator || 'AND'}
+              </button>
+            )}
             <span>{columns.find(c => c.key === filter.column)?.label || filter.column}</span>
             <span>{filter.operator}</span>
             <span>{filter.value}</span>
