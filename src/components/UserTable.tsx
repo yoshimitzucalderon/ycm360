@@ -164,6 +164,7 @@ const UserTable = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const {
     data: filteredData,
@@ -200,6 +201,15 @@ const UserTable = () => {
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
   const paginatedData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // Filtrado por búsqueda en todas las columnas activas
+  const filteredBySearch = paginatedData.filter((row) => {
+    if (!search.trim()) return true;
+    return columns.some(col => {
+      const value = row[col.key];
+      return value && value.toString().toLowerCase().includes(search.toLowerCase());
+    });
+  });
+
   // Handlers para filtros y ordenamiento
   const handleApplyFilter = () => setPage(1);
   const handleApplySort = () => setPage(1);
@@ -233,10 +243,18 @@ const UserTable = () => {
               <ArrowUpDown className="action-icon" />
               Sort
             </button>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Buscar proveedor..."
+              style={{ marginLeft: 16, minWidth: 200 }}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
           <div className="controls-right">
-            <button className="action-button primary">
-              <Plus className="action-icon" />
+            <button className="btn btn-primary">
+              <Plus className="btn-icon" />
               Agregar Proveedor
             </button>
           </div>
@@ -284,7 +302,7 @@ const UserTable = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((user, idx) => (
+              {filteredBySearch.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
                   <td>{user.name}</td>
