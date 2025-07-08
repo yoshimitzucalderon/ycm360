@@ -414,6 +414,13 @@ body {
   white-space: nowrap;
   font-size: 15px;
   height: 38px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
+}
+
+.user-table th:not(:last-child) {
+  border-right: 1px solid #e5e7eb;
 }
 
 .user-table th {
