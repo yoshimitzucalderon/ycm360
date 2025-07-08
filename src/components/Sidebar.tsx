@@ -81,21 +81,23 @@ const SidebarMenu = () => {
   const [activeItem, setActiveItem] = useState('dashboards');
   return (
     <nav className="sidebar">
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '24px 0 8px 0' }}>
+      <div className="sidebar-logo-container">
         <YCM360Logo />
       </div>
-      {menuBlocks.map((block, blockIndex) => (
-        <div key={blockIndex} className="sidebar-block">
-          {block.map((item) => (
-            <SidebarItem
-              key={item.key}
-              item={item}
-              isActive={activeItem === item.key}
-              onClick={() => setActiveItem(item.key)}
-            />
-          ))}
-        </div>
-      ))}
+      <div className="sidebar-menu-scroll">
+        {menuBlocks.map((block, blockIndex) => (
+          <div key={blockIndex} className="sidebar-block">
+            {block.map((item) => (
+              <SidebarItem
+                key={item.key}
+                item={item}
+                isActive={activeItem === item.key}
+                onClick={() => setActiveItem(item.key)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </nav>
   );
 };
