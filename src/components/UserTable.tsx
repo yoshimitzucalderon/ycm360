@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTableData, TableColumn } from "../hooks/useTableData";
 import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
+import { supabase } from "../supabaseClient";
 
 const columns: TableColumn[] = [
   { key: "name", label: "Proveedor" },
-  { key: "email", label: "Email" },
-  { key: "date", label: "Fecha de creación" },
   { key: "company", label: "Proveedor nombre comercial" },
   { key: "rfc", label: "RFC" },
   { key: "giro", label: "Giro de la empresa" },
-  { key: "id", label: "Id" },
   { key: "servicio", label: "Servicio que brinda" },
   { key: "moneda", label: "Moneda" },
   { key: "nacionalidad", label: "Nacionalidad" },
@@ -24,52 +22,87 @@ const columns: TableColumn[] = [
   { key: "correoLegal", label: "Correo electrónico responsable legal" },
   { key: "telefonoLegal", label: "Teléfono responsable legal" },
   { key: "responsableAdmin", label: "Responsable administrativo" },
-];
-
-const initialData = [
-  { name: "Natali Craig", email: "smith@kpmg.com", date: "Just now", company: "KPMG Consulting Services", rfc: "KMP850101ABC", giro: "Consultoría", id: "1", servicio: "Auditoría", moneda: "MXN", nacionalidad: "México", banco: "BBVA", cuenta: "1234567890", clabe: "123456789012345678", anexos: "Contrato.pdf", responsableLegal: "Juan Pérez", direccionLegal: "Av. Reforma 123", correoLegal: "juan@kpmg.com", telefonoLegal: "555-1234", responsableAdmin: "María García" },
-  ...Array.from({ length: 39 }, (_, i) => ({
-    name: `Proveedor ${i + 2}`,
-    email: `proveedor${i + 2}@empresa.com`,
-    date: `${i + 2} days ago`,
-    company: `Empresa Comercial ${i + 2}`,
-    rfc: `RFC${i + 2}`,
-    giro: "Servicios",
-    id: `${i + 2}`,
-    servicio: "Consultoría",
-    moneda: "MXN",
-    nacionalidad: "México",
-    banco: "BBVA",
-    cuenta: `12345678${i + 2}`,
-    clabe: `1234567890123456${i + 2}`,
-    anexos: "Contrato.pdf",
-    responsableLegal: `Responsable ${i + 2}`,
-    direccionLegal: `Calle ${i + 2}", Ciudad` ,
-    correoLegal: `legal${i + 2}@empresa.com`,
-    telefonoLegal: `555-12${i + 2}`,
-    responsableAdmin: `Admin ${i + 2}`
-  }))
+  { key: "correoAdmin", label: "Correo electrónico responsable administrativo" },
+  { key: "telefonoAdmin", label: "Teléfono responsable administrativo" },
+  { key: "id", label: "Id" },
+  { key: "date", label: "Fecha de creación" },
+  { key: "createdBy", label: "Creado por" },
+  { key: "updatedAt", label: "Última actualización" },
+  { key: "updatedBy", label: "Actualizado por" },
+  { key: "deletedBy", label: "Eliminado por" },
+  { key: "deletedAt", label: "Fecha de eliminación" },
 ];
 
 const PAGE_SIZE = 8;
+
+const mapProveedor = (row: any) => ({
+  name: row.proveedor,
+  company: row.proveedor_nombre_comercial,
+  rfc: row.rfc,
+  giro: row.giro_de_la_empresa,
+  servicio: row.servicio_que_brinda,
+  moneda: row.moneda,
+  nacionalidad: row.nacionalidad,
+  banco: row.banco,
+  cuenta: row.cuenta_bancaria,
+  clabe: row.clabe_interbancaria,
+  anexos: row.anexos_expediente_proveedor,
+  responsableLegal: row.nombre_completo_responsable_legal,
+  direccionLegal: row.direccion_responsable_legal,
+  correoLegal: row.correo_electronico_responsable_legal,
+  telefonoLegal: row["telefono responsable legal"],
+  responsableAdmin: row.nombre_completo_responsable_administrativo,
+  correoAdmin: row.correo_electronico_responsable_administrativo,
+  telefonoAdmin: row.telefono_responsable_administrativo,
+  id: row.id,
+  date: row.created_at,
+  createdBy: row.created_by,
+  updatedAt: row.updated_at,
+  updatedBy: row.updated_by,
+  deletedBy: row.deleted_by,
+  deletedAt: row.deleted_at,
+});
 
 const UserTable = () => {
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
   const [showSort, setShowSort] = useState(false);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch de Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      const { data: proveedores, error } = await supabase
+        .from("proveedor_alta_de_proveedor")
+        .select("*");
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+      setData((proveedores || []).map(mapProveedor));
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const {
-    data,
+    data: filteredData,
     filters,
     setFilters,
     sort,
     setSort,
     clearFilters,
     clearSort
-  } = useTableData(initialData, columns);
+  } = useTableData(data, columns);
 
   // Paginación
-  const totalPages = Math.ceil(data.length / PAGE_SIZE);
-  const paginatedData = data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
+  const paginatedData = filteredData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Handlers para filtros y ordenamiento
   const handleApplyFilter = () => setPage(1);
@@ -90,7 +123,6 @@ const UserTable = () => {
       <div className="user-table-header">
         <button onClick={() => setShowFilter(f => !f)} className="user-table-filter-btn">&#x1F50D; Filter</button>
         <button onClick={() => setShowSort(s => !s)} className="user-table-sort-btn">&#x21C5; Sort</button>
-        <input type="text" placeholder="Search" className="user-table-search" />
         <button className="user-table-add">Agregar Proveedor</button>
       </div>
       {showFilter && (
@@ -111,42 +143,48 @@ const UserTable = () => {
           onClear={clearSort}
         />
       )}
-      <table className="user-table">
-        <thead>
-          <tr>
-            <th></th>
-            {columns.slice(0, 4).map(col => (
-              <th
-                key={col.key}
-                onClick={() => handleHeaderClick(col.key)}
-                className="user-table-header-cell"
-                style={{ cursor: "pointer" }}
-              >
-                {col.label}
-                {sort && sort.column === col.key && (
-                  <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.map((user, idx) => (
-            <tr key={user.id || idx}>
-              <td><input type="checkbox" /></td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.date}</td>
-              <td>{user.company}</td>
+      {loading ? (
+        <div style={{ padding: 24 }}>Cargando datos...</div>
+      ) : error ? (
+        <div style={{ color: "red", padding: 24 }}>{error}</div>
+      ) : (
+        <table className="user-table">
+          <thead>
+            <tr>
+              <th></th>
+              {columns.slice(0, 4).map(col => (
+                <th
+                  key={col.key}
+                  onClick={() => handleHeaderClick(col.key)}
+                  className="user-table-header-cell"
+                  style={{ cursor: "pointer" }}
+                >
+                  {col.label}
+                  {sort && sort.column === col.key && (
+                    <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
+                  )}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {paginatedData.map((user, idx) => (
+              <tr key={user.id || idx}>
+                <td><input type="checkbox" /></td>
+                <td>{user.name}</td>
+                <td>{user.company}</td>
+                <td>{user.rfc}</td>
+                <td>{user.giro}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <TablePagination
         page={page}
         setPage={setPage}
         totalPages={totalPages}
-        totalItems={data.length}
+        totalItems={filteredData.length}
         pageSize={PAGE_SIZE}
       />
     </div>
