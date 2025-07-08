@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { FaDollarSign, FaCog, FaStore, FaBullhorn, FaUser, FaHome, FaFolderOpen, FaRegFileAlt, FaUsers, FaShareAlt } from "react-icons/fa";
+import { IconType } from "react-icons";
 
-const dashboards = [
+const dashboards: { name: string; icon: IconType }[] = [
   { name: "Finanzas", icon: FaDollarSign },
   { name: "Administración", icon: FaCog },
   { name: "Comercialización", icon: FaStore },
   { name: "Marketing", icon: FaBullhorn },
 ];
 
-const pages = [
+const pages: { name: string; icon: IconType }[] = [
   { name: "User Profile", icon: FaUser },
   { name: "Overview", icon: FaHome },
   { name: "Projects", icon: FaFolderOpen },
@@ -38,7 +39,7 @@ const Sidebar = () => {
           <div className="sidebar-section-title">DASHBOARDS</div>
           <ul>
             {dashboards.map((item) => {
-              const Icon = item.icon;
+              const Icon: IconType = item.icon;
               return (
                 <li
                   key={item.name}
@@ -56,7 +57,7 @@ const Sidebar = () => {
           <div className="sidebar-section-title">PAGES</div>
           <ul>
             {pages.map((item) => {
-              const Icon = item.icon;
+              const Icon: IconType = item.icon;
               return (
                 <li
                   key={item.name}
