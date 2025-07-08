@@ -215,93 +215,97 @@ const UserTable = () => {
   };
 
   return (
-    <div className="user-table-container">
-      <div className="user-table-header table-controls">
-        <div className="controls-left">
-          <button
-            className={`action-button${showFilter ? ' active' : ''}`}
-            onClick={() => setShowFilter(f => !f)}
-          >
-            <Filter className="action-icon" />
-            Filter
-          </button>
-          <button
-            className={`action-button${showSort ? ' active' : ''}`}
-            onClick={() => setShowSort(s => !s)}
-          >
-            <ArrowUpDown className="action-icon" />
-            Sort
-          </button>
+    <div className="table-container">
+      <div className="table-wrapper">
+        <div className="user-table-header table-controls">
+          <div className="controls-left">
+            <button
+              className={`action-button${showFilter ? ' active' : ''}`}
+              onClick={() => setShowFilter(f => !f)}
+            >
+              <Filter className="action-icon" />
+              Filter
+            </button>
+            <button
+              className={`action-button${showSort ? ' active' : ''}`}
+              onClick={() => setShowSort(s => !s)}
+            >
+              <ArrowUpDown className="action-icon" />
+              Sort
+            </button>
+          </div>
+          <div className="controls-right">
+            <button className="action-button primary">
+              <Plus className="action-icon" />
+              Agregar Proveedor
+            </button>
+          </div>
         </div>
-        <div className="controls-right">
-          <button className="action-button primary">
-            <Plus className="action-icon" />
-            Agregar Proveedor
-          </button>
-        </div>
-      </div>
-      {showFilter && (
-        <TableFilter
-          columns={columns}
-          filters={filters}
-          setFilters={setFilters}
-          onApply={handleApplyFilter}
-          onClear={clearFilters}
-        />
-      )}
-      {showSort && (
-        <TableSort
-          columns={columns}
-          sort={sort}
-          setSort={setSort}
-          onApply={handleApplySort}
-          onClear={clearSort}
-        />
-      )}
-      {loading ? (
-        <div style={{ padding: 24 }}>Cargando datos...</div>
-      ) : error ? (
-        <div style={{ color: "red", padding: 24 }}>{error}</div>
-      ) : (
-        <table className="user-table">
-          <thead>
-            <tr>
-              <th></th>
-              {columns.slice(0, 4).map(col => (
-                <th
-                  key={col.key}
-                  onClick={() => handleHeaderClick(col.key)}
-                  className="user-table-header-cell"
-                  style={{ cursor: "pointer" }}
-                >
-                  {col.label}
-                  {sort && sort.column === col.key && (
-                    <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((user, idx) => (
-              <tr key={user.id || idx}>
-                <td><input type="checkbox" /></td>
-                <td>{user.name}</td>
-                <td>{user.company}</td>
-                <td>{user.rfc}</td>
-                <td>{user.giro}</td>
+        {showFilter && (
+          <TableFilter
+            columns={columns}
+            filters={filters}
+            setFilters={setFilters}
+            onApply={handleApplyFilter}
+            onClear={clearFilters}
+          />
+        )}
+        {showSort && (
+          <TableSort
+            columns={columns}
+            sort={sort}
+            setSort={setSort}
+            onApply={handleApplySort}
+            onClear={clearSort}
+          />
+        )}
+        {loading ? (
+          <div style={{ padding: 24 }}>Cargando datos...</div>
+        ) : error ? (
+          <div style={{ color: "red", padding: 24 }}>{error}</div>
+        ) : (
+          <table className="user-table">
+            <thead>
+              <tr>
+                <th></th>
+                {columns.slice(0, 4).map(col => (
+                  <th
+                    key={col.key}
+                    onClick={() => handleHeaderClick(col.key)}
+                    className="user-table-header-cell"
+                    style={{ cursor: "pointer" }}
+                  >
+                    {col.label}
+                    {sort && sort.column === col.key && (
+                      <span style={{ marginLeft: 4 }}>{sort.direction === "asc" ? "▲" : "▼"}</span>
+                    )}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <TablePagination
-        page={page}
-        setPage={setPage}
-        totalPages={totalPages}
-        totalItems={filteredData.length}
-        pageSize={PAGE_SIZE}
-      />
+            </thead>
+            <tbody>
+              {paginatedData.map((user, idx) => (
+                <tr key={user.id || idx}>
+                  <td><input type="checkbox" /></td>
+                  <td>{user.name}</td>
+                  <td>{user.company}</td>
+                  <td>{user.rfc}</td>
+                  <td>{user.giro}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="table-footer">
+        <TablePagination
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+          totalItems={filteredData.length}
+          pageSize={PAGE_SIZE}
+        />
+      </div>
     </div>
   );
 };
