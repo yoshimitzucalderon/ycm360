@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TableColumn, TableFilter } from "../hooks/useTableData";
+import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 
 const OPERATORS = [
   { value: "=", label: "=" },
@@ -15,14 +15,14 @@ const OPERATORS = [
 
 type Props = {
   columns: TableColumn[];
-  filters: TableFilter[];
-  setFilters: (filters: TableFilter[]) => void;
+  filters: TableFilterType[];
+  setFilters: (filters: TableFilterType[]) => void;
   onApply: () => void;
   onClear: () => void;
 };
 
 const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, onClear }) => {
-  const [newFilter, setNewFilter] = useState<TableFilter>({ column: "", operator: "=", value: "" });
+  const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
 
   const addFilter = () => {
     if (newFilter.column && newFilter.operator) {
