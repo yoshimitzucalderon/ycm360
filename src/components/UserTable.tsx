@@ -352,7 +352,7 @@ const UserTable = () => {
             <thead>
               <tr>
                 <th></th>
-                {columnOrder.map(col => (
+                {columnOrder.map((col: TableColumn) => (
                   <th
                     key={col.key}
                     draggable
@@ -383,7 +383,7 @@ const UserTable = () => {
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td><input type="checkbox" /></td>
-                  {columnOrder.map(col => (
+                  {columnOrder.map((col: TableColumn) => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
                 </tr>
