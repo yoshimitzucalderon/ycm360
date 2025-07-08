@@ -6,6 +6,7 @@ import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus } from 'lucide-react';
 import { RiArrowDownSLine } from 'react-icons/ri';
+const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 
 const columns: TableColumn[] = [
   { key: "name", label: "Proveedor" },
@@ -399,7 +400,7 @@ const UserTable = () => {
                       onClick={e => handleSortMenu(e, col.key)}
                       style={{ cursor: 'pointer', userSelect: 'none', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}
                     >
-                      <RiArrowDownSLine size={18} color={sort && sort.column === col.key ? 'var(--sidebar-accent)' : '#cbd5e1'} />
+                      <ArrowDownIcon size={18} color={sort && sort.column === col.key ? 'var(--sidebar-accent)' : '#cbd5e1'} />
                     </span>
                     {/* Menú contextual de sort */}
                     {sortMenu.colKey === col.key && sortMenu.anchor && (
