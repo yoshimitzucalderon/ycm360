@@ -501,12 +501,12 @@ body {
   width: 320px;
   background: #f8fafc;
   border-left: 1px solid #e2e8f0;
-  padding: 24px 12px 0 24px;
+  padding: 24px 6px 0 24px;
   display: flex;
   flex-direction: column;
   gap: 32px;
   font-family: 'Inter', 'Roboto', Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e2e8f0 #f8fafc;
@@ -525,10 +525,13 @@ body {
   margin-bottom: 18px;
 }
 .right-panel-section h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   margin-bottom: 10px;
   color: #222;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .right-panel-section ul {
   list-style: none;
@@ -536,12 +539,13 @@ body {
   margin: 0;
 }
 .right-panel-section li {
-  font-size: 1rem;
+  font-size: 13px;
   margin-bottom: 10px;
   color: #444;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 6px;
 }
 .right-panel-section .time {
   color: #bdbdbd;
