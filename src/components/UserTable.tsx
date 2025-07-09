@@ -355,68 +355,68 @@ const UserTable = () => {
 
   return (
     <div className="table-container">
-      <div className="table-wrapper">
-        <div className="user-table-header table-controls">
-          <div className="controls-left"></div>
-          <div className="controls-right search-flex-group">
-            {searchVisible ? (
-              <div
-                className={`search-animate${showSearch ? ' expanded' : ''}`}
-                ref={searchContainerRef}
-              >
-                <Search className="search-icon-inside" />
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Buscar..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  autoFocus={showSearch}
-                />
-                {search && (
-                  <button
-                    type="button"
-                    className="search-clear-btn"
-                    onClick={() => setSearch("")}
-                    tabIndex={-1}
-                    aria-label="Limpiar búsqueda"
-                  >
-                    <XIcon className="search-clear-icon" />
-                  </button>
-                )}
-              </div>
-            ) : null}
-            {!searchVisible && (
-              <button
-                className={`action-button`}
-                onClick={() => setShowSearch(s => !s)}
-                title="Buscar"
-                aria-label="Buscar"
-                style={{ zIndex: 2 }}
-              >
-                <Search className="action-icon" />
-              </button>
-            )}
-            <button
-              className={`action-button${showFilter ? ' active' : ''}`}
-              onClick={() => setShowFilter(f => !f)}
+      <div className="user-table-header table-controls">
+        <div className="controls-left"></div>
+        <div className="controls-right search-flex-group">
+          {searchVisible ? (
+            <div
+              className={`search-animate${showSearch ? ' expanded' : ''}`}
+              ref={searchContainerRef}
             >
-              <Filter className="action-icon" />
-            </button>
+              <Search className="search-icon-inside" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Buscar..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                autoFocus={showSearch}
+              />
+              {search && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
+                  onClick={() => setSearch("")}
+                  tabIndex={-1}
+                  aria-label="Limpiar búsqueda"
+                >
+                  <XIcon className="search-clear-icon" />
+                </button>
+              )}
+            </div>
+          ) : null}
+          {!searchVisible && (
             <button
-              className={`action-button${showSort ? ' active' : ''}`}
-              onClick={() => setShowSort(s => !s)}
+              className={`action-button`}
+              onClick={() => setShowSearch(s => !s)}
+              title="Buscar"
+              aria-label="Buscar"
+              style={{ zIndex: 2 }}
             >
-              <ArrowUpDown className="action-icon" />
+              <Search className="action-icon" />
             </button>
-            <button className="btn-minimal" title="Agregar proveedor">
-              <Plus className="btn-icon" />
-            </button>
-            <button className="btn-minimal" title="Descargar">
-              <Download className="btn-icon" />
-            </button>
-          </div>
+          )}
+          <button
+            className={`action-button${showFilter ? ' active' : ''}`}
+            onClick={() => setShowFilter(f => !f)}
+          >
+            <Filter className="action-icon" />
+          </button>
+          <button
+            className={`action-button${showSort ? ' active' : ''}`}
+            onClick={() => setShowSort(s => !s)}
+          >
+            <ArrowUpDown className="action-icon" />
+          </button>
+          <button className="btn-minimal" title="Agregar proveedor">
+            <Plus className="btn-icon" />
+          </button>
+          <button className="btn-minimal" title="Descargar">
+            <Download className="btn-icon" />
+          </button>
         </div>
+      </div>
+      <div className="table-wrapper">
         {showFilter && (
           <TableFilter
             columns={columns}
