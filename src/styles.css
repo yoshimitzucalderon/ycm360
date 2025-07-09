@@ -468,6 +468,7 @@ body {
   padding: 8px 24px 0 24px;
   font-size: 0.95rem;
   color: #888;
+  background: #fff;
 }
 .user-table-pagination {
   display: flex;
