@@ -1,28 +1,29 @@
 import React from "react";
+import { Bell, Activity, User, Circle } from "lucide-react";
 
 const RightPanel = () => (
   <aside className="right-panel">
     <section className="right-panel-section">
-      <h4>Notifications</h4>
+      <h4><Bell size={18} style={{marginRight: 6, verticalAlign: 'middle'}} /> Notifications</h4>
       <ul>
-        <li>🔵 You have a bug that needs... <span className="time">Just now</span></li>
-        <li>🔵 New user registered <span className="time">59 minutes ago</span></li>
-        <li>🔵 Andi Lane subscribed to you <span className="time">Today, 11:59 AM</span></li>
+        <li><Circle size={12} color="#0ea5e9" style={{marginRight: 6, verticalAlign: 'middle'}} /> You have a bug that needs... <span className="time">Just now</span></li>
+        <li><Circle size={12} color="#0ea5e9" style={{marginRight: 6, verticalAlign: 'middle'}} /> New user registered <span className="time">59 minutes ago</span></li>
+        <li><Circle size={12} color="#0ea5e9" style={{marginRight: 6, verticalAlign: 'middle'}} /> Andi Lane subscribed to you <span className="time">Today, 11:59 AM</span></li>
       </ul>
     </section>
     <section className="right-panel-section">
-      <h4>Activities</h4>
+      <h4><Activity size={18} style={{marginRight: 6, verticalAlign: 'middle'}} /> Activities</h4>
       <ul>
-        <li>⚫ Released a new version <span className="time">59 minutes ago</span></li>
-        <li>⚫ Modified data in Page X <span className="time">Today, 11:59 AM</span></li>
+        <li><Circle size={12} color="#222" style={{marginRight: 6, verticalAlign: 'middle'}} /> Released a new version <span className="time">59 minutes ago</span></li>
+        <li><Circle size={12} color="#222" style={{marginRight: 6, verticalAlign: 'middle'}} /> Modified data in Page X <span className="time">Today, 11:59 AM</span></li>
       </ul>
     </section>
     <section className="right-panel-section">
-      <h4>Contacts</h4>
+      <h4><User size={18} style={{marginRight: 6, verticalAlign: 'middle'}} /> Contacts</h4>
       <ul>
-        <li>🟢 Natali Craig</li>
-        <li>🔴 Drew Cano</li>
-        <li>⚫ Orlando Diggs</li>
+        <li><Circle size={12} color="#22c55e" style={{marginRight: 6, verticalAlign: 'middle'}} /> Natali Craig</li>
+        <li><Circle size={12} color="#ef4444" style={{marginRight: 6, verticalAlign: 'middle'}} /> Drew Cano</li>
+        <li><Circle size={12} color="#222" style={{marginRight: 6, verticalAlign: 'middle'}} /> Orlando Diggs</li>
       </ul>
     </section>
   </aside>
