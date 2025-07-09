@@ -1,15 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 
-const Tabs = () => (
-  <div className="tabs">
-    <button className="tab">Overview</button>
-    <button className="tab">Targets</button>
-    <button className="tab">Budget</button>
-    <button className="tab active">Users</button>
-    <button className="tab">Files</button>
-    <button className="tab">Activity</button>
-    <button className="tab">Settings</button>
-  </div>
-);
+const tabLabels = [
+  "Overview",
+  "Targets",
+  "Budget",
+  "Users",
+  "Files",
+  "Activity",
+  "Settings"
+];
+
+const Tabs = () => {
+  const [activeTab, setActiveTab] = useState("Users");
+  return (
+    <div className="tabs">
+      {tabLabels.map(label => (
+        <button
+          key={label}
+          className={"tab" + (activeTab === label ? " active" : "")}
+          onClick={() => setActiveTab(label)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default Tabs; 
