@@ -384,15 +384,17 @@ const UserTable = () => {
                 </button>
               )}
             </div>
-            <button
-              className={`action-button${showSearch ? ' active' : ''}`}
-              onClick={() => setShowSearch(s => !s)}
-              title="Buscar"
-              aria-label="Buscar"
-              style={{ zIndex: 2 }}
-            >
-              <Search className="action-icon" />
-            </button>
+            {!searchVisible && (
+              <button
+                className={`action-button`}
+                onClick={() => setShowSearch(s => !s)}
+                title="Buscar"
+                aria-label="Buscar"
+                style={{ zIndex: 2 }}
+              >
+                <Search className="action-icon" />
+              </button>
+            )}
           </div>
           <div className="controls-right">
             <button
