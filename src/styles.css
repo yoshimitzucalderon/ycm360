@@ -834,6 +834,18 @@ body {
   opacity: 1;
 }
 
+.search-animate input,
+.search-animate .search-icon-inside,
+.search-animate .search-clear-btn {
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1);
+  opacity: 0;
+}
+.search-animate.expanded input,
+.search-animate.expanded .search-icon-inside,
+.search-animate.expanded .search-clear-btn {
+  opacity: 1;
+}
+
 .sort-menu {
   position: absolute;
   top: 100%;
