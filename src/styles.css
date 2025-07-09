@@ -812,6 +812,12 @@ body {
   filter: brightness(1.2);
 }
 
+.search-flex-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
 .search-animate {
   width: 0;
   opacity: 0;
@@ -821,6 +827,7 @@ body {
   display: flex;
   align-items: center;
   position: relative;
+  margin-right: 8px;
 }
 .search-animate.expanded {
   width: 220px;
