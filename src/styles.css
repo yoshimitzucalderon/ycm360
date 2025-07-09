@@ -815,7 +815,7 @@ body {
 .search-flex-group {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 12px;
   position: relative;
 }
 .search-animate {

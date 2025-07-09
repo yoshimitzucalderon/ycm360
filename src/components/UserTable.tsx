@@ -357,45 +357,7 @@ const UserTable = () => {
     <div className="table-container">
       <div className="table-wrapper">
         <div className="user-table-header table-controls">
-          <div className="controls-left search-flex-group">
-            <div
-              className={`search-animate${showSearch ? ' expanded' : ''}`}
-              ref={searchContainerRef}
-            >
-              <Search className="search-icon-inside" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Buscar..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                autoFocus={showSearch}
-                style={{ visibility: showSearch ? 'visible' : 'hidden' }}
-              />
-              {search && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearch("")}
-                  tabIndex={-1}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <XIcon className="search-clear-icon" />
-                </button>
-              )}
-            </div>
-            {!searchVisible && (
-              <button
-                className={`action-button`}
-                onClick={() => setShowSearch(s => !s)}
-                title="Buscar"
-                aria-label="Buscar"
-                style={{ zIndex: 2 }}
-              >
-                <Search className="action-icon" />
-              </button>
-            )}
-          </div>
+          <div className="controls-left"></div>
           <div className="controls-right search-flex-group">
             {searchVisible ? (
               <div
