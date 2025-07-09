@@ -138,6 +138,9 @@ body {
   gap: 32px;
   padding: 0 24px;
 }
+.app-layout, .main-content {
+  background: #fff;
+}
 
 .sidebar-header {
   display: flex;
