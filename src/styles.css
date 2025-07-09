@@ -353,6 +353,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 8px 24px 8px 24px;
+  border-bottom: 1px solid #e5e7eb;
 }
 .user-table-filter-btn,
 .user-table-sort-btn {
