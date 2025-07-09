@@ -612,6 +612,7 @@ body {
   height: 18px;
   stroke-width: 2;
   color: var(--sidebar-accent);
+  display: block;
 }
 .filter-chip {
   display: inline-flex;
@@ -772,6 +773,20 @@ body {
 }
 .search-clear-btn {
   position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-close-btn {
+  position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
@@ -791,7 +806,9 @@ body {
   pointer-events: none;
 }
 .search-clear-btn:focus .search-clear-icon,
-.search-clear-btn:hover .search-clear-icon {
+.search-clear-btn:hover .search-clear-icon,
+.search-close-btn:focus .search-clear-icon,
+.search-close-btn:hover .search-clear-icon {
   filter: brightness(1.2);
 }
 

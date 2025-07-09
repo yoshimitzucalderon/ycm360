@@ -6,6 +6,7 @@ import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
+import { MdSearch } from 'react-icons/md';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -192,6 +193,21 @@ const UserTable = () => {
   const toggleRow = (id: string) => {
     setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
+  const [showSearch, setShowSearch] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSearch) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearch(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSearch]);
 
   const {
     data: filteredData,
@@ -332,41 +348,52 @@ const UserTable = () => {
       <div className="table-wrapper">
         <div className="user-table-header table-controls">
           <div className="controls-left">
-            <div className="search-container">
-              <Search className="search-icon-inside" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Buscar..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-              {search && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearch("")}
-                  tabIndex={-1}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <XIcon className="search-clear-icon" />
-                </button>
-              )}
-            </div>
+            {showSearch && (
+              <div className="search-container" ref={searchContainerRef}>
+                <MdSearch className="search-icon-inside" />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Buscar..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  autoFocus
+                />
+                {search && (
+                  <button
+                    type="button"
+                    className="search-clear-btn"
+                    onClick={() => setSearch("")}
+                    tabIndex={-1}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <XIcon className="search-clear-icon" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           <div className="controls-right">
-                      <button
-            className={`action-button${showFilter ? ' active' : ''}`}
-            onClick={() => setShowFilter(f => !f)}
-          >
-            <Filter className="action-icon" />
-          </button>
-          <button
-            className={`action-button${showSort ? ' active' : ''}`}
-            onClick={() => setShowSort(s => !s)}
-          >
-            <ArrowUpDown className="action-icon" />
-          </button>
+            <button
+              className="action-button"
+              onClick={() => setShowSearch(s => !s)}
+              title="Buscar"
+              aria-label="Buscar"
+            >
+              <MdSearch className="action-icon" />
+            </button>
+            <button
+              className={`action-button${showFilter ? ' active' : ''}`}
+              onClick={() => setShowFilter(f => !f)}
+            >
+              <Filter className="action-icon" />
+            </button>
+            <button
+              className={`action-button${showSort ? ' active' : ''}`}
+              onClick={() => setShowSort(s => !s)}
+            >
+              <ArrowUpDown className="action-icon" />
+            </button>
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
             </button>
@@ -431,76 +458,4 @@ const UserTable = () => {
                     onDragStart={() => handleDragStart(col.key)}
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
-                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
-                    style={{ cursor: "pointer", position: "relative", width: colWidths[col.key] || 150, paddingRight: 28 }}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}>
-                      {col.label}
-                    </span>
-                    <span
-                      className="sort-arrow-down"
-                      onClick={e => handleSortMenu(e, col.key)}
-                      style={{ cursor: 'pointer', userSelect: 'none', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}
-                    >
-                      <ArrowDownIcon size={18} color={sort && sort.column === col.key ? 'var(--sidebar-accent)' : '#cbd5e1'} />
-                    </span>
-                    {/* Menú contextual de sort */}
-                    {sortMenu.colKey === col.key && sortMenu.anchor && (
-                      <div className="sort-menu" style={{ left: 0, top: '100%' }}>
-                        <button
-                          className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'asc' ? ' active' : ''}`}
-                          onClick={() => handleSortOption(col.key, 'asc')}
-                        >
-                          <ArrowUpLineIcon size={18} style={{ marginRight: 6 }} /> Ordenar ascendente
-                        </button>
-                        <button
-                          className={`sort-menu-option${sort?.column === col.key && sort?.direction === 'desc' ? ' active' : ''}`}
-                          onClick={() => handleSortOption(col.key, 'desc')}
-                        >
-                          <ArrowDownLineIcon size={18} style={{ marginRight: 6 }} /> Ordenar descendente
-                        </button>
-                      </div>
-                    )}
-                    {/* Resizer minimalista */}
-                    <div
-                      className="col-resizer"
-                      onMouseDown={e => handleMouseDown(e, col.key)}
-                    />
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((user, idx) => (
-                <tr key={user.id || idx}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={!!selectedRows[user.id]}
-                      onChange={() => toggleRow(user.id)}
-                      className="user-checkbox"
-                    />
-                  </td>
-                  {columnOrder.map((col: TableColumn) => (
-                    <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-      <div className="table-footer">
-        <TablePagination
-          page={page}
-          setPage={setPage}
-          totalPages={totalPages}
-          totalItems={searchedData.length}
-          pageSize={PAGE_SIZE}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default UserTable; 
+                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`
