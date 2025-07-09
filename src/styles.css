@@ -352,7 +352,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 24px 8px 24px;
+  padding: 8px 24px 8px 24px;
 }
 .user-table-filter-btn,
 .user-table-sort-btn {
@@ -650,7 +650,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 .controls-left {
   display: flex;
