@@ -4,7 +4,7 @@ import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
@@ -411,6 +411,9 @@ const UserTable = () => {
             </button>
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
+            </button>
+            <button className="btn-minimal" title="Descargar">
+              <Download className="btn-icon" />
             </button>
           </div>
         </div>
