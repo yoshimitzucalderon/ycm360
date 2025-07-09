@@ -6,6 +6,7 @@ import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
+import { IoIosCheckmark } from "react-icons/io";
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
 const ArrowDownLineIcon = RiArrowDownLine as React.ElementType;
@@ -432,7 +433,33 @@ const UserTable = () => {
             <tbody>
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
-                  <td><input type="checkbox" /></td>
+                  <td>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        style={{ display: 'none' }}
+                        // ...agrega aquí el handler de selección si lo tienes...
+                      />
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 18,
+                          height: 18,
+                          border: '1.5px solid #e5e7eb',
+                          borderRadius: 4,
+                          background: '#fff',
+                          transition: 'border-color 0.2s',
+                        }}
+                        className={/* aquí puedes poner una clase si el checkbox está checked */''}
+                      >
+                        {/* Renderiza el checkmark solo si está checked */}
+                        {/* Suponiendo que tienes un estado de selección, reemplaza el true por la condición */}
+                        {true && <IoIosCheckmark size={18} color="#10b981" />} 
+                      </span>
+                    </label>
+                  </td>
                   {columnOrder.map((col: TableColumn) => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
