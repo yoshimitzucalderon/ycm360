@@ -6,7 +6,6 @@ import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
-import { MdSearch } from 'react-icons/md';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -350,7 +349,7 @@ const UserTable = () => {
           <div className="controls-left">
             {showSearch && (
               <div className="search-container" ref={searchContainerRef}>
-                <MdSearch className="search-icon-inside" />
+                <Search className="search-icon-inside" />
                 <input
                   type="text"
                   className="search-input"
@@ -380,7 +379,7 @@ const UserTable = () => {
               title="Buscar"
               aria-label="Buscar"
             >
-              <MdSearch className="action-icon" />
+              <Search className="action-icon" />
             </button>
             <button
               className={`action-button${showFilter ? ' active' : ''}`}
