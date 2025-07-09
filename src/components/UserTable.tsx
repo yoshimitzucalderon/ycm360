@@ -4,7 +4,7 @@ import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
@@ -341,6 +341,17 @@ const UserTable = () => {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
+              {search && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
+                  onClick={() => setSearch("")}
+                  tabIndex={-1}
+                  aria-label="Limpiar búsqueda"
+                >
+                  <XIcon className="search-clear-icon" />
+                </button>
+              )}
             </div>
           </div>
           <div className="controls-right">
