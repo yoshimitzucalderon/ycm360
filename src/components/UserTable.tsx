@@ -398,7 +398,7 @@ const UserTable = () => {
             </colgroup>
             <thead>
               <tr>
-                <th>
+                <th style={{ minWidth: 40, width: 40, padding: 0, background: '#f8fafc' }}>
                   <input
                     type="checkbox"
                     className="user-checkbox"
