@@ -194,6 +194,17 @@ const UserTable = () => {
   };
   const [showSearch, setShowSearch] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [searchVisible, setSearchVisible] = useState(false);
+
+  useEffect(() => {
+    if (showSearch) {
+      setSearchVisible(true);
+    } else {
+      // Esperar la duración de la animación antes de desmontar
+      const timeout = setTimeout(() => setSearchVisible(false), 250);
+      return () => clearTimeout(timeout);
+    }
+  }, [showSearch]);
 
   useEffect(() => {
     if (!showSearch) return;
@@ -347,8 +358,11 @@ const UserTable = () => {
       <div className="table-wrapper">
         <div className="user-table-header table-controls">
           <div className="controls-left">
-            {showSearch && (
-              <div className="search-container" ref={searchContainerRef}>
+            {searchVisible && (
+              <div
+                className={`search-container search-animate${showSearch ? ' expanded' : ''}`}
+                ref={searchContainerRef}
+              >
                 <Search className="search-icon-inside" />
                 <input
                   type="text"
@@ -373,14 +387,16 @@ const UserTable = () => {
             )}
           </div>
           <div className="controls-right">
-            <button
-              className="action-button"
-              onClick={() => setShowSearch(s => !s)}
-              title="Buscar"
-              aria-label="Buscar"
-            >
-              <Search className="action-icon" />
-            </button>
+            {!showSearch && (
+              <button
+                className="action-button"
+                onClick={() => setShowSearch(s => !s)}
+                title="Buscar"
+                aria-label="Buscar"
+              >
+                <Search className="action-icon" />
+              </button>
+            )}
             <button
               className={`action-button${showFilter ? ' active' : ''}`}
               onClick={() => setShowFilter(f => !f)}

@@ -812,6 +812,21 @@ body {
   filter: brightness(1.2);
 }
 
+.search-animate {
+  width: 0;
+  opacity: 0;
+  transition: width 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.18s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.search-animate.expanded {
+  width: 220px;
+  opacity: 1;
+}
+
 .sort-menu {
   position: absolute;
   top: 100%;
