@@ -4,9 +4,9 @@ import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
-import { IoIosCheckmark } from "react-icons/io";
+
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
 const ArrowDownLineIcon = RiArrowDownLine as React.ElementType;
@@ -456,7 +456,7 @@ const UserTable = () => {
                       >
                         {/* Renderiza el checkmark solo si está checked */}
                         {/* Suponiendo que tienes un estado de selección, reemplaza el true por la condición */}
-                        {true && <IoIosCheckmark size={18} color="#10b981" />} 
+                        {true && <Check size={18} color="#10b981" />} 
                       </span>
                     </label>
                   </td>
