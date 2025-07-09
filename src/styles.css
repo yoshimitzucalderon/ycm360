@@ -580,17 +580,18 @@ body {
   align-items: center;
   justify-content: center;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--sidebar-accent);
   border-radius: 12px;
   transition: background 0.2s, border-color 0.2s;
-  color: #1677ff;
+  color: var(--sidebar-accent);
   box-shadow: none;
   font-size: 16px;
   gap: 0;
 }
 .action-button:hover, .btn-minimal:hover, .action-button:focus, .btn-minimal:focus {
-  background: #f3f6fa;
-  border-color: #1677ff;
+  background: #f0fdf4;
+  border-color: var(--sidebar-accent);
+  color: var(--sidebar-accent);
 }
 .action-button.active {
   background-color: var(--sidebar-active);
@@ -610,6 +611,7 @@ body {
   width: 22px;
   height: 22px;
   stroke-width: 2;
+  color: var(--sidebar-accent);
 }
 .filter-chip {
   display: inline-flex;
