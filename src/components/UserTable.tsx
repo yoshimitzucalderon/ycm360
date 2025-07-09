@@ -332,6 +332,16 @@ const UserTable = () => {
       <div className="table-wrapper">
         <div className="user-table-header table-controls">
           <div className="controls-left">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Buscar proveedor..."
+              style={{ minWidth: 200 }}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="controls-right">
             <button
               className={`action-button${showFilter ? ' active' : ''}`}
               onClick={() => setShowFilter(f => !f)}
@@ -346,21 +356,6 @@ const UserTable = () => {
               <ArrowUpDown className="action-icon" />
               Sort
             </button>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Buscar proveedor..."
-              style={{ marginLeft: 16, minWidth: 200 }}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            {isOrderModified && (
-              <button className="restore-columns-btn" onClick={handleRestoreColumns}>
-                Restaurar columnas
-              </button>
-            )}
-          </div>
-          <div className="controls-right">
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
             </button>
