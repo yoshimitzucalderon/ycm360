@@ -458,4 +458,44 @@ const UserTable = () => {
                     onDragStart={() => handleDragStart(col.key)}
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
-                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`
+                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
+                  >
+                    {col.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((user, idx) => (
+                <tr key={user.id || idx}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={!!selectedRows[user.id]}
+                      onChange={() => toggleRow(user.id)}
+                      className="user-checkbox"
+                    />
+                  </td>
+                  {columnOrder.map((col: TableColumn) => (
+                    <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="table-footer">
+        <TablePagination
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+          totalItems={searchedData.length}
+          pageSize={PAGE_SIZE}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default UserTable;
