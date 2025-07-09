@@ -383,7 +383,7 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 .table-container {
-  padding: 16px 0 0 0;
+  padding: 0;
   background: #fff;
   min-height: 100vh;
 }
