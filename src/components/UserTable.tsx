@@ -188,6 +188,10 @@ const UserTable = () => {
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
   const [sortMenu, setSortMenu] = useState<{ colKey: string | null; anchor: HTMLElement | null }>({ colKey: null, anchor: null });
+  const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
+  const toggleRow = (id: string) => {
+    setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const {
     data: filteredData,
@@ -312,6 +316,17 @@ const UserTable = () => {
     setPage(1);
   };
 
+  const allVisibleSelected = paginatedData.length > 0 && paginatedData.every(user => selectedRows[user.id]);
+  const someVisibleSelected = paginatedData.some(user => selectedRows[user.id]) && !allVisibleSelected;
+  const toggleAllVisible = () => {
+    const newState = !allVisibleSelected;
+    const updated: { [id: string]: boolean } = { ...selectedRows };
+    paginatedData.forEach(user => {
+      updated[user.id] = newState;
+    });
+    setSelectedRows(updated);
+  };
+
   return (
     <div className="table-container">
       <div className="table-wrapper">
@@ -383,7 +398,15 @@ const UserTable = () => {
             </colgroup>
             <thead>
               <tr>
-                <th></th>
+                <th>
+                  <input
+                    type="checkbox"
+                    className="user-checkbox"
+                    checked={allVisibleSelected}
+                    ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
+                    onChange={toggleAllVisible}
+                  />
+                </th>
                 {columnOrder.map((col: TableColumn) => (
                   <th
                     key={col.key}
@@ -434,31 +457,12 @@ const UserTable = () => {
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, cursor: 'pointer' }}>
-                      <input
-                        type="checkbox"
-                        style={{ display: 'none' }}
-                        // ...agrega aquí el handler de selección si lo tienes...
-                      />
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 18,
-                          height: 18,
-                          border: '1.5px solid #e5e7eb',
-                          borderRadius: 4,
-                          background: '#fff',
-                          transition: 'border-color 0.2s',
-                        }}
-                        className={/* aquí puedes poner una clase si el checkbox está checked */''}
-                      >
-                        {/* Renderiza el checkmark solo si está checked */}
-                        {/* Suponiendo que tienes un estado de selección, reemplaza el true por la condición */}
-                        {true && <Check size={18} color="#10b981" />} 
-                      </span>
-                    </label>
+                    <input
+                      type="checkbox"
+                      checked={!!selectedRows[user.id]}
+                      onChange={() => toggleRow(user.id)}
+                      className="user-checkbox"
+                    />
                   </td>
                   {columnOrder.map((col: TableColumn) => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
