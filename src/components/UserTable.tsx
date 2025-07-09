@@ -335,27 +335,25 @@ const UserTable = () => {
             <input
               type="text"
               className="search-input"
-              placeholder="Buscar proveedor..."
+              placeholder="Buscar..."
               style={{ minWidth: 200 }}
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
           <div className="controls-right">
-            <button
-              className={`action-button${showFilter ? ' active' : ''}`}
-              onClick={() => setShowFilter(f => !f)}
-            >
-              <Filter className="action-icon" />
-              Filter
-            </button>
-            <button
-              className={`action-button${showSort ? ' active' : ''}`}
-              onClick={() => setShowSort(s => !s)}
-            >
-              <ArrowUpDown className="action-icon" />
-              Sort
-            </button>
+                      <button
+            className={`action-button${showFilter ? ' active' : ''}`}
+            onClick={() => setShowFilter(f => !f)}
+          >
+            <Filter className="action-icon" />
+          </button>
+          <button
+            className={`action-button${showSort ? ' active' : ''}`}
+            onClick={() => setShowSort(s => !s)}
+          >
+            <ArrowUpDown className="action-icon" />
+          </button>
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
             </button>
