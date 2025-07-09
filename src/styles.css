@@ -385,6 +385,7 @@ body {
 .table-container {
   padding: 16px 0 0 0;
   background: #fff;
+  min-height: 100vh;
 }
 .user-table {
   min-width: 900px;
