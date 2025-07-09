@@ -580,7 +580,7 @@ body {
   align-items: center;
   justify-content: center;
   background: #fff;
-  border: 1px solid var(--sidebar-accent);
+  border: 1.5px solid #e5e7eb;
   border-radius: 10px;
   transition: background 0.2s, border-color 0.2s;
   color: var(--sidebar-accent);
