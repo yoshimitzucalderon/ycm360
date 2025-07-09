@@ -323,7 +323,7 @@ body {
   display: flex;
   gap: 18px;
   background: #fff;
-  padding: 0 32px;
+  padding: 0;
 }
 .tab {
   background: none;
@@ -335,10 +335,15 @@ body {
   border-bottom: 2px solid transparent;
   transition: color 0.2s, border-bottom 0.2s;
 }
-.tab.active, .tab:hover {
+.tab.active {
   color: #10b981;
   border-bottom: 2px solid #10b981;
   font-weight: 600;
+}
+.tab:hover {
+  color: #666;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 500;
 }
 
 .user-table-container {
