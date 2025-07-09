@@ -381,6 +381,7 @@ body {
 }
 .table-container {
   padding: 16px 0 0 0;
+  background: #fff;
 }
 .user-table {
   min-width: 900px;
