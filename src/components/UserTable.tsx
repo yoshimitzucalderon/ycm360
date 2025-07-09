@@ -398,14 +398,25 @@ const UserTable = () => {
             </colgroup>
             <thead>
               <tr>
-                <th style={{ minWidth: 40, width: 40, padding: 0, background: '#f8fafc' }}>
-                  <input
-                    type="checkbox"
-                    className="user-checkbox"
-                    checked={allVisibleSelected}
-                    ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
-                    onChange={toggleAllVisible}
-                  />
+                <th
+                  style={{
+                    minWidth: 40,
+                    width: 40,
+                    padding: 0,
+                    background: '#f8fafc',
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    <input
+                      type="checkbox"
+                      className="user-checkbox"
+                      checked={allVisibleSelected}
+                      ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
+                      onChange={toggleAllVisible}
+                    />
+                  </div>
                 </th>
                 {columnOrder.map((col: TableColumn) => (
                   <th
