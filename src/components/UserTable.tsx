@@ -699,11 +699,26 @@ const UserTable = () => {
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ position: 'relative' }}>
               {paginatedData.length === 0 ? (
-                <tr>
-                  <td colSpan={1 + visibleColumns.length} style={{ textAlign: 'center', padding: 40, color: '#888', fontSize: 16 }}>
-                    No se encontraron resultados para los criterios seleccionados.
+                <tr style={{ height: 240 }}>
+                  <td colSpan={1 + visibleColumns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#888',
+                      fontSize: 16,
+                      pointerEvents: 'none',
+                      background: 'transparent',
+                    }}>
+                      No se encontraron resultados para los criterios seleccionados.
+                    </div>
                   </td>
                 </tr>
               ) : (
