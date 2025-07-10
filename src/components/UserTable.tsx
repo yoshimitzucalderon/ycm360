@@ -516,14 +516,18 @@ const UserTable = () => {
                   {columns.filter(col =>
                     col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
                   ).map(col => (
-                    <label key={col.key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, padding: '2px 0' }}>
+                    <label key={col.key} className="column-menu-checkbox-wrapper" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, padding: '2px 0' }}>
                       <input
                         type="checkbox"
                         checked={visibleColumns.includes(col.key)}
                         onChange={() => toggleColumn(col.key)}
-                        className="column-menu-checkbox"
-                        style={{ accentColor: '#10b981', width: 16, height: 16, marginRight: 4 }}
+                        className="column-menu-checkbox-input"
                       />
+                      <span className="column-menu-checkbox-custom">
+                        <svg className="column-menu-checkbox-check" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3.5 7.5L6 10L10.5 5.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
                       {col.label}
                     </label>
                   ))}
