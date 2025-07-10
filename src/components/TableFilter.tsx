@@ -328,8 +328,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           onClick={addFilter}
           style={{
             background: '#fff',
-            color: '#3b82f6',
-            border: '1.5px solid #3b82f6',
+            color: '#22c55e',
+            border: '1.5px solid #22c55e',
             borderRadius: 6,
             padding: '2px 12px',
             fontWeight: 500,
@@ -337,12 +337,12 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             transition: 'background 0.15s, color 0.15s',
           }}
           onMouseOver={e => {
-            (e.currentTarget as HTMLButtonElement).style.background = '#dbeafe';
-            (e.currentTarget as HTMLButtonElement).style.color = '#1e40af';
+            (e.currentTarget as HTMLButtonElement).style.background = '#bbf7d0';
+            (e.currentTarget as HTMLButtonElement).style.color = '#166534';
           }}
           onMouseOut={e => {
             (e.currentTarget as HTMLButtonElement).style.background = '#fff';
-            (e.currentTarget as HTMLButtonElement).style.color = '#3b82f6';
+            (e.currentTarget as HTMLButtonElement).style.color = '#22c55e';
           }}
         >
           + Añadir filtro
