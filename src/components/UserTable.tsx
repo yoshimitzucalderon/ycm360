@@ -517,6 +517,7 @@ const UserTable = () => {
               onClose={() => setColumnMenuOpen(false)}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
               transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              marginThreshold={8}
               disableRestoreFocus
             >
               <div style={{ minWidth: 220 }}>
