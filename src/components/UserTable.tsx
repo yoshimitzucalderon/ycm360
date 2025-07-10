@@ -443,9 +443,9 @@ const UserTable = () => {
           <div style={{ position: 'relative' }}>
             <button
               className="action-button"
-              title="Seleccionar columnas"
+              title="Administrar columnas"
               onClick={() => setColumnMenuOpen(open => !open)}
-              aria-label="Seleccionar columnas"
+              aria-label="Administrar columnas"
             >
               <Columns3 className="action-icon" />
             </button>
@@ -511,7 +511,7 @@ const UserTable = () => {
                     </button>
                   )}
                 </div>
-                <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Seleccionar columnas</div>
+                <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {columns.filter(col =>
                     col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
