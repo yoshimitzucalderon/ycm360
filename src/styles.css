@@ -287,17 +287,6 @@ body {
   color: #bdbdbd;
   font-weight: 400;
 }
-.header-search-shortcut {
-  background: #f3f4f6;
-  color: #888;
-  font-size: 12px;
-  border-radius: 4px;
-  padding: 2px 7px;
-  margin-left: 8px;
-  font-family: 'Inter', monospace, sans-serif;
-  border: 1px solid #e5e7eb;
-  user-select: none;
-}
 .header-right {
   flex: 0 0 auto;
   display: flex;

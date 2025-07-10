@@ -18,7 +18,6 @@ const Header = () => (
           type="text"
           placeholder="Search..."
         />
-        <span className="header-search-shortcut">Ctrl+K</span>
       </div>
     </div>
     <div className="header-right">
