@@ -235,6 +235,12 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     }
   };
 
+  // MenuProps con container dinámico
+  const getMenuProps = () => ({
+    ...menuProps,
+    container: popoverRef.current || undefined,
+  });
+
   return ReactDOM.createPortal(
     <div
       ref={popoverRef}
@@ -265,7 +271,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 <MinimalSelect
                   value={filter.logicalOperator || 'AND'}
                   onChange={e => setLogicalOperator(idx, (e.target.value as string))}
-                  MenuProps={menuProps}
+                  MenuProps={getMenuProps()}
                 >
                   {LOGICALS.map(l => (
                     <MinimalMenuItem key={l.value} value={l.value}>{l.label}</MinimalMenuItem>
@@ -285,7 +291,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                     setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
                   }
                 }}
-                MenuProps={menuProps}
+                MenuProps={getMenuProps()}
               >
                 <MinimalMenuItem value="">Columna...</MinimalMenuItem>
                 {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
@@ -298,7 +304,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 value={filter.operator}
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
-                MenuProps={menuProps}
+                MenuProps={getMenuProps()}
               >
                 {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
               </MinimalSelect>
