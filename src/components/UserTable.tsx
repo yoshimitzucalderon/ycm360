@@ -461,8 +461,8 @@ const UserTable = () => {
   });
 
   const handleOpenColumnMenu = () => {
-    if (columnMenuRef.current) {
-      const rect = columnMenuRef.current.getBoundingClientRect();
+    if (columnMenuButtonRef.current) {
+      const rect = columnMenuButtonRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
       if (spaceBelow < 350 && spaceAbove > spaceBelow) {
