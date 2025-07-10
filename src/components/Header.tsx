@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import { FaBell, FaUserCircle } from "react-icons/fa";
-import { Search, X as XIcon } from 'lucide-react';
-
-const BellIcon = FaBell as React.ElementType;
-const UserIcon = FaUserCircle as React.ElementType;
+import { Search, X as XIcon, Bell, CircleUserRound } from 'lucide-react';
 
 const Header = () => {
   const [search, setSearch] = useState("");
@@ -37,8 +33,8 @@ const Header = () => {
         </div>
       </div>
       <div className="header-right">
-        <span className="header-icon"><BellIcon /></span>
-        <span className="header-icon"><UserIcon /></span>
+        <span className="header-icon"><Bell size={24} /></span>
+        <span className="header-icon"><CircleUserRound size={24} /></span>
       </div>
     </header>
   );
