@@ -33,10 +33,11 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
   const popoverRef = useRef<HTMLDivElement>(null);
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+  const [initialized, setInitialized] = useState(false);
 
-  // Al abrir, si no hay filtros, poner uno vacío por defecto
+  // Al abrir, si no hay filtros, poner uno vacío por defecto SOLO una vez
   useEffect(() => {
-    if (filters.length === 0) {
+    if (!initialized && filters.length === 0) {
       setFilters([
         {
           column: '',
@@ -45,9 +46,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           logicalOperator: undefined,
         },
       ]);
+      setInitialized(true);
     }
     // eslint-disable-next-line
-  }, []);
+  }, [initialized, filters.length]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -185,6 +187,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, value: e.target.value } : f))}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
               placeholder="Valor"
+              disabled={!filter.column}
             />
           </div>
         ))}
