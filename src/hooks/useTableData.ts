@@ -28,68 +28,123 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
     console.log('DEBUG filters:', filters);
     console.log('DEBUG validFilters:', validFilters);
     if (validFilters.length === 0) return initialData;
-    // Agrupa los filtros por operador lógico
-    let result = initialData;
-    let currentGroup: typeof validFilters = [];
-    let currentOperator: 'AND' | 'OR' = 'AND';
-    validFilters.forEach((filter, idx) => {
-      if (idx === 0) {
-        currentGroup = [filter];
-        currentOperator = 'AND';
-      } else {
-        if (filter.logicalOperator === 'OR') {
-          currentGroup.push(filter);
+    
+    // Aplica todos los filtros usando la lógica de Supabase
+    return initialData.filter(row => {
+      // Para cada fila, evalúa todos los filtros en secuencia
+      let result = true;
+      let previousOperator: 'AND' | 'OR' = 'AND';
+      
+      for (let i = 0; i < validFilters.length; i++) {
+        const filter = validFilters[i];
+        const currentResult = applyFilter(row, filter);
+        
+        if (i === 0) {
+          // Primer filtro siempre se aplica
+          result = currentResult;
         } else {
-          // Aplica el grupo anterior
-          if (currentOperator === 'AND') {
-            result = result.filter(row => currentGroup.every(f => applyFilter(row, f)));
-          } else {
-            result = result.filter(row => currentGroup.some(f => applyFilter(row, f)));
+          // Para filtros subsiguientes, usa el operador lógico del filtro actual
+          const logicalOperator = filter.logicalOperator || 'AND';
+          
+          if (logicalOperator === 'AND') {
+            result = result && currentResult;
+          } else if (logicalOperator === 'OR') {
+            result = result || currentResult;
           }
-          // Nuevo grupo
-          currentGroup = [filter];
-          currentOperator = 'AND';
         }
       }
-      // Si es el último filtro, aplica el grupo
-      if (idx === validFilters.length - 1) {
-        if (currentOperator === 'AND') {
-          result = result.filter(row => currentGroup.every(f => applyFilter(row, f)));
-        } else {
-          result = result.filter(row => currentGroup.some(f => applyFilter(row, f)));
-        }
-      }
-      // Actualiza el operador para el siguiente grupo
-      if (filter.logicalOperator) currentOperator = filter.logicalOperator;
+      
+      return result;
     });
-    return result;
   }, [initialData, filters]);
 
   function applyFilter(row: any, filter: TableFilter) {
-    const value = String((row as Record<string, any>)[filter.column] ?? '').toLowerCase();
-    const filterValue = filter.value.toLowerCase();
+    const rawValue = (row as Record<string, any>)[filter.column];
+    const filterValue = filter.value.trim();
+    
+    // Manejo especial para el operador 'is'
+    if (filter.operator === 'is') {
+      switch (filterValue.toLowerCase()) {
+        case 'null':
+          return rawValue === null || rawValue === undefined || rawValue === '';
+        case 'not null':
+          return rawValue !== null && rawValue !== undefined && rawValue !== '';
+        case 'true':
+          return rawValue === true || String(rawValue).toLowerCase() === 'true';
+        case 'false':
+          return rawValue === false || String(rawValue).toLowerCase() === 'false';
+        default:
+          return false;
+      }
+    }
+    
+    // Para otros operadores, convertir a string para comparación
+    const value = String(rawValue ?? '').toLowerCase();
+    const filterValueLower = filterValue.toLowerCase();
+    
     switch (filter.operator) {
       case '=':
-        return value === filterValue;
+        return value === filterValueLower;
+      case '<>':
+        return value !== filterValueLower;
       case '>=':
-        return value >= filterValue;
+        // Intentar comparación numérica primero
+        const numValue = parseFloat(value);
+        const numFilterValue = parseFloat(filterValue);
+        if (!isNaN(numValue) && !isNaN(numFilterValue)) {
+          return numValue >= numFilterValue;
+        }
+        // Si no son números, comparación lexicográfica
+        return value >= filterValueLower;
       case '<=':
-        return value <= filterValue;
+        // Intentar comparación numérica primero
+        const numValue2 = parseFloat(value);
+        const numFilterValue2 = parseFloat(filterValue);
+        if (!isNaN(numValue2) && !isNaN(numFilterValue2)) {
+          return numValue2 <= numFilterValue2;
+        }
+        // Si no son números, comparación lexicográfica
+        return value <= filterValueLower;
       case '>':
-        return value > filterValue;
+        // Intentar comparación numérica primero
+        const numValue3 = parseFloat(value);
+        const numFilterValue3 = parseFloat(filterValue);
+        if (!isNaN(numValue3) && !isNaN(numFilterValue3)) {
+          return numValue3 > numFilterValue3;
+        }
+        // Si no son números, comparación lexicográfica
+        return value > filterValueLower;
       case '<':
-        return value < filterValue;
+        // Intentar comparación numérica primero
+        const numValue4 = parseFloat(value);
+        const numFilterValue4 = parseFloat(filterValue);
+        if (!isNaN(numValue4) && !isNaN(numFilterValue4)) {
+          return numValue4 < numFilterValue4;
+        }
+        // Si no son números, comparación lexicográfica
+        return value < filterValueLower;
       case 'like':
-        return value.includes(filterValue);
+        // Coincidencia exacta con comodines SQL
+        const likePattern = filterValueLower
+          .replace(/%/g, '.*')  // % se convierte en .*
+          .replace(/_/g, '.')   // _ se convierte en .
+          .replace(/\.\*/g, '.*') // Evitar doble escape
+          .replace(/\.\./g, '._'); // Evitar doble escape
+        const likeRegex = new RegExp(`^${likePattern}$`, 'i');
+        return likeRegex.test(value);
       case 'ilike':
-        return value.includes(filterValue);
+        // Coincidencia sin distinguir mayúsculas/minúsculas con comodines SQL
+        const ilikePattern = filterValueLower
+          .replace(/%/g, '.*')  // % se convierte en .*
+          .replace(/_/g, '.')   // _ se convierte en .
+          .replace(/\.\*/g, '.*') // Evitar doble escape
+          .replace(/\.\./g, '._'); // Evitar doble escape
+        const ilikeRegex = new RegExp(`^${ilikePattern}$`, 'i');
+        return ilikeRegex.test(value);
       case 'in':
-        return filter.value.split(',').map(v => v.trim().toLowerCase()).includes(value);
-      case 'is':
-        if (filterValue === 'null') return !value;
-        if (filterValue === 'not null') return !!value;
-        if (["true", "false"].includes(filterValue)) return value === filterValue;
-        return false;
+        // Lista de valores separados por comas
+        const inValues = filterValue.split(',').map(v => v.trim().toLowerCase());
+        return inValues.includes(value);
       default:
         return true;
     }

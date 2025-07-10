@@ -10,10 +10,10 @@ const OPERATORS = [
   { value: "<", label: "< (menor que)" },
   { value: ">=", label: ">= (mayor o igual)" },
   { value: "<=", label: "<= (menor o igual)" },
-  { value: "like", label: "~ Coincidencia exacta" },
-  { value: "ilike", label: "~* Coincidencia sin mayúsculas" },
-  { value: "in", label: "in (Uno de la lista)" },
-  { value: "is", label: "is (Valores especiales: null, true, false)" },
+  { value: "like", label: "LIKE (con % y _)" },
+  { value: "ilike", label: "ILIKE (sin distinguir mayúsculas)" },
+  { value: "in", label: "IN (lista separada por comas)" },
+  { value: "is", label: "IS (null, not null, true, false)" },
 ];
 
 const LOGICALS = [
@@ -138,6 +138,26 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     ));
   };
 
+  // Función para obtener el placeholder según el operador
+  const getPlaceholder = (operator: string) => {
+    switch (operator) {
+      case 'like':
+      case 'ilike':
+        return 'Ej: Juan% o %ana%';
+      case 'in':
+        return 'valor1, valor2, valor3';
+      case 'is':
+        return 'null, not null, true, false';
+      case '>':
+      case '<':
+      case '>=':
+      case '<=':
+        return 'Número o texto';
+      default:
+        return 'Valor';
+    }
+  };
+
   return ReactDOM.createPortal(
     <div
       ref={popoverRef}
@@ -202,7 +222,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
               }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
-              placeholder="Valor"
+              placeholder={getPlaceholder(filter.operator)}
               disabled={!filter.column}
             />
           </div>
