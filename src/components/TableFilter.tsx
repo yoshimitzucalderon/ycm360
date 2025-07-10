@@ -63,6 +63,7 @@ const menuProps = {
       boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       borderRadius: 8,
       padding: 0,
+      zIndex: 3000, // Asegura que esté por encima del popover
     },
   },
   MenuListProps: {
