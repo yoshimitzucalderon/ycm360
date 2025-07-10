@@ -46,6 +46,22 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     // eslint-disable-next-line
   }, [filters.length]);
 
+  // Al abrir el popover, si no hay filtros, agrega uno vacío solo una vez
+  useEffect(() => {
+    if (filters.length === 0) {
+      setFilters([
+        {
+          column: '',
+          operator: '=',
+          value: '',
+          logicalOperator: undefined,
+        },
+      ]);
+    }
+    // Solo en el primer render
+    // eslint-disable-next-line
+  }, []);
+
   // Cerrar al hacer click fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
