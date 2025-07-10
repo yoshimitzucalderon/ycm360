@@ -175,9 +175,6 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 // Si el usuario borra la columna, elimina el filtro
                 if (!col) {
                   setFilters(filters.filter((_, i) => i !== idx));
-                } else if (!filter.value) {
-                  // Si no hay valor, elimina el filtro (no permitas filtro incompleto)
-                  setFilters(filters.filter((_, i) => i !== idx));
                 } else {
                   setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
                 }
@@ -202,12 +199,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               value={filter.value}
               onChange={e => {
                 const val = e.target.value;
-                // Si no hay valor, elimina el filtro (no permitas filtro incompleto)
-                if (!val) {
-                  setFilters(filters.filter((_, i) => i !== idx));
-                } else {
-                  setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
-                }
+                setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
               }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
               placeholder="Valor"
