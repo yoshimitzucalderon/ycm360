@@ -34,6 +34,21 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   const popoverRef = useRef<HTMLDivElement>(null);
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
+  // Al abrir, si no hay filtros, poner uno vacío por defecto
+  useEffect(() => {
+    if (filters.length === 0) {
+      setFilters([
+        {
+          column: '',
+          operator: '=',
+          value: '',
+          logicalOperator: undefined,
+        },
+      ]);
+    }
+    // eslint-disable-next-line
+  }, []);
+
   // Cerrar al hacer click fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
