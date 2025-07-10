@@ -176,6 +176,16 @@ const getStoredColumnOrder = () => {
   return ORIGINAL_COLUMNS;
 };
 
+const getStoredVisibleColumns = () => {
+  try {
+    const stored = localStorage.getItem('visibleColumns');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {}
+  return columns.map(c => c.key);
+};
+
 const UserTable = () => {
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
@@ -195,6 +205,9 @@ const UserTable = () => {
   const [showSearch, setShowSearch] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(getStoredVisibleColumns());
+  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
+  const columnMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -237,6 +250,35 @@ const UserTable = () => {
   // Restaurar columnas
   const isOrderModified = columnOrder.map((c: TableColumn) => c.key).join(',') !== ORIGINAL_COLUMNS.map((c: TableColumn) => c.key).join(',');
   const handleRestoreColumns = () => setColumnOrder(ORIGINAL_COLUMNS);
+
+  // Persistir columnas visibles
+  useEffect(() => {
+    localStorage.setItem('visibleColumns', JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  // Cerrar menú columnas al hacer click fuera
+  useEffect(() => {
+    if (!columnMenuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (columnMenuRef.current && !columnMenuRef.current.contains(event.target as Node)) {
+        setColumnMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [columnMenuOpen]);
+
+  // Helpers columnas
+  const allChecked = visibleColumns.length === columns.length;
+  const noneChecked = visibleColumns.length === 0;
+  const toggleColumn = (key: string) => {
+    setVisibleColumns(cols =>
+      cols.includes(key) ? cols.filter(k => k !== key) : [...cols, key]
+    );
+  };
+  const showAllColumns = () => setVisibleColumns(columns.map(c => c.key));
+  const hideAllColumns = () => setVisibleColumns([]);
+  const resetColumns = () => setVisibleColumns(columns.map(c => c.key));
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
@@ -397,9 +439,64 @@ const UserTable = () => {
             </button>
           )}
           {/* Botón Seleccionar Columnas */}
-          <button className="action-button" title="Seleccionar columnas">
-            <Columns3 className="action-icon" />
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button
+              className="action-button"
+              title="Seleccionar columnas"
+              onClick={() => setColumnMenuOpen(open => !open)}
+              aria-label="Seleccionar columnas"
+            >
+              <Columns3 className="action-icon" />
+            </button>
+            {columnMenuOpen && (
+              <div
+                ref={columnMenuRef}
+                style={{
+                  position: 'absolute',
+                  top: 40,
+                  left: 0,
+                  minWidth: 220,
+                  background: '#fff',
+                  border: '1.5px solid #e5e7eb',
+                  borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  zIndex: 100,
+                  padding: 12,
+                  maxHeight: 340,
+                  overflowY: 'auto',
+                }}
+              >
+                <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Seleccionar columnas</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {columns.map(col => (
+                    <label key={col.key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, padding: '2px 0' }}>
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.key)}
+                        onChange={() => toggleColumn(col.key)}
+                        style={{ accentColor: '#10b981', width: 16, height: 16, marginRight: 4 }}
+                      />
+                      {col.label}
+                    </label>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
+                  <button
+                    style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 500, cursor: 'pointer', fontSize: 14 }}
+                    onClick={allChecked ? hideAllColumns : showAllColumns}
+                  >
+                    {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
+                  </button>
+                  <button
+                    style={{ background: 'none', border: 'none', color: '#888', fontWeight: 500, cursor: 'pointer', fontSize: 14 }}
+                    onClick={resetColumns}
+                  >
+                    Resetear
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
@@ -423,33 +520,18 @@ const UserTable = () => {
         </div>
       </div>
       <div className="table-wrapper">
-        {showFilter && (
-          <TableFilter
-            columns={columns}
-            filters={filters}
-            setFilters={setFilters}
-            onApply={handleApplyFilter}
-            onClear={clearFilters}
-          />
-        )}
-        {showSort && (
-          <TableSort
-            columns={columns}
-            sort={sort}
-            setSort={setSort}
-            onApply={handleApplySort}
-            onClear={clearSort}
-          />
-        )}
-        {loading ? (
-          <div style={{ padding: 24 }}>Cargando datos...</div>
-        ) : error ? (
-          <div style={{ color: "red", padding: 24 }}>{error}</div>
+        {noneChecked ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
+            <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
+            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuOpen(true)}>
+              Seleccionar columnas a través del botón correspondiente
+            </div>
+          </div>
         ) : (
           <table className="user-table" ref={tableRef}>
             <colgroup>
               <col style={{ width: 40 }} /> {/* Para el checkbox */}
-              {columnOrder.map((col: TableColumn) => (
+              {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                 <col key={col.key} style={{ width: colWidths[col.key] || 150 }} />
               ))}
             </colgroup>
@@ -475,7 +557,7 @@ const UserTable = () => {
                     />
                   </div>
                 </th>
-                {columnOrder.map((col: TableColumn) => (
+                {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                   <th
                     key={col.key}
                     draggable
@@ -500,7 +582,7 @@ const UserTable = () => {
                       className="user-checkbox"
                     />
                   </td>
-                  {columnOrder.map((col: TableColumn) => (
+                  {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
                 </tr>
