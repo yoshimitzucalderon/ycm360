@@ -14,6 +14,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
+import Menu from '@mui/material/Menu';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -532,16 +533,43 @@ const UserTable = () => {
               <Columns3 className="action-icon" />
             </button>
             {columnMenuAnchorEl && (
-              <MinimalPopover
+              <Menu
                 open={columnMenuOpen}
                 anchorEl={columnMenuAnchorEl}
                 onClose={handleCloseColumnMenu}
                 anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
                 marginThreshold={8}
-                disableRestoreFocus
-                disableEnforceFocus
-                disableAutoFocus
+                PaperProps={{
+                  style: {
+                    minWidth: 220,
+                    borderRadius: 10,
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                    border: '1.5px solid #e5e7eb',
+                    padding: 12,
+                    maxHeight: 340,
+                    overflowY: 'auto',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#d1d5db #f8fafc',
+                  },
+                }}
+                MenuListProps={{
+                  sx: {
+                    '::-webkit-scrollbar': {
+                      width: '6px',
+                      background: '#f8fafc',
+                    },
+                    '::-webkit-scrollbar-thumb': {
+                      background: '#d1d5db',
+                      borderRadius: '4px',
+                    },
+                    '::-webkit-scrollbar-thumb:hover': {
+                      background: '#b6bbc4',
+                    },
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#d1d5db #f8fafc',
+                  },
+                }}
               >
                 <div style={{ minWidth: 220 }}>
                   <TextField
@@ -589,7 +617,7 @@ const UserTable = () => {
                     </Button>
                   </div>
                 </div>
-              </MinimalPopover>
+              </Menu>
             )}
           </div>
           <button
