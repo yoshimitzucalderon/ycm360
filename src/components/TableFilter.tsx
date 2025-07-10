@@ -95,20 +95,17 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     });
   }, [anchorRef, filters.length]);
 
-  // Si no hay filtros, mostrar una fila editable (newFilter) siempre
-  const showNewFilterRow = filters.length === 0;
-
+  // Cambia la lógica para que el botón '+ Añadir filtro' siempre esté visible y permita agregar múltiples filtros vacíos
   const addFilter = () => {
-    if (newFilter.column && newFilter.operator) {
-      setFilters([
-        ...filters,
-        {
-          ...newFilter,
-          logicalOperator: filters.length === 0 ? undefined : 'AND' as 'AND',
-        },
-      ]);
-      setNewFilter({ column: '', operator: '=', value: '' });
-    }
+    setFilters([
+      ...filters,
+      {
+        column: '',
+        operator: '=',
+        value: '',
+        logicalOperator: filters.length === 0 ? undefined : 'AND',
+      },
+    ]);
   };
 
   const removeFilter = (idx: number) => {
@@ -130,6 +127,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         flexDirection: 'column',
         justifyContent: 'flex-start',
         gap: 12,
+        position: 'relative',
+        paddingBottom: 48, // espacio para el botón fijo
       }}
     >
       <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
@@ -153,6 +152,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, column: e.target.value } : f))}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word' }}
             >
+              <option value="">Columna...</option>
               {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
                 <option key={col.key} value={col.key}>{col.label}</option>
               ))}
@@ -173,57 +173,31 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             />
           </div>
         ))}
-        {showNewFilterRow && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <select
-              value={newFilter.column}
-              onChange={e => setNewFilter(f => ({ ...f, column: e.target.value }))}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word' }}
-            >
-              <option value="">Columna...</option>
-              {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
-                <option key={col.key} value={col.key}>{col.label}</option>
-              ))}
-            </select>
-            <select
-              value={newFilter.operator}
-              onChange={e => setNewFilter(f => ({ ...f, operator: e.target.value }))}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word' }}
-            >
-              {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-            </select>
-            <input
-              type="text"
-              placeholder="Valor"
-              value={newFilter.value}
-              onChange={e => setNewFilter(f => ({ ...f, value: e.target.value }))}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
-            />
-            <button
-              onClick={addFilter}
-              style={{
-                background: '#fff',
-                color: '#10b981',
-                border: '1.5px solid #10b981',
-                borderRadius: 6,
-                padding: '2px 10px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                transition: 'background 0.15s, color 0.15s',
-              }}
-              onMouseOver={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#d1fae5';
-                (e.currentTarget as HTMLButtonElement).style.color = '#047857';
-              }}
-              onMouseOut={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#fff';
-                (e.currentTarget as HTMLButtonElement).style.color = '#10b981';
-              }}
-            >
-              + Añadir filtro
-            </button>
-          </div>
-        )}
+      </div>
+      <div style={{ position: 'absolute', left: 16, bottom: 12, zIndex: 2 }}>
+        <button
+          onClick={addFilter}
+          style={{
+            background: '#fff',
+            color: '#3b82f6',
+            border: '1.5px solid #3b82f6',
+            borderRadius: 6,
+            padding: '2px 12px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s',
+          }}
+          onMouseOver={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = '#dbeafe';
+            (e.currentTarget as HTMLButtonElement).style.color = '#1e40af';
+          }}
+          onMouseOut={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = '#fff';
+            (e.currentTarget as HTMLButtonElement).style.color = '#3b82f6';
+          }}
+        >
+          + Añadir filtro
+        </button>
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 18 }}>
         <button
@@ -231,7 +205,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           style={{
             background: 'none',
             border: 'none',
-            color: '#10b981',
+            color: '#3b82f6',
             fontWeight: 500,
             cursor: 'pointer',
             fontSize: 14,

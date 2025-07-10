@@ -409,7 +409,7 @@ const UserTable = () => {
 
   return (
     <div className="table-container">
-      <div className="user-table-header table-controls">
+        <div className="user-table-header table-controls">
         <div className="controls-left"></div>
         <div className="controls-right search-flex-group">
           {searchVisible ? (
@@ -481,8 +481,8 @@ const UserTable = () => {
                 {/* Barra de búsqueda */}
                 <div style={{ position: 'relative', marginBottom: 10 }}>
                   <Search style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#bdbdbd', width: 18, height: 18 }} />
-                  <input
-                    type="text"
+            <input
+              type="text"
                     value={columnMenuSearch}
                     onChange={e => setColumnMenuSearch(e.target.value)}
                     placeholder="Buscar..."
@@ -555,7 +555,7 @@ const UserTable = () => {
                     onClick={resetColumns}
                   >
                     Resetear
-                  </button>
+              </button>
                 </div>
               </div>
             )}
@@ -571,20 +571,20 @@ const UserTable = () => {
             {totalFilters > 0 && (
               <span style={{
                 position: 'absolute',
-                top: 2,
-                right: 2,
-                background: '#10b981',
+                top: -6,
+                right: -6,
+                background: '#3b82f6',
                 color: '#fff',
                 borderRadius: '50%',
-                fontSize: 11,
-                minWidth: 18,
-                height: 18,
+                fontSize: 10,
+                minWidth: 15,
+                height: 15,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 600,
                 boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                zIndex: 1
+                zIndex: 2
               }}>{totalFilters}</span>
             )}
           </button>
@@ -595,9 +595,9 @@ const UserTable = () => {
           >
             <ArrowUpDown className="action-icon" />
           </button>
-          <button className="btn-minimal" title="Agregar proveedor">
-            <Plus className="btn-icon" />
-          </button>
+            <button className="btn-minimal" title="Agregar proveedor">
+              <Plus className="btn-icon" />
+            </button>
           <button className="btn-minimal" title="Descargar">
             <Download className="btn-icon" />
           </button>
@@ -677,20 +677,20 @@ const UserTable = () => {
                     {filtersByColumn[col.key] > 0 && (
                       <span style={{
                         position: 'absolute',
-                        top: 4,
-                        right: 6,
-                        background: '#10b981',
+                        top: -7,
+                        right: -7,
+                        background: '#3b82f6',
                         color: '#fff',
                         borderRadius: '50%',
                         fontSize: 10,
-                        minWidth: 16,
-                        height: 16,
+                        minWidth: 15,
+                        height: 15,
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 600,
                         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                        zIndex: 1
+                        zIndex: 2
                       }}>{filtersByColumn[col.key]}</span>
                     )}
                   </th>
@@ -702,12 +702,12 @@ const UserTable = () => {
                 <tr key={user.id || idx}>
                   <td className="user-table-checkbox-cell">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                      <input
-                        type="checkbox"
-                        checked={!!selectedRows[user.id]}
-                        onChange={() => toggleRow(user.id)}
-                        className="user-checkbox"
-                      />
+                    <input
+                      type="checkbox"
+                      checked={!!selectedRows[user.id]}
+                      onChange={() => toggleRow(user.id)}
+                      className="user-checkbox"
+                    />
                     </div>
                   </td>
                   {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
@@ -732,4 +732,4 @@ const UserTable = () => {
   );
 };
 
-export default UserTable;
+export default UserTable; 
