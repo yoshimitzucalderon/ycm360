@@ -398,14 +398,14 @@ const UserTable = () => {
     setSelectedRows(updated);
   };
 
-  // Calcular filtros activos por columna y total
+  // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
   const filtersByColumn: { [key: string]: number } = {};
   filters.forEach(f => {
-    if (f.column) {
+    if (f.column && f.value) {
       filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
     }
   });
-  const totalFilters = filters.length;
+  const totalFilters = filters.filter(f => f.column && f.value).length;
 
   return (
     <div className="table-container">
@@ -605,16 +605,18 @@ const UserTable = () => {
       </div>
       <div className="table-wrapper">
         {/* Filtros y orden siempre renderizados */}
-        {showFilter && (
-          <TableFilterPopover
-            columns={columns}
-            visibleColumns={visibleColumns}
-            filters={filters}
-            setFilters={setFilters}
-            anchorRef={filterButtonRef}
-            onClose={() => setShowFilter(false)}
-          />
-        )}
+        <div style={{ position: 'relative', zIndex: 100 }}>
+          {showFilter && (
+            <TableFilterPopover
+              columns={columns}
+              visibleColumns={visibleColumns}
+              filters={filters}
+              setFilters={setFilters}
+              anchorRef={filterButtonRef}
+              onClose={() => setShowFilter(false)}
+            />
+          )}
+        </div>
         {showSort && (
           <TableSort
             columns={columns}
