@@ -32,6 +32,7 @@ type Props = {
 const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters, setFilters, anchorRef, onClose }) => {
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
   const popoverRef = useRef<HTMLDivElement>(null);
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -47,6 +48,52 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose, anchorRef]);
+
+  // Posicionamiento inteligente para no salirse del viewport
+  useEffect(() => {
+    if (!anchorRef.current || !popoverRef.current) return;
+    const anchorRect = anchorRef.current.getBoundingClientRect();
+    const popover = popoverRef.current;
+    const popoverRect = popover.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    let top = anchorRect.bottom + window.scrollY + 8;
+    let left = anchorRect.left + window.scrollX;
+    let maxWidth = 420;
+    let maxHeight = 400;
+    // Si se sale por la derecha
+    if (left + popoverRect.width > viewportWidth - 12) {
+      left = Math.max(viewportWidth - popoverRect.width - 12, 12);
+    }
+    // Si se sale por abajo
+    if (top + popoverRect.height > viewportHeight + window.scrollY - 12) {
+      // Mostrar hacia arriba si hay más espacio arriba
+      if (anchorRect.top > popoverRect.height + 24) {
+        top = anchorRect.top + window.scrollY - popoverRect.height - 8;
+      } else {
+        // Limitar altura y hacer scroll interno
+        maxHeight = viewportHeight - anchorRect.bottom - 32;
+      }
+    }
+    setPopoverStyle({
+      position: 'absolute',
+      top,
+      left,
+      background: '#fff',
+      border: '1.5px solid #e5e7eb',
+      borderRadius: 10,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+      zIndex: 200,
+      padding: 16,
+      minWidth: 260,
+      maxWidth,
+      maxHeight,
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12,
+    });
+  }, [anchorRef, filters.length]);
 
   // Si no hay filtros, mostrar una fila editable (newFilter) siempre
   const showNewFilterRow = filters.length === 0;
@@ -77,22 +124,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   return (
     <div
       ref={popoverRef}
-      style={{
-        position: 'absolute',
-        top: anchorRef.current ? anchorRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
-        left: anchorRef.current ? anchorRef.current.getBoundingClientRect().left + window.scrollX : 0,
-        background: '#fff',
-        border: '1.5px solid #e5e7eb',
-        borderRadius: 10,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-        zIndex: 200,
-        padding: 16,
-        minWidth: 260,
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-      }}
+      style={popoverStyle}
     >
       <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
       {filters.map((filter, idx) => (
