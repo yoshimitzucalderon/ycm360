@@ -700,23 +700,31 @@ const UserTable = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((user, idx) => (
-                <tr key={user.id || idx}>
-                  <td className="user-table-checkbox-cell">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <input
-                      type="checkbox"
-                      checked={!!selectedRows[user.id]}
-                      onChange={() => toggleRow(user.id)}
-                      className="user-checkbox"
-                    />
-                    </div>
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan={1 + visibleColumns.length} style={{ textAlign: 'center', padding: 40, color: '#888', fontSize: 16 }}>
+                    No se encontraron resultados para los criterios seleccionados.
                   </td>
-                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                    <td key={col.key}>{user[col.key]}</td>
-                  ))}
                 </tr>
-              ))}
+              ) : (
+                paginatedData.map((user, idx) => (
+                  <tr key={user.id || idx}>
+                    <td className="user-table-checkbox-cell">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                        <input
+                          type="checkbox"
+                          checked={!!selectedRows[user.id]}
+                          onChange={() => toggleRow(user.id)}
+                          className="user-checkbox"
+                        />
+                      </div>
+                    </td>
+                    {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                      <td key={col.key}>{user[col.key]}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}
