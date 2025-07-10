@@ -51,10 +51,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     // eslint-disable-next-line
   }, [filters.length]);
 
-  // Si el usuario borra el valor, eliminar el filtro automáticamente (sin loops infinitos)
+  // Si el usuario borra el valor o solo selecciona columna, eliminar el filtro automáticamente (sin loops infinitos)
   useEffect(() => {
-    // Solo mantener filtros que tengan columna y valor no vacío ni solo espacios
-    const cleaned = filters.filter(f => !(f.column && (!f.value || f.value.trim() === "")));
+    // Solo mantener filtros que tengan columna Y valor (no solo columna)
+    const cleaned = filters.filter(f => f.column && f.value && f.value.trim() !== "");
     if (cleaned.length !== filters.length) {
       setFilters(cleaned);
     }
@@ -177,7 +177,15 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             )}
             <select
               value={filter.column}
-              onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, column: e.target.value } : f))}
+              onChange={e => {
+                const col = e.target.value;
+                // Si el usuario borra la columna, elimina el filtro
+                if (!col) {
+                  setFilters(filters.filter((_, i) => i !== idx));
+                } else {
+                  setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
+                }
+              }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word' }}
             >
               <option value="">Columna...</option>
@@ -189,6 +197,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               value={filter.operator}
               onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word' }}
+              disabled={!filter.column}
             >
               {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
             </select>
