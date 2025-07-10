@@ -635,7 +635,7 @@ const UserTable = () => {
             </div>
           </div>
         ) : (
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', minHeight: 240 }}>
             <table className="user-table" ref={tableRef}>
               <colgroup>
                 <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
@@ -723,18 +723,15 @@ const UserTable = () => {
             {paginatedData.length === 0 && (
               <div style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
+                inset: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#888',
                 fontSize: 16,
                 pointerEvents: 'none',
-                background: 'rgba(255,255,255,0.92)',
-                zIndex: 10
+                background: 'rgba(255,255,255,0.96)',
+                zIndex: 20
               }}>
                 No se encontraron resultados para los criterios seleccionados.
               </div>

@@ -51,6 +51,16 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     // eslint-disable-next-line
   }, [filters.length]);
 
+  // Si el usuario borra el valor, eliminar el filtro automáticamente (sin loops infinitos)
+  useEffect(() => {
+    // Solo mantener filtros que tengan columna y valor no vacío ni solo espacios
+    const cleaned = filters.filter(f => !(f.column && (!f.value || f.value.trim() === "")));
+    if (cleaned.length !== filters.length) {
+      setFilters(cleaned);
+    }
+    // eslint-disable-next-line
+  }, [filters.length]);
+
   // Cerrar al hacer click fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -185,7 +195,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             <input
               type="text"
               value={filter.value}
-              onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, value: e.target.value } : f))}
+              onChange={e => {
+                const val = e.target.value;
+                setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
+              }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
               placeholder="Valor"
               disabled={!filter.column}
