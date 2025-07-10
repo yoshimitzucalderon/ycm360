@@ -24,11 +24,14 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   // Filtrado tipo Supabase
   const filteredData = useMemo(() => {
     if (filters.length === 0) return initialData;
+    // Filtrar solo los filtros con columna Y valor
+    const validFilters = filters.filter(f => f.column && f.value);
+    if (validFilters.length === 0) return initialData;
     // Agrupa los filtros por operador lógico
     let result = initialData;
-    let currentGroup: typeof filters = [];
+    let currentGroup: typeof validFilters = [];
     let currentOperator: 'AND' | 'OR' = 'AND';
-    filters.forEach((filter, idx) => {
+    validFilters.forEach((filter, idx) => {
       if (idx === 0) {
         currentGroup = [filter];
         currentOperator = 'AND';
@@ -48,7 +51,7 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
         }
       }
       // Si es el último filtro, aplica el grupo
-      if (idx === filters.length - 1) {
+      if (idx === validFilters.length - 1) {
         if (currentOperator === 'AND') {
           result = result.filter(row => currentGroup.every(f => applyFilter(row, f)));
         } else {
