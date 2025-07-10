@@ -380,8 +380,6 @@ body {
   min-height: 100vh;
 }
 .user-table {
-  min-width: 900px;
-  width: 100%;
   border-collapse: collapse;
   font-size: 15px;
   background: #fff;
