@@ -142,12 +142,14 @@ const applyFilter = (query: any, filter: TableFilterType) => {
 
 // Helper para construir la query de Supabase con filtros AND/OR
 const buildSupabaseQuery = (baseQuery: any, filters: TableFilterType[]) => {
-  if (filters.length === 0) return baseQuery;
+  // Limpieza extra: solo pasa filtros con columna y valor no vacío, no null, no undefined y no solo espacios
+  const validFilters = filters.filter(f => f.column && typeof f.value === 'string' && f.value.trim() !== '');
+  if (validFilters.length === 0) return baseQuery;
 
   // Si hay al menos un OR, agrupa todos los filtros en .or()
-  const hasOr = filters.some((f, idx) => idx > 0 && f.logicalOperator === 'OR');
+  const hasOr = validFilters.some((f, idx) => idx > 0 && f.logicalOperator === 'OR');
   if (hasOr) {
-    const orString = filters.map(f => {
+    const orString = validFilters.map(f => {
       const dbColumn = columnMap[f.column] || f.column;
       const op = opMap[f.operator] || f.operator;
       return `${dbColumn}.${op}.${f.value}`;
@@ -156,7 +158,7 @@ const buildSupabaseQuery = (baseQuery: any, filters: TableFilterType[]) => {
   } else {
     // Todos los filtros son AND
     let query = baseQuery;
-    filters.forEach(f => {
+    validFilters.forEach(f => {
       query = applyFilter(query, f);
     });
     return query;
