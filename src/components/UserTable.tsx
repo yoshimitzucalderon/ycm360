@@ -219,6 +219,7 @@ const UserTable = () => {
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnMenuButtonRef = useRef<HTMLButtonElement>(null);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
+  const [columnMenuSearch, setColumnMenuSearch] = useState("");
 
   useEffect(() => {
     if (showSearch) {
@@ -471,6 +472,8 @@ const UserTable = () => {
     }
   };
 
+  const dummyRef = useRef<HTMLElement>(null);
+
   return (
     <div className="table-container">
         <div className="user-table-header table-controls">
@@ -585,7 +588,6 @@ const UserTable = () => {
             )}
           </div>
           <button
-            ref={filterButtonRef}
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
             title="Filtrar"
@@ -636,8 +638,8 @@ const UserTable = () => {
               visibleColumns={visibleColumns}
               filters={filters}
               setFilters={setFilters}
-              anchorRef={filterButtonRef}
               onClose={() => setShowFilter(false)}
+              anchorRef={dummyRef}
             />
           )}
         </div>
