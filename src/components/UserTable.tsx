@@ -208,6 +208,7 @@ const UserTable = () => {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getStoredVisibleColumns());
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnMenuRef = useRef<HTMLDivElement>(null);
+  const [columnMenuSearch, setColumnMenuSearch] = useState("");
 
   useEffect(() => {
     if (showSearch) {
@@ -466,9 +467,55 @@ const UserTable = () => {
                   overflowY: 'auto',
                 }}
               >
+                {/* Barra de búsqueda */}
+                <div style={{ position: 'relative', marginBottom: 10 }}>
+                  <Search style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#bdbdbd', width: 18, height: 18 }} />
+                  <input
+                    type="text"
+                    value={columnMenuSearch}
+                    onChange={e => setColumnMenuSearch(e.target.value)}
+                    placeholder="Buscar..."
+                    style={{
+                      width: '100%',
+                      padding: '7px 32px 7px 34px',
+                      border: '2px solid #10b981',
+                      borderRadius: 20,
+                      fontSize: 15,
+                      outline: 'none',
+                      color: '#222',
+                      background: '#fff',
+                    }}
+                  />
+                  {columnMenuSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setColumnMenuSearch("")}
+                      style={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        margin: 0,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      tabIndex={-1}
+                      aria-label="Limpiar búsqueda"
+                    >
+                      <XIcon style={{ width: 18, height: 18, color: '#bdbdbd' }} />
+                    </button>
+                  )}
+                </div>
                 <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Seleccionar columnas</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {columns.map(col => (
+                  {columns.filter(col =>
+                    col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
+                  ).map(col => (
                     <label key={col.key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, padding: '2px 0' }}>
                       <input
                         type="checkbox"
