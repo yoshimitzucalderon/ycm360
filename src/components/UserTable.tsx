@@ -628,14 +628,7 @@ const UserTable = () => {
         )}
         {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
-            <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
-            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuOpen(true)}>
-              Seleccionar columnas a través del botón correspondiente
-            </div>
-          </div>
-        ) : (
-          <div style={{ position: 'relative', minHeight: 240 }}>
+          <div className="table-data-area" style={{ position: 'relative', minHeight: 240, overflow: 'auto' }}>
             <table className="user-table" ref={tableRef}>
               <colgroup>
                 <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
@@ -722,8 +715,12 @@ const UserTable = () => {
             </table>
             {paginatedData.length === 0 && (
               <div style={{
-                position: 'absolute',
-                inset: 0,
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                minWidth: 320,
+                minHeight: 80,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -731,7 +728,9 @@ const UserTable = () => {
                 fontSize: 16,
                 pointerEvents: 'none',
                 background: 'rgba(255,255,255,0.96)',
-                zIndex: 20
+                zIndex: 2000,
+                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+                borderRadius: 12
               }}>
                 No se encontraron resultados para los criterios seleccionados.
               </div>
