@@ -221,7 +221,7 @@ const UserTable = () => {
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
-  const columnMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const columnMenuButtonRef = React.createRef<HTMLButtonElement>();
 
   useEffect(() => {
     if (showSearch) {
