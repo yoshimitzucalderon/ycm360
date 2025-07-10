@@ -540,6 +540,8 @@ const UserTable = () => {
                 anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
                 marginThreshold={8}
+                disableAutoFocusItem
+                disablePortal
                 PaperProps={{
                   style: {
                     minWidth: 220,
@@ -598,10 +600,12 @@ const UserTable = () => {
                           <MinimalCheckbox
                             checked={visibleColumns.includes(col.key)}
                             onChange={() => toggleColumn(col.key)}
+                            onClick={e => e.stopPropagation()}
                           />
                         }
                         label={col.label}
                         sx={{ fontSize: 14, ml: 0 }}
+                        onClick={e => e.stopPropagation()}
                       />
                     ))}
                   </FormGroup>
