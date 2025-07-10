@@ -540,6 +540,8 @@ const UserTable = () => {
                 transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
                 marginThreshold={8}
                 disableRestoreFocus
+                disableEnforceFocus
+                disableAutoFocus
               >
                 <div style={{ minWidth: 220 }}>
                   <TextField
