@@ -45,7 +45,14 @@ const MinimalSelect = styled(Select)(({ theme }) => ({
     padding: '4px 10px',
   },
   '& fieldset': {
-    border: '1px solid #e5e7eb',
+    border: '1.5px solid #e5e7eb',
+  },
+  '&.Mui-focused fieldset': {
+    borderColor: '#22c55e',
+    boxShadow: '0 0 0 1.5px #bbf7d0',
+  },
+  '&:hover fieldset': {
+    borderColor: '#22c55e',
   },
 }));
 
@@ -354,7 +361,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           style={{
             background: 'none',
             border: 'none',
-            color: '#3b82f6',
+            color: '#22c55e',
             fontWeight: 500,
             cursor: 'pointer',
             fontSize: 14,
