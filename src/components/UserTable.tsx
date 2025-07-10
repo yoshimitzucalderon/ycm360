@@ -398,6 +398,15 @@ const UserTable = () => {
     setSelectedRows(updated);
   };
 
+  // Calcular filtros activos por columna y total
+  const filtersByColumn: { [key: string]: number } = {};
+  filters.forEach(f => {
+    if (f.column) {
+      filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
+    }
+  });
+  const totalFilters = filters.length;
+
   return (
     <div className="table-container">
       <div className="user-table-header table-controls">
@@ -556,8 +565,28 @@ const UserTable = () => {
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
             title="Filtrar"
+            style={{ position: 'relative' }}
           >
             <Filter className="action-icon" />
+            {totalFilters > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                background: '#10b981',
+                color: '#fff',
+                borderRadius: '50%',
+                fontSize: 11,
+                minWidth: 18,
+                height: 18,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 600,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                zIndex: 1
+              }}>{totalFilters}</span>
+            )}
           </button>
           <button
             className={`action-button${showSort ? ' active' : ''}`}
@@ -642,8 +671,28 @@ const UserTable = () => {
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
                     className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
+                    style={{ position: 'relative' }}
                   >
                     {col.label}
+                    {filtersByColumn[col.key] > 0 && (
+                      <span style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 6,
+                        background: '#10b981',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        fontSize: 10,
+                        minWidth: 16,
+                        height: 16,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                        zIndex: 1
+                      }}>{filtersByColumn[col.key]}</span>
+                    )}
                   </th>
                 ))}
               </tr>

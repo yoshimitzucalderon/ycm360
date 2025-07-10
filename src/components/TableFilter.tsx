@@ -9,10 +9,10 @@ const OPERATORS = [
   { value: "<", label: "< (menor que)" },
   { value: ">=", label: ">= (mayor o igual)" },
   { value: "<=", label: "<= (menor o igual)" },
-  { value: "like", label: "~ (LIKE)" },
-  { value: "ilike", label: "~* (ILIKE)" },
-  { value: "in", label: "in (uno de)" },
-  { value: "is", label: "is (especial)" },
+  { value: "like", label: "~ Coincidencia exacta" },
+  { value: "ilike", label: "~* Coincidencia sin mayúsculas" },
+  { value: "in", label: "in (Uno de la lista)" },
+  { value: "is", label: "is (Valores especiales: null, true, false)" },
 ];
 
 const LOGICALS = [
@@ -85,8 +85,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         zIndex: 200,
         padding: 16,
         minWidth: 260,
-        maxWidth: 420,
-        maxHeight: 400,
+        // maxWidth: 420, // Quitar restricción
+        // maxHeight: 400, // Quitar restricción
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
@@ -97,6 +97,9 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
       {filters.length === 0 && <div style={{ color: '#888', fontSize: 14 }}>No hay filtros aplicados</div>}
       {filters.map((filter, idx) => (
         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
+            <X size={16} />
+          </button>
           {idx > 0 && (
             <select
               value={filter.logicalOperator || 'AND'}
@@ -129,37 +132,15 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
             placeholder="Valor"
           />
-          <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
-            <X size={16} />
-          </button>
         </div>
       ))}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <select
-          value={newFilter.column}
-          onChange={e => setNewFilter(f => ({ ...f, column: e.target.value }))}
-          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
-        >
-          <option value="">Columna...</option>
-          {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
-            <option key={col.key} value={col.key}>{col.label}</option>
-          ))}
-        </select>
-        <select
-          value={newFilter.operator}
-          onChange={e => setNewFilter(f => ({ ...f, operator: e.target.value }))}
-          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
-        >
-          {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-        </select>
-        <input
-          type="text"
-          placeholder="Valor"
-          value={newFilter.value}
-          onChange={e => setNewFilter(f => ({ ...f, value: e.target.value }))}
-          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
-        />
-        <button onClick={addFilter} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '2px 10px', fontWeight: 500, cursor: 'pointer' }}>+ Añadir</button>
+        <button onClick={addFilter} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '2px 10px', fontWeight: 500, cursor: 'pointer' }}>+ Añadir filtro</button>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+        <button onClick={() => setFilters([])} style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 500, cursor: 'pointer', fontSize: 14, textDecoration: 'underline' }}>
+          Reestablecer filtros
+        </button>
       </div>
     </div>
   );
