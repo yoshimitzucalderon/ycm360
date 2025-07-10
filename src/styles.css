@@ -1033,3 +1033,7 @@ body {
 .ycm-filter-popover::-webkit-scrollbar-thumb:hover {
   background: #b6bbc4;
 }
+
+.filter-row-indented {
+  margin-left: 32px;
+}

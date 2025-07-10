@@ -198,7 +198,11 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
       <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filters.map((filter, idx) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div
+            key={idx}
+            className={idx > 0 ? 'filter-row-indented' : ''}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
+          >
             <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
               <X size={16} />
             </button>
