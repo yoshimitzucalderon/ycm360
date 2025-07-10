@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useTableData, TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import TableFilter from "./TableFilter";
+import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
@@ -209,6 +210,7 @@ const UserTable = () => {
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnMenuRef = useRef<HTMLDivElement>(null);
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -550,6 +552,7 @@ const UserTable = () => {
             )}
           </div>
           <button
+            ref={filterButtonRef}
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
             title="Filtrar"
@@ -574,12 +577,13 @@ const UserTable = () => {
       <div className="table-wrapper">
         {/* Filtros y orden siempre renderizados */}
         {showFilter && (
-          <TableFilter
+          <TableFilterPopover
             columns={columns}
+            visibleColumns={visibleColumns}
             filters={filters}
             setFilters={setFilters}
-            onApply={handleApplyFilter}
-            onClear={clearFilters}
+            anchorRef={filterButtonRef}
+            onClose={() => setShowFilter(false)}
           />
         )}
         {showSort && (

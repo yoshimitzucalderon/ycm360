@@ -1,38 +1,60 @@
-import React, { useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import { X } from 'lucide-react';
 
 const OPERATORS = [
-  { value: "=", label: "=" },
-  { value: ">=", label: ">=" },
-  { value: "<=", label: "<=" },
-  { value: ">", label: ">" },
-  { value: "<", label: "<" },
-  { value: "like", label: "like" },
-  { value: "ilike", label: "ilike" },
-  { value: "in", label: "in" },
-  { value: "is", label: "is (null, not null, true, false)" },
+  { value: "=", label: "= (igual)" },
+  { value: "<>", label: "<> (diferente)" },
+  { value: ">", label: "> (mayor que)" },
+  { value: "<", label: "< (menor que)" },
+  { value: ">=", label: ">= (mayor o igual)" },
+  { value: "<=", label: "<= (menor o igual)" },
+  { value: "like", label: "~ (LIKE)" },
+  { value: "ilike", label: "~* (ILIKE)" },
+  { value: "in", label: "in (uno de)" },
+  { value: "is", label: "is (especial)" },
+];
+
+const LOGICALS = [
+  { value: "AND", label: "AND" },
+  { value: "OR", label: "OR" },
 ];
 
 type Props = {
   columns: TableColumn[];
+  visibleColumns: string[];
   filters: TableFilterType[];
   setFilters: (filters: TableFilterType[]) => void;
-  onApply: () => void;
-  onClear: () => void;
+  anchorRef: React.RefObject<HTMLElement>;
+  onClose: () => void;
 };
 
-const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, onClear }) => {
+const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters, setFilters, anchorRef, onClose }) => {
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar al hacer click fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target as Node) &&
+        (!anchorRef.current || !anchorRef.current.contains(event.target as Node))
+      ) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose, anchorRef]);
 
   const addFilter = () => {
     if (newFilter.column && newFilter.operator) {
-      // El primer filtro no tiene operador lógico, los siguientes sí
       setFilters([
         ...filters,
         {
           ...newFilter,
-          logicalOperator: filters.length === 0 ? undefined : 'AND',
+          logicalOperator: filters.length === 0 ? undefined : 'AND' as 'AND',
         },
       ]);
       setNewFilter({ column: '', operator: '=', value: '' });
@@ -43,66 +65,104 @@ const TableFilter: React.FC<Props> = ({ columns, filters, setFilters, onApply, o
     setFilters(filters.filter((_, i) => i !== idx));
   };
 
-  const toggleLogicalOperator = (idx: number) => {
+  const setLogicalOperator = (idx: number, op: string) => {
     setFilters(filters.map((f, i) =>
-      i === idx ? { ...f, logicalOperator: f.logicalOperator === 'AND' ? 'OR' : 'AND' } : f
+      i === idx ? { ...f, logicalOperator: op as 'AND' | 'OR' } : f
     ));
   };
 
   return (
-    <div className="table-filter">
-      <div className="table-filter-list">
-        {filters.length === 0 && <div className="table-filter-empty">No filters applied to this view</div>}
-        {filters.map((filter, idx) => (
-          <div className="filter-chip table-filter-row" key={idx}>
-            {idx > 0 && (
-              <button
-                className={`table-filter-toggle ${filter.logicalOperator?.toLowerCase()}`}
-                onClick={() => toggleLogicalOperator(idx)}
-                title={`Toggle to ${filter.logicalOperator === 'AND' ? 'OR' : 'AND'}`}
-              >
-                {filter.logicalOperator || 'AND'}
-              </button>
-            )}
-            <span className="filter-text">{columns.find(c => c.key === filter.column)?.label || filter.column} {filter.operator} {filter.value}</span>
-            <button onClick={() => removeFilter(idx)} className="filter-remove">
-              <X className="action-icon" />
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="table-filter-controls">
+    <div
+      ref={popoverRef}
+      style={{
+        position: 'absolute',
+        top: anchorRef.current ? anchorRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
+        left: anchorRef.current ? anchorRef.current.getBoundingClientRect().left + window.scrollX : 0,
+        background: '#fff',
+        border: '1.5px solid #e5e7eb',
+        borderRadius: 10,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+        zIndex: 200,
+        padding: 16,
+        minWidth: 260,
+        maxWidth: 420,
+        maxHeight: 400,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+      }}
+    >
+      <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
+      {filters.length === 0 && <div style={{ color: '#888', fontSize: 14 }}>No hay filtros aplicados</div>}
+      {filters.map((filter, idx) => (
+        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {idx > 0 && (
+            <select
+              value={filter.logicalOperator || 'AND'}
+              onChange={e => setLogicalOperator(idx, e.target.value)}
+              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
+            >
+              {LOGICALS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+            </select>
+          )}
+          <select
+            value={filter.column}
+            onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, column: e.target.value } : f))}
+            style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
+          >
+            {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
+              <option key={col.key} value={col.key}>{col.label}</option>
+            ))}
+          </select>
+          <select
+            value={filter.operator}
+            onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
+            style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
+          >
+            {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
+          </select>
+          <input
+            type="text"
+            value={filter.value}
+            onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, value: e.target.value } : f))}
+            style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
+            placeholder="Valor"
+          />
+          <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
+            <X size={16} />
+          </button>
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <select
           value={newFilter.column}
           onChange={e => setNewFilter(f => ({ ...f, column: e.target.value }))}
+          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
         >
-          <option value="">Select column...</option>
-          {columns.map(col => (
+          <option value="">Columna...</option>
+          {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
             <option key={col.key} value={col.key}>{col.label}</option>
           ))}
         </select>
         <select
           value={newFilter.operator}
           onChange={e => setNewFilter(f => ({ ...f, operator: e.target.value }))}
+          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px' }}
         >
-          {OPERATORS.map(op => (
-            <option key={op.value} value={op.value}>{op.label}</option>
-          ))}
+          {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
         </select>
         <input
           type="text"
-          placeholder="Enter a value"
+          placeholder="Valor"
           value={newFilter.value}
           onChange={e => setNewFilter(f => ({ ...f, value: e.target.value }))}
+          style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
         />
-        <button onClick={addFilter} className="table-filter-add">+ Add filter</button>
-      </div>
-      <div className="table-filter-actions">
-        <button onClick={onClear} className="table-filter-clear">Clear all filters</button>
-        <button onClick={onApply} className="table-filter-apply">Apply filter</button>
+        <button onClick={addFilter} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '2px 10px', fontWeight: 500, cursor: 'pointer' }}>+ Añadir</button>
       </div>
     </div>
   );
 };
 
-export default TableFilter; 
+export default TableFilterPopover; 
