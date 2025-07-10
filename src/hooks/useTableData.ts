@@ -23,8 +23,8 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
 
   // Filtrado tipo Supabase
   const filteredData = useMemo(() => {
-    // Solo filtrar si hay al menos un filtro con columna y valor
-    const validFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "");
+    // Limpieza extra: solo considera filtros con columna y valor no vacío, no null, no undefined y no solo espacios
+    const validFilters = filters.filter(f => f.column && typeof f.value === 'string' && f.value.trim() !== '');
     console.log('DEBUG filters:', filters);
     console.log('DEBUG validFilters:', validFilters);
     if (validFilters.length === 0) return initialData;
