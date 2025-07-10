@@ -217,11 +217,8 @@ const UserTable = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getStoredVisibleColumns());
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
-  const columnMenuRef = useRef<HTMLDivElement>(null);
-  const [columnMenuSearch, setColumnMenuSearch] = useState("");
-  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const columnMenuButtonRef = useRef<HTMLButtonElement>(null);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
-  const columnMenuButtonRef = React.createRef<HTMLButtonElement>();
 
   useEffect(() => {
     if (showSearch) {
@@ -274,7 +271,7 @@ const UserTable = () => {
   useEffect(() => {
     if (!columnMenuOpen) return;
     function handleClickOutside(event: MouseEvent) {
-      if (columnMenuRef.current && !columnMenuRef.current.contains(event.target as Node)) {
+      if (columnMenuButtonRef.current && !columnMenuButtonRef.current.contains(event.target as Node)) {
         setColumnMenuOpen(false);
       }
     }
@@ -470,8 +467,8 @@ const UserTable = () => {
       } else {
         setPopoverPosition('down');
       }
+      setColumnMenuOpen(true);
     }
-    setColumnMenuOpen(true);
   };
 
   return (
@@ -528,62 +525,64 @@ const UserTable = () => {
             >
               <Columns3 className="action-icon" />
             </button>
-            <MinimalPopover
-              open={columnMenuOpen}
-              anchorEl={columnMenuButtonRef.current}
-              onClose={() => setColumnMenuOpen(false)}
-              anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
-              marginThreshold={8}
-              disableRestoreFocus
-            >
-              <div style={{ minWidth: 220 }}>
-                <TextField
-                  value={columnMenuSearch}
-                  onChange={e => setColumnMenuSearch(e.target.value)}
-                  placeholder="Buscar..."
-                  size="small"
-                  fullWidth
-                  variant="outlined"
-                  sx={{ mb: 1, background: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 15, paddingLeft: 1 } }}
-                  InputProps={{
-                    startAdornment: <Search style={{ color: '#bdbdbd', width: 18, height: 18, marginRight: 6 }} />,
-                    endAdornment: columnMenuSearch && (
-                      <XIcon style={{ cursor: 'pointer', color: '#bdbdbd', width: 18, height: 18 }} onClick={() => setColumnMenuSearch('')} />
-                    ),
-                  }}
-                />
-                <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
-                <FormGroup>
-                  {columns.filter(col =>
-                    col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
-                  ).map(col => (
-                    <FormControlLabel
-                      key={col.key}
-                      control={
-                        <MinimalCheckbox
-                          checked={visibleColumns.includes(col.key)}
-                          onChange={() => toggleColumn(col.key)}
-                        />
-                      }
-                      label={col.label}
-                      sx={{ fontSize: 14, ml: 0 }}
-                    />
-                  ))}
-                </FormGroup>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
-                  <MinimalButton onClick={allChecked ? hideAllColumns : showAllColumns}>
-                    {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
-                  </MinimalButton>
-                  <Button
-                    onClick={resetColumns}
-                    sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
-                  >
-                    Resetear
-                  </Button>
+            {columnMenuButtonRef.current && (
+              <MinimalPopover
+                open={columnMenuOpen}
+                anchorEl={columnMenuButtonRef.current}
+                onClose={() => setColumnMenuOpen(false)}
+                anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
+                marginThreshold={8}
+                disableRestoreFocus
+              >
+                <div style={{ minWidth: 220 }}>
+                  <TextField
+                    value={columnMenuSearch}
+                    onChange={e => setColumnMenuSearch(e.target.value)}
+                    placeholder="Buscar..."
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                    sx={{ mb: 1, background: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 15, paddingLeft: 1 } }}
+                    InputProps={{
+                      startAdornment: <Search style={{ color: '#bdbdbd', width: 18, height: 18, marginRight: 6 }} />,
+                      endAdornment: columnMenuSearch && (
+                        <XIcon style={{ cursor: 'pointer', color: '#bdbdbd', width: 18, height: 18 }} onClick={() => setColumnMenuSearch('')} />
+                      ),
+                    }}
+                  />
+                  <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
+                  <FormGroup>
+                    {columns.filter(col =>
+                      col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
+                    ).map(col => (
+                      <FormControlLabel
+                        key={col.key}
+                        control={
+                          <MinimalCheckbox
+                            checked={visibleColumns.includes(col.key)}
+                            onChange={() => toggleColumn(col.key)}
+                          />
+                        }
+                        label={col.label}
+                        sx={{ fontSize: 14, ml: 0 }}
+                      />
+                    ))}
+                  </FormGroup>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
+                    <MinimalButton onClick={allChecked ? hideAllColumns : showAllColumns}>
+                      {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
+                    </MinimalButton>
+                    <Button
+                      onClick={resetColumns}
+                      sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
+                    >
+                      Resetear
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </MinimalPopover>
+              </MinimalPopover>
+            )}
           </div>
           <button
             ref={filterButtonRef}
