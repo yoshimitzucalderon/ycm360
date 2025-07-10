@@ -679,8 +679,8 @@ const UserTable = () => {
                     {filtersByColumn[col.key] > 0 && (
                       <span style={{
                         position: 'absolute',
-                        top: -7,
-                        right: -7,
+                        top: 6,
+                        right: 4,
                         background: '#3b82f6',
                         color: '#fff',
                         borderRadius: '50%',
