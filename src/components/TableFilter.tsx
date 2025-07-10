@@ -129,7 +129,29 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   };
 
   const removeFilter = (idx: number) => {
-    setFilters(filters.filter((_, i) => i !== idx));
+    if (filters.length === 1) {
+      // Si solo queda uno, lo resetea en vez de eliminar
+      setFilters([
+        {
+          column: '',
+          operator: '=',
+          value: '',
+          logicalOperator: undefined,
+        },
+      ]);
+    } else if (filters.length === 2) {
+      // Si quedan dos y eliminas uno, el otro se resetea
+      setFilters([
+        {
+          column: '',
+          operator: '=',
+          value: '',
+          logicalOperator: undefined,
+        },
+      ]);
+    } else {
+      setFilters(filters.filter((_, i) => i !== idx));
+    }
   };
 
   const setLogicalOperator = (idx: number, op: string) => {
