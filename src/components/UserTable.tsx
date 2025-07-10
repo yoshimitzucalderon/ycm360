@@ -577,9 +577,9 @@ const UserTable = () => {
         ) : (
           <table className="user-table" ref={tableRef}>
             <colgroup>
-              <col style={{ width: 40 }} /> {/* Para el checkbox */}
+              <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
               {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                <col key={col.key} style={{ width: colWidths[col.key] || 150 }} />
+                <col key={col.key} style={{ width: `${100 / visibleColumns.length}%` }} />
               ))}
             </colgroup>
             <thead>
@@ -587,6 +587,7 @@ const UserTable = () => {
                 <th
                   style={{
                     minWidth: 40,
+                    maxWidth: 40,
                     width: 40,
                     padding: 0,
                     background: '#f8fafc',
@@ -612,6 +613,7 @@ const UserTable = () => {
                     onDragOver={e => handleDragOver(e, col.key)}
                     onDrop={e => handleDrop(e, col.key)}
                     className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
+                    style={{ width: `${100 / visibleColumns.length}%` }}
                   >
                     {col.label}
                   </th>
@@ -621,7 +623,7 @@ const UserTable = () => {
             <tbody>
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
-                  <td>
+                  <td style={{ minWidth: 40, maxWidth: 40, width: 40, padding: 0 }}>
                     <input
                       type="checkbox"
                       checked={!!selectedRows[user.id]}
@@ -630,7 +632,7 @@ const UserTable = () => {
                     />
                   </td>
                   {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                    <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
+                    <td key={col.key} style={{ width: `${100 / visibleColumns.length}%` }}>{user[col.key]}</td>
                   ))}
                 </tr>
               ))}
