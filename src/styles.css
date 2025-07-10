@@ -951,6 +951,11 @@ body {
   padding: 0 !important;
 }
 
+.user-table td.user-table-checkbox-cell {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
 .table-filter, .table-sort, .table-filter-row, .table-filter-controls select, .table-filter-controls input, .table-sort-controls select {
   font-size: 14px !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
