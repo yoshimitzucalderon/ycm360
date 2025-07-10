@@ -403,12 +403,14 @@ const UserTable = () => {
           <button
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
+            title="Filtrar"
           >
             <Filter className="action-icon" />
           </button>
           <button
             className={`action-button${showSort ? ' active' : ''}`}
             onClick={() => setShowSort(s => !s)}
+            title="Ordenar"
           >
             <ArrowUpDown className="action-icon" />
           </button>
