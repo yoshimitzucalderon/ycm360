@@ -25,6 +25,8 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   const filteredData = useMemo(() => {
     // Solo filtrar si hay al menos un filtro con columna y valor
     const validFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "");
+    console.log('DEBUG filters:', filters);
+    console.log('DEBUG validFilters:', validFilters);
     if (validFilters.length === 0) return initialData;
     // Agrupa los filtros por operador lógico
     let result = initialData;
