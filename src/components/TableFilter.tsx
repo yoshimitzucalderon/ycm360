@@ -2,6 +2,11 @@ import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import { X } from 'lucide-react';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import { styled } from '@mui/material/styles';
 
 const OPERATORS = [
   { value: "=", label: "= (igual)" },
@@ -29,6 +34,25 @@ type Props = {
   anchorRef: React.RefObject<HTMLElement>;
   onClose: () => void;
 };
+
+// Estilo minimalista para el Select de MUI
+const MinimalSelect = styled(Select)(({ theme }) => ({
+  minWidth: 80,
+  background: '#f8fafc',
+  borderRadius: 6,
+  fontSize: 13,
+  '& .MuiSelect-select': {
+    padding: '4px 10px',
+  },
+  '& fieldset': {
+    border: '1px solid #e5e7eb',
+  },
+}));
+
+const MinimalMenuItem = styled(MenuItem)({
+  fontSize: 13,
+  padding: '4px 10px',
+});
 
 const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters, setFilters, anchorRef, onClose }) => {
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
@@ -200,47 +224,51 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         {filters.map((filter, idx) => (
           <div
             key={idx}
-            className={idx > 0 ? 'filter-row-indented' : ''}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
+            className="filter-row"
           >
             <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
               <X size={16} />
             </button>
             {idx > 0 && (
-              <select
-                value={filter.logicalOperator || 'AND'}
-                onChange={e => setLogicalOperator(idx, e.target.value)}
-                style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 90, whiteSpace: 'normal', wordBreak: 'break-word' }}
-              >
-                {LOGICALS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-              </select>
+              <FormControl size="small" sx={{ minWidth: 70 }}>
+                <MinimalSelect
+                  value={filter.logicalOperator || 'AND'}
+                  onChange={e => setLogicalOperator(idx, e.target.value)}
+                >
+                  {LOGICALS.map(l => (
+                    <MinimalMenuItem key={l.value} value={l.value}>{l.label}</MinimalMenuItem>
+                  ))}
+                </MinimalSelect>
+              </FormControl>
             )}
-            <select
-              value={filter.column}
-              onChange={e => {
-                const col = e.target.value;
-                // Si el usuario borra la columna, elimina el filtro
-                if (!col) {
-                  setFilters(filters.filter((_, i) => i !== idx));
-                } else {
-                  setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
-                }
-              }}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word' }}
-            >
-              <option value="">Columna...</option>
-              {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
-                <option key={col.key} value={col.key}>{col.label}</option>
-              ))}
-            </select>
-            <select
-              value={filter.operator}
-              onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word' }}
-              disabled={!filter.column}
-            >
-              {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-            </select>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <MinimalSelect
+                value={filter.column}
+                displayEmpty
+                onChange={e => {
+                  const col = e.target.value;
+                  if (!col) {
+                    setFilters(filters.filter((_, i) => i !== idx));
+                  } else {
+                    setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
+                  }
+                }}
+              >
+                <MinimalMenuItem value="">Columna...</MinimalMenuItem>
+                {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
+                  <MinimalMenuItem key={col.key} value={col.key}>{col.label}</MinimalMenuItem>
+                ))}
+              </MinimalSelect>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
+              <MinimalSelect
+                value={filter.operator}
+                onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
+                disabled={!filter.column}
+              >
+                {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
+              </MinimalSelect>
+            </FormControl>
             <input
               type="text"
               value={filter.value}

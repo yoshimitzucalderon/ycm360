@@ -1037,3 +1037,32 @@ body {
 .filter-row-indented {
   margin-left: 32px;
 }
+
+/* Sangría en la segunda línea de cada filtro, igual al ancho de la X */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.filter-row > * {
+  /* Nada especial para la primera línea */
+}
+.filter-row {
+  /* Para la sangría en la segunda línea */
+}
+.filter-row::before {
+  content: '';
+  display: block;
+  width: 32px; /* igual al ancho de la X + gap */
+  flex-shrink: 0;
+  height: 0;
+}
+.filter-row > button:first-child {
+  position: relative;
+  z-index: 1;
+}
+.filter-row > *:not(:first-child) {
+  /* Nada especial, pero permite que el ::before empuje la segunda línea */
+}
