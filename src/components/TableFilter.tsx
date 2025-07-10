@@ -36,21 +36,6 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const [initialized, setInitialized] = useState(false);
 
-  // Al abrir, si no hay filtros, poner uno vacío por defecto cada vez que filters.length === 0
-  useEffect(() => {
-    if (filters.length === 0) {
-      setFilters([
-        {
-          column: '',
-          operator: '=',
-          value: '',
-          logicalOperator: undefined,
-        },
-      ]);
-    }
-    // eslint-disable-next-line
-  }, [filters.length]);
-
   // Si el usuario borra el valor o solo selecciona columna, eliminar el filtro automáticamente (sin loops infinitos)
   useEffect(() => {
     // Solo mantener filtros que tengan columna Y valor (no solo columna)
