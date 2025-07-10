@@ -648,12 +648,14 @@ const UserTable = () => {
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
                   <td className="user-table-checkbox-cell">
-                    <input
-                      type="checkbox"
-                      checked={!!selectedRows[user.id]}
-                      onChange={() => toggleRow(user.id)}
-                      className="user-checkbox"
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                      <input
+                        type="checkbox"
+                        checked={!!selectedRows[user.id]}
+                        onChange={() => toggleRow(user.id)}
+                        className="user-checkbox"
+                      />
+                    </div>
                   </td>
                   {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                     <td key={col.key}>{user[col.key]}</td>
