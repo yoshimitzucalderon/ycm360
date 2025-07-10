@@ -1002,3 +1002,17 @@ body {
 .column-menu-checkbox-input:checked + .column-menu-checkbox-custom .column-menu-checkbox-check {
   display: block;
 }
+
+/* Scrollbar delgado para el menú de columnas */
+[style*="overflow-y: auto"][style*="max-height: 340px"] {
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd #fff;
+}
+[style*="overflow-y: auto"][style*="max-height: 340px"]::-webkit-scrollbar {
+  width: 6px;
+  background: #fff;
+}
+[style*="overflow-y: auto"][style*="max-height: 340px"]::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 6px;
+}
