@@ -38,8 +38,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
 
   // Si el usuario borra el valor o solo selecciona columna, eliminar el filtro automáticamente (sin loops infinitos)
   useEffect(() => {
-    // Solo mantener filtros que tengan columna Y valor (no solo columna)
-    const cleaned = filters.filter(f => f.column && f.value && f.value.trim() !== "");
+    // Solo eliminar filtros que tengan columna pero no valor
+    const cleaned = filters.filter(f => !(f.column && !f.value));
     if (cleaned.length !== filters.length) {
       setFilters(cleaned);
     }
