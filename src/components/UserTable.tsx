@@ -197,6 +197,25 @@ const getStoredVisibleColumns = () => {
   return columns.map(c => c.key);
 };
 
+// Estilos globales para los componentes
+const MinimalCheckbox = styled(Checkbox)({
+  color: '#22c55e',
+  '&.Mui-checked': {
+    color: '#22c55e',
+  },
+});
+
+const MinimalButton = styled(Button)({
+  color: '#22c55e',
+  fontWeight: 500,
+  fontSize: 14,
+  textTransform: 'none',
+  '&:hover': {
+    background: '#bbf7d0',
+    color: '#166534',
+  },
+});
+
 // Componente separado para el menú de columnas
 const ColumnManager = ({ 
   columns, 
@@ -293,9 +312,15 @@ const ColumnManager = ({
                 <FormControlLabel
                   key={col.key}
                   control={
-                    <MinimalCheckbox
+                    <Checkbox
                       checked={visibleColumns.includes(col.key)}
                       onChange={() => onToggleColumn(col.key)}
+                      sx={{ 
+                        color: '#22c55e',
+                        '&.Mui-checked': {
+                          color: '#22c55e',
+                        },
+                      }}
                     />
                   }
                   label={col.label}
@@ -304,9 +329,21 @@ const ColumnManager = ({
               ))}
             </FormGroup>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
-              <MinimalButton onClick={allChecked ? onHideAll : onShowAll}>
+              <Button
+                onClick={allChecked ? onHideAll : onShowAll}
+                sx={{
+                  color: '#22c55e',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: '#bbf7d0',
+                    color: '#166534',
+                  },
+                }}
+              >
                 {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
-              </MinimalButton>
+              </Button>
               <Button
                 onClick={onReset}
                 sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
@@ -566,22 +603,6 @@ const UserTable = () => {
     },
     '& .MuiPaper-root::-webkit-scrollbar-thumb:hover': {
       background: '#b6bbc4',
-    },
-  });
-  const MinimalCheckbox = styled(Checkbox)({
-    color: '#22c55e',
-    '&.Mui-checked': {
-      color: '#22c55e',
-    },
-  });
-  const MinimalButton = styled(Button)({
-    color: '#22c55e',
-    fontWeight: 500,
-    fontSize: 14,
-    textTransform: 'none',
-    '&:hover': {
-      background: '#bbf7d0',
-      color: '#166534',
     },
   });
 
