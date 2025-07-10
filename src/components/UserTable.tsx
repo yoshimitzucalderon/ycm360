@@ -401,11 +401,11 @@ const UserTable = () => {
   // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
   const filtersByColumn: { [key: string]: number } = {};
   filters.forEach(f => {
-    if (f.column && f.value) {
+    if (f.column && f.value && f.value.trim() !== "") {
       filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
     }
   });
-  const totalFilters = filters.filter(f => f.column && f.value).length;
+  const totalFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "").length;
 
   return (
     <div className="table-container">
