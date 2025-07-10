@@ -532,97 +532,73 @@ const UserTable = () => {
             >
               <Columns3 className="action-icon" />
             </button>
-            {columnMenuAnchorEl && (
-              <Menu
-                open={columnMenuOpen}
-                anchorEl={columnMenuAnchorEl}
-                onClose={handleCloseColumnMenu}
-                anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
-                transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
-                marginThreshold={8}
-                disableAutoFocusItem
-                disablePortal
-                PaperProps={{
-                  style: {
-                    minWidth: 220,
-                    borderRadius: 10,
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                    border: '1.5px solid #e5e7eb',
-                    padding: 12,
-                    maxHeight: 340,
-                    overflowY: 'auto',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#d1d5db #f8fafc',
-                  },
-                }}
-                MenuListProps={{
-                  sx: {
-                    '::-webkit-scrollbar': {
-                      width: '6px',
-                      background: '#f8fafc',
-                    },
-                    '::-webkit-scrollbar-thumb': {
-                      background: '#d1d5db',
-                      borderRadius: '4px',
-                    },
-                    '::-webkit-scrollbar-thumb:hover': {
-                      background: '#b6bbc4',
-                    },
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#d1d5db #f8fafc',
-                  },
-                }}
-              >
-                <div style={{ minWidth: 220 }}>
-                  <TextField
-                    value={columnMenuSearch}
-                    onChange={e => setColumnMenuSearch(e.target.value)}
-                    placeholder="Buscar..."
-                    size="small"
-                    fullWidth
-                    variant="outlined"
-                    sx={{ mb: 1, background: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 15, paddingLeft: 1 } }}
-                    InputProps={{
-                      startAdornment: <Search style={{ color: '#bdbdbd', width: 18, height: 18, marginRight: 6 }} />,
-                      endAdornment: columnMenuSearch && (
-                        <XIcon style={{ cursor: 'pointer', color: '#bdbdbd', width: 18, height: 18 }} onClick={() => setColumnMenuSearch('')} />
-                      ),
-                    }}
-                  />
-                  <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
-                  <FormGroup>
-                    {columns.filter(col =>
-                      col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
-                    ).map(col => (
-                      <FormControlLabel
-                        key={col.key}
-                        control={
-                          <MinimalCheckbox
-                            checked={visibleColumns.includes(col.key)}
-                            onChange={() => toggleColumn(col.key)}
-                            onClick={e => e.stopPropagation()}
-                          />
-                        }
-                        label={col.label}
-                        sx={{ fontSize: 14, ml: 0 }}
-                        onClick={e => e.stopPropagation()}
-                      />
-                    ))}
-                  </FormGroup>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
-                    <MinimalButton onClick={allChecked ? hideAllColumns : showAllColumns}>
-                      {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
-                    </MinimalButton>
-                    <Button
-                      onClick={resetColumns}
-                      sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
-                    >
-                      Resetear
-                    </Button>
-                  </div>
+            <Popover
+              open={columnMenuOpen}
+              anchorEl={columnMenuAnchorEl}
+              onClose={handleCloseColumnMenu}
+              anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
+              PaperProps={{
+                style: {
+                  minWidth: 220,
+                  borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1.5px solid #e5e7eb',
+                  padding: 12,
+                  maxHeight: 340,
+                  overflowY: 'auto',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#d1d5db #f8fafc',
+                },
+              }}
+            >
+              <div style={{ minWidth: 220 }}>
+                <TextField
+                  value={columnMenuSearch}
+                  onChange={e => setColumnMenuSearch(e.target.value)}
+                  placeholder="Buscar..."
+                  size="small"
+                  fullWidth
+                  variant="outlined"
+                  sx={{ mb: 1, background: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 15, paddingLeft: 1 } }}
+                  InputProps={{
+                    startAdornment: <Search style={{ color: '#bdbdbd', width: 18, height: 18, marginRight: 6 }} />,
+                    endAdornment: columnMenuSearch && (
+                      <XIcon style={{ cursor: 'pointer', color: '#bdbdbd', width: 18, height: 18 }} onClick={() => setColumnMenuSearch('')} />
+                    ),
+                  }}
+                />
+                <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
+                <FormGroup>
+                  {columns.filter(col =>
+                    col.label.toLowerCase().includes(columnMenuSearch.toLowerCase())
+                  ).map(col => (
+                    <FormControlLabel
+                      key={col.key}
+                      control={
+                        <MinimalCheckbox
+                          checked={visibleColumns.includes(col.key)}
+                          onChange={() => toggleColumn(col.key)}
+                        />
+                      }
+                      label={col.label}
+                      sx={{ fontSize: 14, ml: 0 }}
+                    />
+                  ))}
+                </FormGroup>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
+                  <MinimalButton onClick={allChecked ? hideAllColumns : showAllColumns}>
+                    {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
+                  </MinimalButton>
+                  <Button
+                    onClick={resetColumns}
+                    sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
+                  >
+                    Resetear
+                  </Button>
                 </div>
-              </Menu>
-            )}
+              </div>
+            </Popover>
           </div>
           <button
             className={`action-button${filterOpen ? ' active' : ''}`}
