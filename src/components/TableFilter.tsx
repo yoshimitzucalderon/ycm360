@@ -54,6 +54,36 @@ const MinimalMenuItem = styled(MenuItem)({
   padding: '4px 10px',
 });
 
+// Estilo para el menú desplegable de MUI Select
+const menuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: 240,
+      minWidth: 120,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+      borderRadius: 8,
+      padding: 0,
+    },
+  },
+  MenuListProps: {
+    sx: {
+      '::-webkit-scrollbar': {
+        width: '6px',
+        background: '#f8fafc',
+      },
+      '::-webkit-scrollbar-thumb': {
+        background: '#d1d5db',
+        borderRadius: '4px',
+      },
+      '::-webkit-scrollbar-thumb:hover': {
+        background: '#b6bbc4',
+      },
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#d1d5db #f8fafc',
+    },
+  },
+};
+
 const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters, setFilters, anchorRef, onClose }) => {
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -234,6 +264,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 <MinimalSelect
                   value={filter.logicalOperator || 'AND'}
                   onChange={e => setLogicalOperator(idx, (e.target.value as string))}
+                  MenuProps={menuProps}
                 >
                   {LOGICALS.map(l => (
                     <MinimalMenuItem key={l.value} value={l.value}>{l.label}</MinimalMenuItem>
@@ -253,6 +284,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                     setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
                   }
                 }}
+                MenuProps={menuProps}
               >
                 <MinimalMenuItem value="">Columna...</MinimalMenuItem>
                 {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
@@ -265,6 +297,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 value={filter.operator}
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
+                MenuProps={menuProps}
               >
                 {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
               </MinimalSelect>
