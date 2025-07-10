@@ -622,7 +622,7 @@ const UserTable = () => {
             <tbody>
               {paginatedData.map((user, idx) => (
                 <tr key={user.id || idx}>
-                  <td className="user-table-checkbox-cell" style={{ minWidth: 40, maxWidth: 40, width: 40, padding: 0, textAlign: 'center', verticalAlign: 'middle' }}>
+                  <td className="user-table-checkbox-cell" style={{ minWidth: 40, maxWidth: 40, width: 40, padding: 0 }}>
                     <input
                       type="checkbox"
                       checked={!!selectedRows[user.id]}
