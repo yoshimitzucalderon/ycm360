@@ -216,6 +216,8 @@ const UserTable = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getStoredVisibleColumns());
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const filterOpen = Boolean(filterAnchorEl);
   const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState<null | HTMLElement>(null);
   const columnMenuOpen = Boolean(columnMenuAnchorEl);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
@@ -458,6 +460,9 @@ const UserTable = () => {
     },
   });
 
+  const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
+  const handleCloseFilter = () => setFilterAnchorEl(null);
+
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
@@ -586,8 +591,8 @@ const UserTable = () => {
             )}
           </div>
           <button
-            className={`action-button${showFilter ? ' active' : ''}`}
-            onClick={() => setShowFilter(f => !f)}
+            className={`action-button${filterOpen ? ' active' : ''}`}
+            onClick={handleOpenFilter}
             title="Filtrar"
             style={{ position: 'relative' }}
           >
@@ -597,7 +602,7 @@ const UserTable = () => {
                 position: 'absolute',
                 top: -6,
                 right: -6,
-                background: '#3b82f6',
+                background: '#22c55e',
                 color: '#fff',
                 borderRadius: '50%',
                 fontSize: 10,
@@ -612,6 +617,16 @@ const UserTable = () => {
               }}>{totalFilters}</span>
             )}
           </button>
+          {filterAnchorEl && (
+            <TableFilterPopover
+              columns={columns}
+              visibleColumns={visibleColumns}
+              filters={filters}
+              setFilters={setFilters}
+              anchorRef={{ current: filterAnchorEl }}
+              onClose={handleCloseFilter}
+            />
+          )}
           <button
             className={`action-button${showSort ? ' active' : ''}`}
             onClick={() => setShowSort(s => !s)}
@@ -630,16 +645,7 @@ const UserTable = () => {
       <div className="table-wrapper" style={{ position: 'relative' }}>
         {/* Filtros y orden siempre renderizados */}
         <div style={{ position: 'relative', zIndex: 100 }}>
-          {showFilter && (
-            <TableFilterPopover
-              columns={columns}
-              visibleColumns={visibleColumns}
-              filters={filters}
-              setFilters={setFilters}
-              onClose={() => setShowFilter(false)}
-              anchorRef={dummyRef}
-            />
-          )}
+          {/* No hay filtros abiertos */}
         </div>
         {showSort && (
           <TableSort
