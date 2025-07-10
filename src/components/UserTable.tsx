@@ -216,8 +216,8 @@ const UserTable = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchVisible, setSearchVisible] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(getStoredVisibleColumns());
-  const [columnMenuOpen, setColumnMenuOpen] = useState(false);
-  const columnMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const columnMenuOpen = Boolean(columnMenuAnchorEl);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
 
@@ -272,13 +272,13 @@ const UserTable = () => {
   useEffect(() => {
     if (!columnMenuOpen) return;
     function handleClickOutside(event: MouseEvent) {
-      if (columnMenuButtonRef.current && !columnMenuButtonRef.current.contains(event.target as Node)) {
-        setColumnMenuOpen(false);
+      if (columnMenuAnchorEl && !columnMenuAnchorEl.contains(event.target as Node)) {
+        setColumnMenuAnchorEl(null);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [columnMenuOpen]);
+  }, [columnMenuOpen, columnMenuAnchorEl]);
 
   // Helpers columnas
   const allChecked = visibleColumns.length === columns.length;
@@ -458,19 +458,18 @@ const UserTable = () => {
     },
   });
 
-  const handleOpenColumnMenu = () => {
-    if (columnMenuButtonRef.current) {
-      const rect = columnMenuButtonRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      if (spaceBelow < 350 && spaceAbove > spaceBelow) {
-        setPopoverPosition('up');
-      } else {
-        setPopoverPosition('down');
-      }
-      setColumnMenuOpen(true);
+  const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 350 && spaceAbove > spaceBelow) {
+      setPopoverPosition('up');
+    } else {
+      setPopoverPosition('down');
     }
+    setColumnMenuAnchorEl(event.currentTarget);
   };
+  const handleCloseColumnMenu = () => setColumnMenuAnchorEl(null);
 
   const dummyRef = useRef<HTMLElement>(null);
 
@@ -522,17 +521,16 @@ const UserTable = () => {
             <button
               className="action-button"
               title="Administrar columnas"
-              ref={columnMenuButtonRef}
               onClick={handleOpenColumnMenu}
               aria-label="Administrar columnas"
             >
               <Columns3 className="action-icon" />
             </button>
-            {columnMenuButtonRef.current && (
+            {columnMenuAnchorEl && (
               <MinimalPopover
                 open={columnMenuOpen}
-                anchorEl={columnMenuButtonRef.current}
-                onClose={() => setColumnMenuOpen(false)}
+                anchorEl={columnMenuAnchorEl}
+                onClose={handleCloseColumnMenu}
                 anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
                 marginThreshold={8}
@@ -656,7 +654,7 @@ const UserTable = () => {
         {noneChecked ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
             <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
-            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuOpen(true)}>
+            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuAnchorEl(null)}>
               Seleccionar columnas a través del botón correspondiente
             </div>
           </div>
