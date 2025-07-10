@@ -220,6 +220,8 @@ const UserTable = () => {
   const columnMenuRef = useRef<HTMLDivElement>(null);
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
+  const columnMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -458,6 +460,20 @@ const UserTable = () => {
     },
   });
 
+  const handleOpenColumnMenu = () => {
+    if (columnMenuRef.current) {
+      const rect = columnMenuRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < 350 && spaceAbove > spaceBelow) {
+        setPopoverPosition('up');
+      } else {
+        setPopoverPosition('down');
+      }
+    }
+    setColumnMenuOpen(true);
+  };
+
   return (
     <div className="table-container">
         <div className="user-table-header table-controls">
@@ -506,17 +522,18 @@ const UserTable = () => {
             <button
               className="action-button"
               title="Administrar columnas"
-              onClick={() => setColumnMenuOpen(open => !open)}
+              ref={columnMenuButtonRef}
+              onClick={handleOpenColumnMenu}
               aria-label="Administrar columnas"
             >
               <Columns3 className="action-icon" />
             </button>
             <MinimalPopover
               open={columnMenuOpen}
-              anchorEl={columnMenuRef.current}
+              anchorEl={columnMenuButtonRef.current}
               onClose={() => setColumnMenuOpen(false)}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
               marginThreshold={8}
               disableRestoreFocus
             >
