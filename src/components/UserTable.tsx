@@ -567,6 +567,26 @@ const UserTable = () => {
         </div>
       </div>
       <div className="table-wrapper">
+        {/* Filtros y orden siempre renderizados */}
+        {showFilter && (
+          <TableFilter
+            columns={columns}
+            filters={filters}
+            setFilters={setFilters}
+            onApply={handleApplyFilter}
+            onClear={clearFilters}
+          />
+        )}
+        {showSort && (
+          <TableSort
+            columns={columns}
+            sort={sort}
+            setSort={setSort}
+            onApply={handleApplySort}
+            onClear={clearSort}
+          />
+        )}
+        {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
             <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
