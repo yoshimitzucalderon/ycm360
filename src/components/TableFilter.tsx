@@ -183,6 +183,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   return ReactDOM.createPortal(
     <div
       ref={popoverRef}
+      className="ycm-filter-popover"
       style={{
         ...popoverStyle,
         display: 'flex',

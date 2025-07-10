@@ -1016,3 +1016,20 @@ body {
   background: #bdbdbd;
   border-radius: 6px;
 }
+
+/* Barra de desplazamiento delgada para el popover de filtros */
+.ycm-filter-popover {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #d1d5db #f8fafc; /* thumb y track */
+}
+.ycm-filter-popover::-webkit-scrollbar {
+  width: 6px;
+  background: #f8fafc;
+}
+.ycm-filter-popover::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+.ycm-filter-popover::-webkit-scrollbar-thumb:hover {
+  background: #b6bbc4;
+}
