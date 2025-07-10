@@ -603,7 +603,7 @@ const UserTable = () => {
           </button>
         </div>
       </div>
-      <div className="table-wrapper">
+      <div className="table-wrapper" style={{ position: 'relative' }}>
         {/* Filtros y orden siempre renderizados */}
         <div style={{ position: 'relative', zIndex: 100 }}>
           {showFilter && (
@@ -635,7 +635,7 @@ const UserTable = () => {
             </div>
           </div>
         ) : (
-          <div className="table-data-area" style={{ position: 'relative', minHeight: 240, overflow: 'auto' }}>
+          <div className="table-data-area" style={{ minHeight: 240, overflow: 'auto' }}>
             <table className="user-table" ref={tableRef}>
               <colgroup>
                 <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
@@ -722,7 +722,7 @@ const UserTable = () => {
             </table>
             {paginatedData.length === 0 && (
               <div style={{
-                position: 'fixed',
+                position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
