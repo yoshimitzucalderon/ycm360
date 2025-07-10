@@ -735,9 +735,8 @@ const UserTable = () => {
                 fontSize: 16,
                 pointerEvents: 'none',
                 background: 'rgba(255,255,255,0.96)',
-                zIndex: 2000,
-                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-                borderRadius: 12
+                zIndex: 2000
+                // Eliminados: boxShadow y borderRadius
               }}>
                 No se encontraron resultados para los criterios seleccionados.
               </div>
