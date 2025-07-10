@@ -521,6 +521,7 @@ const UserTable = () => {
                         type="checkbox"
                         checked={visibleColumns.includes(col.key)}
                         onChange={() => toggleColumn(col.key)}
+                        className="column-menu-checkbox"
                         style={{ accentColor: '#10b981', width: 16, height: 16, marginRight: 4 }}
                       />
                       {col.label}
