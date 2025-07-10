@@ -316,8 +316,8 @@ const UserTable = () => {
   // Filtrado por búsqueda en todas las columnas activas (sobre todos los datos filtrados)
   const searchedData = filteredData.filter((row) => {
     if (!search.trim()) return true;
-    return columns.some(col => {
-      const value = row[col.key];
+    return visibleColumns.some(colKey => {
+      const value = row[colKey];
       return value && value.toString().toLowerCase().includes(search.toLowerCase());
     });
   });
