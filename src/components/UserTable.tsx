@@ -635,94 +635,73 @@ const UserTable = () => {
             </div>
           </div>
         ) : (
-          <table className="user-table" ref={tableRef}>
-            <colgroup>
-              <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
-              {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                <col key={col.key} />
-              ))}
-            </colgroup>
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    minWidth: 40,
-                    maxWidth: 40,
-                    width: 40,
-                    padding: 0,
-                    background: '#f8fafc',
-                    textAlign: 'center',
-                    verticalAlign: 'middle',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <input
-                      type="checkbox"
-                      className="user-checkbox"
-                      checked={allVisibleSelected}
-                      ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
-                      onChange={toggleAllVisible}
-                    />
-                  </div>
-                </th>
+          <div style={{ position: 'relative' }}>
+            <table className="user-table" ref={tableRef}>
+              <colgroup>
+                <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
                 {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                  <th
-                    key={col.key}
-                    draggable
-                    onDragStart={() => handleDragStart(col.key)}
-                    onDragOver={e => handleDragOver(e, col.key)}
-                    onDrop={e => handleDrop(e, col.key)}
-                    className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
-                    style={{ position: 'relative' }}
-                  >
-                    {col.label}
-                    {filtersByColumn[col.key] > 0 && (
-                      <span style={{
-                        position: 'absolute',
-                        top: 6,
-                        right: 4,
-                        background: '#3b82f6',
-                        color: '#fff',
-                        borderRadius: '50%',
-                        fontSize: 10,
-                        minWidth: 15,
-                        height: 15,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 600,
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                        zIndex: 2
-                      }}>{filtersByColumn[col.key]}</span>
-                    )}
-                  </th>
+                  <col key={col.key} />
                 ))}
-              </tr>
-            </thead>
-            <tbody style={{ position: 'relative' }}>
-              {paginatedData.length === 0 ? (
-                <tr style={{ height: 240 }}>
-                  <td colSpan={1 + visibleColumns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#888',
-                      fontSize: 16,
-                      pointerEvents: 'none',
-                      background: 'transparent',
-                    }}>
-                      No se encontraron resultados para los criterios seleccionados.
+              </colgroup>
+              <thead>
+                <tr>
+                  <th
+                    style={{
+                      minWidth: 40,
+                      maxWidth: 40,
+                      width: 40,
+                      padding: 0,
+                      background: '#f8fafc',
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                      <input
+                        type="checkbox"
+                        className="user-checkbox"
+                        checked={allVisibleSelected}
+                        ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
+                        onChange={toggleAllVisible}
+                      />
                     </div>
-                  </td>
+                  </th>
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                    <th
+                      key={col.key}
+                      draggable
+                      onDragStart={() => handleDragStart(col.key)}
+                      onDragOver={e => handleDragOver(e, col.key)}
+                      onDrop={e => handleDrop(e, col.key)}
+                      className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
+                      style={{ position: 'relative' }}
+                    >
+                      {col.label}
+                      {filtersByColumn[col.key] > 0 && (
+                        <span style={{
+                          position: 'absolute',
+                          top: 6,
+                          right: 4,
+                          background: '#3b82f6',
+                          color: '#fff',
+                          borderRadius: '50%',
+                          fontSize: 10,
+                          minWidth: 15,
+                          height: 15,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 600,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                          zIndex: 2
+                        }}>{filtersByColumn[col.key]}</span>
+                      )}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                paginatedData.map((user, idx) => (
+              </thead>
+              <tbody>
+                {paginatedData.map((user, idx) => (
                   <tr key={user.id || idx}>
                     <td className="user-table-checkbox-cell">
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -738,10 +717,29 @@ const UserTable = () => {
                       <td key={col.key}>{user[col.key]}</td>
                     ))}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+            {paginatedData.length === 0 && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#888',
+                fontSize: 16,
+                pointerEvents: 'none',
+                background: 'rgba(255,255,255,0.92)',
+                zIndex: 10
+              }}>
+                No se encontraron resultados para los criterios seleccionados.
+              </div>
+            )}
+          </div>
         )}
       </div>
       <div className="table-footer">
