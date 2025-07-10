@@ -233,7 +233,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               <FormControl size="small" sx={{ minWidth: 70 }}>
                 <MinimalSelect
                   value={filter.logicalOperator || 'AND'}
-                  onChange={e => setLogicalOperator(idx, e.target.value)}
+                  onChange={e => setLogicalOperator(idx, (e.target.value as string))}
                 >
                   {LOGICALS.map(l => (
                     <MinimalMenuItem key={l.value} value={l.value}>{l.label}</MinimalMenuItem>
@@ -246,7 +246,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 value={filter.column}
                 displayEmpty
                 onChange={e => {
-                  const col = e.target.value;
+                  const col = e.target.value as string;
                   if (!col) {
                     setFilters(filters.filter((_, i) => i !== idx));
                   } else {
@@ -263,7 +263,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             <FormControl size="small" sx={{ minWidth: 100 }}>
               <MinimalSelect
                 value={filter.operator}
-                onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
+                onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
               >
                 {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
