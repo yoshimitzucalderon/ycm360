@@ -4,7 +4,7 @@ import TableFilter from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3 } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
@@ -396,6 +396,10 @@ const UserTable = () => {
               <Search className="action-icon" />
             </button>
           )}
+          {/* Botón Seleccionar Columnas */}
+          <button className="action-button" title="Seleccionar columnas">
+            <Columns3 className="action-icon" />
+          </button>
           <button
             className={`action-button${showFilter ? ' active' : ''}`}
             onClick={() => setShowFilter(f => !f)}
