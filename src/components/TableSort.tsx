@@ -10,6 +10,15 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { styled } from '@mui/material/styles';
 import SortIcon from '@mui/icons-material/Sort';
 
+type Props = {
+  columns: TableColumn[];
+  visibleColumns: string[];
+  sort: TableSortType | null;
+  setSort: (sort: TableSortType | null) => void;
+  onApply: () => void;
+  onClear: () => void;
+};
+
 const MinimalButton = styled(Button)({
   color: '#22c55e',
   fontWeight: 500,
@@ -55,15 +64,7 @@ const MinimalPopover = styled(Popover)({
   },
 });
 
-type Props = {
-  columns: TableColumn[];
-  sort: TableSortType | null;
-  setSort: (sort: TableSortType | null) => void;
-  onApply: () => void;
-  onClear: () => void;
-};
-
-const TableSort: React.FC<Props> = ({ columns, sort, setSort, onApply, onClear }) => {
+const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, onApply, onClear }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [localSort, setLocalSort] = useState<TableSortType>(sort || { column: "", direction: "asc" });
 
@@ -102,7 +103,7 @@ const TableSort: React.FC<Props> = ({ columns, sort, setSort, onApply, onClear }
             sx={{ mb: 1, background: '#fff', borderRadius: 2, fontSize: 15, minWidth: 180 }}
           >
             <MenuItem value="">Pick a column to sort by</MenuItem>
-            {columns.map(col => (
+            {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
               <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
             ))}
           </Select>
