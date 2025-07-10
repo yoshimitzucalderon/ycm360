@@ -531,7 +531,7 @@ const UserTable = () => {
           <table className="user-table" ref={tableRef}>
             <colgroup>
               <col style={{ width: 40 }} /> {/* Para el checkbox */}
-              {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+              {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                 <col key={col.key} style={{ width: colWidths[col.key] || 150 }} />
               ))}
             </colgroup>
@@ -557,7 +557,7 @@ const UserTable = () => {
                     />
                   </div>
                 </th>
-                {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                   <th
                     key={col.key}
                     draggable
@@ -582,7 +582,7 @@ const UserTable = () => {
                       className="user-checkbox"
                     />
                   </td>
-                  {columnOrder.filter(col => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
                     <td key={col.key} style={{ width: colWidths[col.key] || 150 }}>{user[col.key]}</td>
                   ))}
                 </tr>
