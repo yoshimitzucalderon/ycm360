@@ -36,15 +36,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const [initialized, setInitialized] = useState(false);
 
-  // Si el usuario borra el valor o solo selecciona columna, eliminar el filtro automáticamente (sin loops infinitos)
-  useEffect(() => {
-    // Solo eliminar filtros que tengan columna pero no valor
-    const cleaned = filters.filter(f => !(f.column && !f.value));
-    if (cleaned.length !== filters.length) {
-      setFilters(cleaned);
-    }
-    // eslint-disable-next-line
-  }, [filters.length]);
+  // Elimina el useEffect de limpieza automática de filtros
 
   // Al abrir el popover, si no hay filtros, agrega uno vacío solo una vez
   useEffect(() => {
@@ -180,11 +172,11 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               value={filter.column}
               onChange={e => {
                 const col = e.target.value;
-                // Si el usuario borra la columna, elimina el filtro
-                if (!col) {
-                  setFilters(filters.filter((_, i) => i !== idx));
-                } else {
+                // Solo actualiza el filtro si hay columna Y valor
+                if (col && filter.value) {
                   setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
+                } else if (!col) {
+                  setFilters(filters.filter((_, i) => i !== idx));
                 }
               }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word' }}
@@ -196,7 +188,12 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             </select>
             <select
               value={filter.operator}
-              onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f))}
+              onChange={e => {
+                // Solo actualiza el filtro si hay columna Y valor
+                if (filter.column && filter.value) {
+                  setFilters(filters.map((f, i) => i === idx ? { ...f, operator: e.target.value } : f));
+                }
+              }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#f8fafc', padding: '2px 6px', maxWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word' }}
               disabled={!filter.column}
             >
@@ -207,7 +204,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               value={filter.value}
               onChange={e => {
                 const val = e.target.value;
-                setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
+                // Solo actualiza el filtro si hay columna Y valor
+                if (filter.column && val) {
+                  setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
+                }
               }}
               style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
               placeholder="Valor"
