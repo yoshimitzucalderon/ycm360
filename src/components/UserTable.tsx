@@ -628,6 +628,13 @@ const UserTable = () => {
         )}
         {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
+            <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
+            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuOpen(true)}>
+              Seleccionar columnas a través del botón correspondiente
+            </div>
+          </div>
+        ) : (
           <div className="table-data-area" style={{ position: 'relative', minHeight: 240, overflow: 'auto' }}>
             <table className="user-table" ref={tableRef}>
               <colgroup>
