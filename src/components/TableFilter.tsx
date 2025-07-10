@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
 import { X } from 'lucide-react';
 
@@ -35,9 +36,9 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const [initialized, setInitialized] = useState(false);
 
-  // Al abrir, si no hay filtros, poner uno vacío por defecto SOLO una vez
+  // Al abrir, si no hay filtros, poner uno vacío por defecto cada vez que filters.length === 0
   useEffect(() => {
-    if (!initialized && filters.length === 0) {
+    if (filters.length === 0) {
       setFilters([
         {
           column: '',
@@ -46,10 +47,9 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           logicalOperator: undefined,
         },
       ]);
-      setInitialized(true);
     }
     // eslint-disable-next-line
-  }, [initialized, filters.length]);
+  }, [filters.length]);
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -135,7 +135,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     ));
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div
       ref={popoverRef}
       style={{
@@ -144,8 +144,9 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         flexDirection: 'column',
         justifyContent: 'flex-start',
         gap: 12,
-        position: 'relative',
+        position: 'absolute',
         paddingBottom: 48, // espacio para el botón fijo
+        zIndex: 2000,
       }}
     >
       <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
@@ -233,7 +234,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           Reestablecer filtros
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
