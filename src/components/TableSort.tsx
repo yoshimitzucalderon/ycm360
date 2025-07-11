@@ -65,71 +65,51 @@ const MinimalPopover = styled(Popover)({
 });
 
 const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, onApply, onClear }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [localSort, setLocalSort] = useState<TableSortType>(sort || { column: "", direction: "asc" });
 
   const handleApply = () => {
     if (localSort.column) setSort(localSort);
     onApply();
-    setAnchorEl(null);
   };
   const handleClear = () => {
     onClear();
-    setAnchorEl(null);
   };
 
   return (
-    <>
-      <MinimalButton
-        startIcon={<SortIcon />}
-        onClick={e => setAnchorEl(e.currentTarget)}
-        sx={{ ml: 1 }}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 220 }}>
+      <Select
+        value={localSort.column}
+        onChange={e => setLocalSort(s => ({ ...s, column: e.target.value as string }))}
+        displayEmpty
+        size="small"
+        sx={{ mb: 1, background: '#fff', borderRadius: 2, fontSize: 15, minWidth: 180 }}
       >
-        Ordenar
-      </MinimalButton>
-      <MinimalPopover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        <MenuItem value="">Pick a column to sort by</MenuItem>
+        {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
+          <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
+        ))}
+      </Select>
+      <RadioGroup
+        row
+        value={localSort.direction}
+        onChange={e => setLocalSort(s => ({ ...s, direction: e.target.value as 'asc' | 'desc' }))}
+        sx={{ gap: 2, alignItems: 'center' }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Select
-            value={localSort.column}
-            onChange={e => setLocalSort(s => ({ ...s, column: e.target.value as string }))}
-            displayEmpty
-            size="small"
-            sx={{ mb: 1, background: '#fff', borderRadius: 2, fontSize: 15, minWidth: 180 }}
-          >
-            <MenuItem value="">Pick a column to sort by</MenuItem>
-            {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
-              <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
-            ))}
-          </Select>
-          <RadioGroup
-            row
-            value={localSort.direction}
-            onChange={e => setLocalSort(s => ({ ...s, direction: e.target.value as 'asc' | 'desc' }))}
-            sx={{ gap: 2, alignItems: 'center' }}
-          >
-            <FormControlLabel value="asc" control={<Radio size="small" />} label="Ascending" />
-            <FormControlLabel value="desc" control={<Radio size="small" />} label="Descending" />
-          </RadioGroup>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <MinimalButton onClick={handleApply} disabled={!localSort.column}>
-              Apply sorting
-            </MinimalButton>
-            <Button
-              onClick={handleClear}
-              sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none', border: '1.5px solid #e5e7eb', borderRadius: 6, background: '#fff' }}
-            >
-              Clear all sorts
-            </Button>
-          </div>
-        </div>
-      </MinimalPopover>
-    </>
+        <FormControlLabel value="asc" control={<Radio size="small" />} label="Ascending" />
+        <FormControlLabel value="desc" control={<Radio size="small" />} label="Descending" />
+      </RadioGroup>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <MinimalButton onClick={handleApply} disabled={!localSort.column}>
+          Apply sorting
+        </MinimalButton>
+        <Button
+          onClick={handleClear}
+          sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none', border: '1.5px solid #e5e7eb', borderRadius: 6, background: '#fff' }}
+        >
+          Clear all sorts
+        </Button>
+      </div>
+    </div>
   );
 };
 
