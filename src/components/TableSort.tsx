@@ -67,13 +67,13 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
   };
 
   return (
-    <div style={{ minWidth: 260, maxWidth: 340, padding: 0, background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+    <div style={{ minWidth: 260, maxWidth: 340, padding: 0, borderRadius: 10 }}>
       {/* Encabezado */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '10px 16px 8px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SortAsc size={18} style={{ color: '#22c55e' }} />
           <span style={{ fontWeight: 600, fontSize: 15, color: '#222' }}>
-            {sortRules.length > 0 ? `Sorted by ${sortRules.length} rule${sortRules.length > 1 ? 's' : ''}` : 'No sorting'}
+            {sortRules.length > 0 ? `Ordenado por ${sortRules.length} criterio${sortRules.length > 1 ? 's' : ''}` : 'Sin orden'}
           </span>
         </div>
         {onRequestClose && (
@@ -111,7 +111,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           <GripVertical size={16} />
                         </span>
                         <span style={{ fontSize: 13, color: '#888', minWidth: 60, marginRight: 2 }}>
-                          {idx === 0 ? 'sort by' : 'then by'}
+                          {idx === 0 ? 'ordenar por' : 'luego por'}
                         </span>
                         <span style={{ fontWeight: 500, minWidth: 80, fontSize: 14, color: '#222' }}>{col?.label || rule.column}</span>
                         <Switch
@@ -123,7 +123,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           inputProps={{ 'aria-label': 'ascendente/descendente' }}
                         />
                         <span style={{ fontSize: 12, color: '#888', minWidth: 60 }}>
-                          {rule.direction === 'asc' ? 'ascending' : 'descending'}
+                          {rule.direction === 'asc' ? 'ascendente' : 'descendente'}
                         </span>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
@@ -150,7 +150,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           size="small"
           sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 120, height: 28 }}
         >
-          <MenuItem value="">Pick another column to sort by</MenuItem>
+          <MenuItem value="">Selecciona otra columna para ordenar</MenuItem>
           {availableColumns.map(col => (
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
@@ -160,19 +160,19 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           disabled={!newColumn}
           sx={{ minWidth: 36, px: 2, fontSize: 13, height: 28, borderRadius: 5 }}
         >
-          Add
+          Añadir
         </Button>
       </div>
       {/* Botón de aplicar */}
       <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'flex-end', padding: '10px 12px 10px 12px' }}>
         <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 80, fontSize: 13, height: 32, borderRadius: 6 }}>
-          Apply sorting
+          Aplicar orden
         </MinimalButton>
         <Button
           onClick={onClear}
           sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 6, background: '#fff', minWidth: 60, height: 32 }}
         >
-          Clear
+          Limpiar
         </Button>
       </div>
     </div>
