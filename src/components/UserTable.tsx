@@ -661,7 +661,7 @@ const UserTable = () => {
     const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
     const data = paginatedData.map(row => {
       const obj: any = {};
-      exportColumns.forEach(col => {
+      exportColumns.forEach((col: TableColumn) => {
         obj[col.label] = row[col.key];
       });
       return obj;
@@ -680,7 +680,7 @@ const UserTable = () => {
     const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
     const data = paginatedData.map(row => {
       const obj: any = {};
-      exportColumns.forEach(col => {
+      exportColumns.forEach((col: TableColumn) => {
         obj[col.label] = row[col.key];
       });
       return obj;
