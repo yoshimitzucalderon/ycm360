@@ -20,6 +20,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { FaRegFilePdf } from 'react-icons/fa6';
+import { BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -878,7 +880,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}>📄</span>
+              <span style={{ fontSize: 16 }}><FaRegFilePdf /></span>
               Descargar PDF
             </button>
             <button
@@ -900,7 +902,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}>📊</span>
+              <span style={{ fontSize: 16 }}><BsFiletypeXls /></span>
               Descargar XLSX
             </button>
             <button
@@ -922,7 +924,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}>📋</span>
+              <span style={{ fontSize: 16 }}><BsFiletypeCsv /></span>
               Descargar CSV
             </button>
           </Menu>
