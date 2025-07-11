@@ -88,7 +88,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, on
             style: {
               zIndex: 4000
             }
-          }
+          },
+          container: () => document.body
         }}
       >
         <MenuItem value="">Pick a column to sort by</MenuItem>
