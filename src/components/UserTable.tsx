@@ -748,6 +748,8 @@ const UserTable = () => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 340, maxHeight: 320, overflowY: 'auto' } }}
+          disableEnforceFocus
+          disableAutoFocus
         >
           <TableSort
             columns={columns}
