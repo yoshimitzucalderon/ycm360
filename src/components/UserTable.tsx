@@ -369,6 +369,7 @@ const UserTable = () => {
   const [colWidths, setColWidths] = useState<{ [key: string]: number }>({});
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
+  // Estado para el popover de orden
   const [sortMenu, setSortMenu] = useState<{ colKey: string | null; anchor: HTMLElement | null }>({ colKey: null, anchor: null });
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
   const toggleRow = (id: string) => {
@@ -717,6 +718,14 @@ const UserTable = () => {
               onClose={handleCloseFilter}
             />
           )}
+          {/* En la barra de acciones (arriba a la derecha): */}
+          <button
+            className={`action-button${showSort ? ' active' : ''}`}
+            onClick={() => setShowSort(s => !s)}
+            title="Ordenar"
+          >
+            <ArrowUpDown className="action-icon" />
+          </button>
           {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
@@ -732,14 +741,42 @@ const UserTable = () => {
           {/* No hay filtros abiertos */}
         </div>
         {showSort && (
-          <TableSort
-            columns={columns}
-            visibleColumns={visibleColumns}
-            sort={sort}
-            setSort={setSort}
-            onApply={handleApplySort}
-            onClear={clearSort}
-          />
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 3000,
+              background: 'rgba(255,255,255,0.98)',
+              borderRadius: 12,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              padding: 24,
+              minWidth: 320,
+              maxWidth: 400,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <TableSort
+              columns={columns}
+              visibleColumns={visibleColumns}
+              sort={sort}
+              setSort={setSort}
+              onApply={() => setShowSort(false)}
+              onClear={clearSort}
+            />
+            <button
+              style={{ marginTop: 16, color: '#888', background: 'none', border: 'none', fontSize: 15, cursor: 'pointer' }}
+              onClick={() => setShowSort(false)}
+            >
+              Cerrar
+            </button>
+          </div>
         )}
         {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
@@ -792,17 +829,6 @@ const UserTable = () => {
                       style={{ position: 'relative' }}
                     >
                       {col.label}
-                      <button
-                        className="sort-button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setSortMenu({ colKey: col.key, anchor: e.currentTarget });
-                        }}
-                        title="Ordenar por esta columna"
-                        style={{ marginLeft: 4 }}
-                      >
-                        <ArrowUpDown className="sort-icon" />
-                      </button>
                       {filtersByColumn[col.key] > 0 && (
                         <span style={{
                           position: 'absolute',
@@ -821,20 +847,6 @@ const UserTable = () => {
                           boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                           zIndex: 2
                         }}>{filtersByColumn[col.key]}</span>
-                      )}
-                      {/* Menú flotante de orden para esta columna */}
-                      {sortMenu.colKey === col.key && sortMenu.anchor && (
-                        <TableSort
-                          columns={columns}
-                          visibleColumns={visibleColumns}
-                          sort={sort}
-                          setSort={setSort}
-                          onApply={handleApplySort}
-                          onClear={clearSort}
-                          anchorEl={sortMenu.anchor}
-                          onClose={() => setSortMenu({ colKey: null, anchor: null })}
-                          colKey={col.key}
-                        />
                       )}
                     </th>
                   ))}
