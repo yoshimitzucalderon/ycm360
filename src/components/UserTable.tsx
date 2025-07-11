@@ -717,13 +717,7 @@ const UserTable = () => {
               onClose={handleCloseFilter}
             />
           )}
-          <button
-            className={`action-button${showSort ? ' active' : ''}`}
-            onClick={() => setShowSort(s => !s)}
-            title="Ordenar"
-          >
-            <ArrowUpDown className="action-icon" />
-          </button>
+          {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
             </button>
@@ -798,6 +792,17 @@ const UserTable = () => {
                       style={{ position: 'relative' }}
                     >
                       {col.label}
+                      <button
+                        className="sort-button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSortMenu({ colKey: col.key, anchor: e.currentTarget });
+                        }}
+                        title="Ordenar por esta columna"
+                        style={{ marginLeft: 4 }}
+                      >
+                        <ArrowUpDown className="sort-icon" />
+                      </button>
                       {filtersByColumn[col.key] > 0 && (
                         <span style={{
                           position: 'absolute',
@@ -816,6 +821,20 @@ const UserTable = () => {
                           boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                           zIndex: 2
                         }}>{filtersByColumn[col.key]}</span>
+                      )}
+                      {/* Menú flotante de orden para esta columna */}
+                      {sortMenu.colKey === col.key && sortMenu.anchor && (
+                        <TableSort
+                          columns={columns}
+                          visibleColumns={visibleColumns}
+                          sort={sort}
+                          setSort={setSort}
+                          onApply={handleApplySort}
+                          onClear={clearSort}
+                          anchorEl={sortMenu.anchor}
+                          onClose={() => setSortMenu({ colKey: null, anchor: null })}
+                          colKey={col.key}
+                        />
                       )}
                     </th>
                   ))}
