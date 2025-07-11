@@ -8,7 +8,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { styled } from '@mui/material/styles';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, X as XIcon } from 'lucide-react';
+import { GripVertical, X as XIcon, ArrowUp, ArrowDown } from 'lucide-react';
 
 const MinimalButton = styled(Button)({
   color: '#22c55e',
@@ -97,15 +97,25 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           <GripVertical size={16} />
                         </span>
                         <span style={{ fontWeight: 500, minWidth: 80 }}>{col?.label || rule.column}</span>
-                        <RadioGroup
-                          row
-                          value={rule.direction}
-                          onChange={e => handleDirectionChange(idx, e.target.value as 'asc' | 'desc')}
-                          sx={{ gap: 1, alignItems: 'center', marginLeft: 8 }}
+                        <Button
+                          onClick={() => handleDirectionChange(idx, rule.direction === 'asc' ? 'desc' : 'asc')}
+                          sx={{
+                            minWidth: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            background: rule.direction === 'asc' ? '#e0fce0' : '#fee2e2',
+                            color: rule.direction === 'asc' ? '#16a34a' : '#dc2626',
+                            boxShadow: 'none',
+                            border: '1.5px solid #e5e7eb',
+                            '&:hover': {
+                              background: rule.direction === 'asc' ? '#bbf7d0' : '#fecaca',
+                            },
+                            ml: 1,
+                          }}
+                          title={rule.direction === 'asc' ? 'Ascendente' : 'Descendente'}
                         >
-                          <FormControlLabel value="asc" control={<Radio size="small" />} label="Asc" />
-                          <FormControlLabel value="desc" control={<Radio size="small" />} label="Desc" />
-                        </RadioGroup>
+                          {rule.direction === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+                        </Button>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
                           sx={{ minWidth: 28, padding: 0, color: '#888', ml: 1 }}
