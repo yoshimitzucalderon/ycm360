@@ -556,7 +556,7 @@ const UserTable = () => {
     // setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement }); // This state is removed
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
-    setSortRules({ column: colKey, direction });
+    setSortRules([{ column: colKey, direction }]);
     // setSortMenu({ colKey: null, anchor: null }); // This state is removed
     setPage(1);
   };
