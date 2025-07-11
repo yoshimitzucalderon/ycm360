@@ -16,6 +16,10 @@ import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -390,6 +394,7 @@ const UserTable = () => {
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -623,8 +628,70 @@ const UserTable = () => {
     setColumnMenuOpen(true);
   };
   const handleCloseColumnMenu = () => {
-    setColumnMenuOpen(false);
     setColumnMenuAnchorEl(null);
+    setColumnMenuSearch("");
+  };
+
+  const handleOpenDownload = (event: React.MouseEvent<HTMLElement>) => {
+    setDownloadAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseDownload = () => {
+    setDownloadAnchorEl(null);
+  };
+
+  const handleDownloadPDF = () => {
+    const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
+    const data = paginatedData.map(row => exportColumns.map(col => row[col.key]));
+    const doc = new jsPDF({ orientation: 'landscape' });
+    autoTable(doc, {
+      head: [exportColumns.map(col => col.label)],
+      body: data,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [37, 99, 235] }, // azul
+      margin: { top: 20 },
+      tableWidth: 'auto',
+    });
+    doc.save('tabla.pdf');
+    handleCloseDownload();
+  };
+
+  const handleDownloadXLSX = () => {
+    // Exportar solo las columnas visibles y los datos paginados/filtrados
+    const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
+    const data = paginatedData.map(row => {
+      const obj: any = {};
+      exportColumns.forEach(col => {
+        obj[col.label] = row[col.key];
+      });
+      return obj;
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+    const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([xlsxBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, 'tabla.xlsx');
+    handleCloseDownload();
+  };
+
+  const handleDownloadCSV = () => {
+    // Exportar solo las columnas visibles y los datos paginados/filtrados
+    const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
+    const data = paginatedData.map(row => {
+      const obj: any = {};
+      exportColumns.forEach(col => {
+        obj[col.label] = row[col.key];
+      });
+      return obj;
+    });
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'tabla.csv');
+    handleCloseDownload();
   };
 
   const dummyRef = useRef<HTMLElement>(null);
@@ -768,9 +835,97 @@ const UserTable = () => {
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
             </button>
-          <button className="btn-minimal" title="Descargar">
+          <button 
+            className={`btn-minimal${Boolean(downloadAnchorEl) ? ' active' : ''}`} 
+            title="Descargar"
+            onClick={handleOpenDownload}
+          >
             <Download className="btn-icon" />
           </button>
+          {/* Menu de Descarga */}
+          <Menu
+            anchorEl={downloadAnchorEl}
+            open={Boolean(downloadAnchorEl)}
+            onClose={handleCloseDownload}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            PaperProps={{
+              style: {
+                minWidth: 140,
+                borderRadius: 8,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                border: '1px solid #e5e7eb',
+                padding: 4
+              }
+            }}
+          >
+            <button
+              onClick={handleDownloadPDF}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: 4,
+                fontSize: 13,
+                color: '#374151',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textAlign: 'left'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{ fontSize: 16 }}>📄</span>
+              Descargar PDF
+            </button>
+            <button
+              onClick={handleDownloadXLSX}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: 4,
+                fontSize: 13,
+                color: '#374151',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textAlign: 'left'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{ fontSize: 16 }}>📊</span>
+              Descargar XLSX
+            </button>
+            <button
+              onClick={handleDownloadCSV}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: 4,
+                fontSize: 13,
+                color: '#374151',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textAlign: 'left'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{ fontSize: 16 }}>📋</span>
+              Descargar CSV
+            </button>
+          </Menu>
         </div>
       </div>
       <div className="table-wrapper" style={{ position: 'relative' }}>
