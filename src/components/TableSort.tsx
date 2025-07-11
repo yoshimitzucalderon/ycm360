@@ -83,6 +83,13 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, on
         displayEmpty
         size="small"
         sx={{ mb: 1, background: '#fff', borderRadius: 2, fontSize: 15, minWidth: 180 }}
+        MenuProps={{
+          PaperProps: {
+            style: {
+              zIndex: 4000
+            }
+          }
+        }}
       >
         <MenuItem value="">Pick a column to sort by</MenuItem>
         {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
