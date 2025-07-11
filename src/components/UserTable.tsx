@@ -645,7 +645,7 @@ const UserTable = () => {
     const data = paginatedData.map(row => exportColumns.map((col: TableColumn) => row[col.key]));
     const doc = new jsPDF({ orientation: 'landscape' });
     autoTable(doc, {
-      head: [exportColumns.map(col => col.label)],
+      head: [exportColumns.map((col: TableColumn) => col.label)],
       body: data,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [37, 99, 235] }, // azul
