@@ -647,7 +647,7 @@ const UserTable = () => {
 
   const handleDownloadPDF = () => {
     const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
-    const data = paginatedData.map(row => exportColumns.map((col: TableColumn) => row[col.key]));
+    const data = searchedData.map(row => exportColumns.map((col: TableColumn) => row[col.key]));
     const doc = new jsPDF({ orientation: 'landscape' });
     autoTable(doc, {
       head: [exportColumns.map((col: TableColumn) => col.label)],
@@ -664,7 +664,7 @@ const UserTable = () => {
   const handleDownloadXLSX = () => {
     // Exportar solo las columnas visibles y los datos paginados/filtrados
     const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
-    const data = paginatedData.map(row => {
+    const data = searchedData.map(row => {
       const obj: any = {};
       exportColumns.forEach((col: TableColumn) => {
         obj[col.label] = row[col.key];
@@ -683,7 +683,7 @@ const UserTable = () => {
   const handleDownloadCSV = () => {
     // Exportar solo las columnas visibles y los datos paginados/filtrados
     const exportColumns = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
-    const data = paginatedData.map(row => {
+    const data = searchedData.map(row => {
       const obj: any = {};
       exportColumns.forEach((col: TableColumn) => {
         obj[col.label] = row[col.key];
