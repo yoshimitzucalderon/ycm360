@@ -389,6 +389,7 @@ const UserTable = () => {
   const [columnMenuAnchorEl, setColumnMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -724,56 +725,30 @@ const UserTable = () => {
           )}
           {/* En la barra de acciones (arriba a la derecha): */}
           <button
-            ref={orderButtonRef}
-            className={`action-button${orderPanelOpen ? ' active' : ''}`}
-            onClick={() => {
-              if (!orderPanelOpen && orderButtonRef.current) {
-                const rect = orderButtonRef.current.getBoundingClientRect();
-                const top = rect.bottom + window.scrollY + 6;
-                const left = rect.left + window.scrollX;
-                setOrderPanelPosition({ top, left });
-                console.log('OrderPanel position:', { top, left });
-              }
-              setOrderPanelOpen(open => !open);
-            }}
+            className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
+            onClick={e => setSortAnchorEl(e.currentTarget)}
             title="Ordenar"
           >
             <ArrowUpDown className="action-icon" />
           </button>
-          {orderPanelOpen && (
-            <ClickAwayListener onClickAway={() => setOrderPanelOpen(false)}>
-              <div
-                style={{
-                  position: 'absolute',
-                  top: orderPanelPosition.top !== null ? orderPanelPosition.top : '50%',
-                  left: orderPanelPosition.left !== null ? orderPanelPosition.left : '50%',
-                  transform: orderPanelPosition.top !== null && orderPanelPosition.left !== null ? undefined : 'translate(-50%, -50%)',
-                  minWidth: 260,
-                  borderRadius: 10,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  border: '2px solid red', // borde rojo para depuración
-                  padding: 16,
-                  maxWidth: 340,
-                  maxHeight: 320,
-                  overflowY: 'auto',
-                  background: '#fffbe6', // fondo visible para depuración
-                  zIndex: 3000,
-                }}
-              >
-                <div style={{ color: 'red', fontSize: 12, marginBottom: 8 }}>
-                  Posición: top={orderPanelPosition.top}, left={orderPanelPosition.left}
-                </div>
-                <TableSort
-                  columns={columns}
-                  visibleColumns={visibleColumns}
-                  sort={sort}
-                  setSort={setSort}
-                  onApply={() => setOrderPanelOpen(false)}
-                  onClear={clearSort}
-                />
-              </div>
-            </ClickAwayListener>
-          )}
+          {/* Popover de Ordenamiento */}
+          <Popover
+            open={Boolean(sortAnchorEl)}
+            anchorEl={sortAnchorEl}
+            onClose={() => setSortAnchorEl(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 340, maxHeight: 320, overflowY: 'auto' } }}
+          >
+            <TableSort
+              columns={columns}
+              visibleColumns={visibleColumns}
+              sort={sort}
+              setSort={setSort}
+              onApply={() => setSortAnchorEl(null)}
+              onClear={clearSort}
+            />
+          </Popover>
           {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
