@@ -5,7 +5,7 @@ import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3 } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -723,8 +723,28 @@ const UserTable = () => {
             className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
             onClick={e => setSortAnchorEl(e.currentTarget)}
             title="Ordenar"
+            style={{ position: 'relative' }}
           >
             <ArrowUpDown className="action-icon" />
+            {sortRules.length > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: -6,
+                right: -6,
+                background: '#2563eb', // azul más oscuro para sort
+                color: '#fff',
+                borderRadius: '50%',
+                fontSize: 11,
+                minWidth: 18,
+                height: 18,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 600,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                zIndex: 2
+              }}>{sortRules.length}</span>
+            )}
           </button>
           {/* Popover de Ordenamiento */}
           <Popover
@@ -800,39 +820,48 @@ const UserTable = () => {
                       />
                     </div>
                   </th>
-                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                    <th
-                      key={col.key}
-                      draggable
-                      onDragStart={() => handleDragStart(col.key)}
-                      onDragOver={e => handleDragOver(e, col.key)}
-                      onDrop={e => handleDrop(e, col.key)}
-                      className="user-table-header-cell"
-                      style={{ position: 'relative' }}
-                    >
-                      {col.label}
-                      {/* Aquí podrías mostrar un icono si la columna está en sortRules */}
-                      {filtersByColumn[col.key] > 0 && (
-                        <span style={{
-                          position: 'absolute',
-                          top: 6,
-                          right: 4,
-                          background: '#3b82f6',
-                          color: '#fff',
-                          borderRadius: '50%',
-                          fontSize: 10,
-                          minWidth: 15,
-                          height: 15,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 600,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                          zIndex: 2
-                        }}>{filtersByColumn[col.key]}</span>
-                      )}
-                    </th>
-                  ))}
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => {
+                    const sortRule = sortRules.find(rule => rule.column === col.key);
+                    return (
+                      <th
+                        key={col.key}
+                        draggable
+                        onDragStart={() => handleDragStart(col.key)}
+                        onDragOver={e => handleDragOver(e, col.key)}
+                        onDrop={e => handleDrop(e, col.key)}
+                        className="user-table-header-cell"
+                        style={{ position: 'relative' }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          {col.label}
+                          {sortRule && (
+                            sortRule.direction === 'asc' ?
+                              <ArrowUp size={16} style={{ color: '#22c55e', marginLeft: 2 }} /> :
+                              <ArrowDown size={16} style={{ color: '#22c55e', marginLeft: 2 }} />
+                          )}
+                        </span>
+                        {filtersByColumn[col.key] > 0 && (
+                          <span style={{
+                            position: 'absolute',
+                            top: 6,
+                            right: 4,
+                            background: '#3b82f6',
+                            color: '#fff',
+                            borderRadius: '50%',
+                            fontSize: 10,
+                            minWidth: 15,
+                            height: 15,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 600,
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                            zIndex: 2
+                          }}>{filtersByColumn[col.key]}</span>
+                        )}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
