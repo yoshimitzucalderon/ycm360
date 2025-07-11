@@ -21,7 +21,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { AiFillFilePdf } from 'react-icons/ai';
-import { BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
+import { BsFiletypePdf, BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -880,7 +880,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}><AiFillFilePdf color="#e11d48" /></span>
+              <span style={{ fontSize: 16, color: '#e11d48' }}><BsFiletypePdf /></span>
               Descargar PDF
             </button>
             <button
@@ -902,7 +902,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}><BsFiletypeXls /></span>
+              <span style={{ fontSize: 16, color: '#22c55e' }}><BsFiletypeXls /></span>
               Descargar XLSX
             </button>
             <button
@@ -924,7 +924,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}><BsFiletypeCsv /></span>
+              <span style={{ fontSize: 16, color: '#2563eb' }}><BsFiletypeCsv /></span>
               Descargar CSV
             </button>
           </Menu>
