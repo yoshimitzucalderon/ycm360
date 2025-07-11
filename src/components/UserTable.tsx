@@ -370,7 +370,7 @@ const UserTable = () => {
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
   // Estado para el popover de orden
-  const [sortMenu, setSortMenu] = useState<{ colKey: string | null; anchor: HTMLElement | null }>({ colKey: null, anchor: null });
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
   const toggleRow = (id: string) => {
     setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
@@ -459,14 +459,14 @@ const UserTable = () => {
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
-    if (!sortMenu.anchor) return;
+    if (!sortAnchorEl) return;
     const handleClick = (e: MouseEvent) => {
       if (!(e.target instanceof Node)) return;
-      if (!sortMenu.anchor || !sortMenu.anchor.contains(e.target)) setSortMenu({ colKey: null, anchor: null });
+      if (!sortAnchorEl || !sortAnchorEl.contains(e.target)) setSortAnchorEl(null);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [sortMenu]);
+  }, [sortAnchorEl]);
 
   // Fetch de Supabase con filtros AND/OR
   useEffect(() => {
@@ -553,11 +553,11 @@ const UserTable = () => {
 
   const handleSortMenu = (e: React.MouseEvent, colKey: string) => {
     e.stopPropagation();
-    setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement });
+    // setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement }); // This state is removed
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
     setSort({ column: colKey, direction });
-    setSortMenu({ colKey: null, anchor: null });
+    // setSortMenu({ colKey: null, anchor: null }); // This state is removed
     setPage(1);
   };
 
@@ -720,8 +720,8 @@ const UserTable = () => {
           )}
           {/* En la barra de acciones (arriba a la derecha): */}
           <button
-            className={`action-button${showSort ? ' active' : ''}`}
-            onClick={() => setShowSort(s => !s)}
+            className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
+            onClick={e => setSortAnchorEl(e.currentTarget)}
             title="Ordenar"
           >
             <ArrowUpDown className="action-icon" />
@@ -740,44 +740,24 @@ const UserTable = () => {
         <div style={{ position: 'relative', zIndex: 100 }}>
           {/* No hay filtros abiertos */}
         </div>
-        {showSort && (
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2000, // antes 3000
-              background: 'rgba(255,255,255,0.98)',
-              borderRadius: 12,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-              padding: 24,
-              minWidth: 320,
-              maxWidth: 400,
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <TableSort
-              columns={columns}
-              visibleColumns={visibleColumns}
-              sort={sort}
-              setSort={setSort}
-              onApply={() => setShowSort(false)}
-              onClear={clearSort}
-            />
-            <button
-              style={{ marginTop: 16, color: '#888', background: 'none', border: 'none', fontSize: 15, cursor: 'pointer' }}
-              onClick={() => setShowSort(false)}
-            >
-              Cerrar
-            </button>
-          </div>
-        )}
+        {/* Popover de Ordenamiento */}
+        <Popover
+          open={Boolean(sortAnchorEl)}
+          anchorEl={sortAnchorEl}
+          onClose={() => setSortAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 340, maxHeight: 320, overflowY: 'auto' } }}
+        >
+          <TableSort
+            columns={columns}
+            visibleColumns={visibleColumns}
+            sort={sort}
+            setSort={setSort}
+            onApply={() => setSortAnchorEl(null)}
+            onClear={clearSort}
+          />
+        </Popover>
         {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
