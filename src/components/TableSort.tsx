@@ -68,7 +68,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 260 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 180, maxWidth: 240, padding: 10 }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sort-rules-droppable">
           {(provided) => (
@@ -84,43 +84,44 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 8,
-                          marginBottom: 8,
+                          gap: 6,
+                          marginBottom: 6,
                           background: '#f8fafc',
-                          borderRadius: 6,
-                          padding: '6px 10px',
-                          border: '1.5px solid #e5e7eb',
+                          borderRadius: 5,
+                          padding: '4px 6px',
+                          border: '1.2px solid #e5e7eb',
                           ...dragProvided.draggableProps.style
                         }}
                       >
                         <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888' }}>
-                          <GripVertical size={16} />
+                          <GripVertical size={14} />
                         </span>
-                        <span style={{ fontWeight: 500, minWidth: 80 }}>{col?.label || rule.column}</span>
+                        <span style={{ fontWeight: 500, minWidth: 60, fontSize: 13 }}>{col?.label || rule.column}</span>
                         <Button
                           onClick={() => handleDirectionChange(idx, rule.direction === 'asc' ? 'desc' : 'asc')}
                           sx={{
-                            minWidth: 32,
-                            height: 32,
+                            minWidth: 24,
+                            height: 24,
                             borderRadius: '50%',
                             background: rule.direction === 'asc' ? '#e0fce0' : '#fee2e2',
                             color: rule.direction === 'asc' ? '#16a34a' : '#dc2626',
                             boxShadow: 'none',
-                            border: '1.5px solid #e5e7eb',
+                            border: '1.2px solid #e5e7eb',
                             '&:hover': {
                               background: rule.direction === 'asc' ? '#bbf7d0' : '#fecaca',
                             },
                             ml: 1,
+                            p: 0,
                           }}
                           title={rule.direction === 'asc' ? 'Ascendente' : 'Descendente'}
                         >
-                          {rule.direction === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+                          {rule.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
                         </Button>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
-                          sx={{ minWidth: 28, padding: 0, color: '#888', ml: 1 }}
+                          sx={{ minWidth: 20, padding: 0, color: '#888', ml: 1 }}
                         >
-                          <XIcon size={18} />
+                          <XIcon size={14} />
                         </Button>
                       </div>
                     )}
@@ -132,39 +133,34 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           )}
         </Droppable>
       </DragDropContext>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         <Select
           value={newColumn}
           onChange={e => setNewColumn(e.target.value as string)}
           displayEmpty
           size="small"
-          sx={{ background: '#fff', borderRadius: 2, fontSize: 15, minWidth: 120 }}
+          sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 80, height: 28 }}
         >
           <MenuItem value="">Agregar columna…</MenuItem>
           {availableColumns.map(col => (
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
         </Select>
-        <RadioGroup
-          row
-          value={newDirection}
-          onChange={e => setNewDirection(e.target.value as 'asc' | 'desc')}
-          sx={{ gap: 1, alignItems: 'center' }}
+        <Button
+          onClick={handleAddRule}
+          disabled={!newColumn}
+          sx={{ minWidth: 28, px: 1, fontSize: 13, height: 28, borderRadius: 5 }}
         >
-          <FormControlLabel value="asc" control={<Radio size="small" />} label="Asc" />
-          <FormControlLabel value="desc" control={<Radio size="small" />} label="Desc" />
-        </RadioGroup>
-        <MinimalButton onClick={handleAddRule} disabled={!newColumn} sx={{ minWidth: 36, px: 2 }}>
           Añadir
-        </MinimalButton>
+        </Button>
       </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-        <MinimalButton onClick={onApply} disabled={sortRules.length === 0}>
-          Aplicar orden
+      <div style={{ display: 'flex', gap: 6, marginTop: 6, justifyContent: 'flex-end' }}>
+        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 60, fontSize: 13, height: 28, borderRadius: 5 }}>
+          Aplicar
         </MinimalButton>
         <Button
           onClick={onClear}
-          sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none', border: '1.5px solid #e5e7eb', borderRadius: 6, background: '#fff' }}
+          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 5, background: '#fff', minWidth: 60, height: 28 }}
         >
           Limpiar
         </Button>
