@@ -17,6 +17,7 @@ type Props = {
   setSort: (sort: TableSortType | null) => void;
   onApply: () => void;
   onClear: () => void;
+  setSelectMenuOpen?: (open: boolean) => void;
 };
 
 const MinimalButton = styled(Button)({
@@ -64,7 +65,7 @@ const MinimalPopover = styled(Popover)({
   },
 });
 
-const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, onApply, onClear }) => {
+const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, onApply, onClear, setSelectMenuOpen }) => {
   const [localSort, setLocalSort] = useState<TableSortType>(sort || { column: "", direction: "asc" });
 
   const handleApply = () => {
@@ -91,6 +92,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, on
           },
           container: () => document.body
         }}
+        onOpen={() => setSelectMenuOpen && setSelectMenuOpen(true)}
+        onClose={() => setSelectMenuOpen && setSelectMenuOpen(false)}
       >
         <MenuItem value="">Pick a column to sort by</MenuItem>
         {columns.filter(col => visibleColumns.includes(col.key)).map(col => (

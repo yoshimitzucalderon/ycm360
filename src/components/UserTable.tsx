@@ -371,6 +371,7 @@ const UserTable = () => {
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
   // Estado para el menú de orden
   const [sortMenuAnchorEl, setSortMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectMenuOpen, setSelectMenuOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
   const toggleRow = (id: string) => {
     setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
@@ -744,7 +745,10 @@ const UserTable = () => {
         <Menu
           open={Boolean(sortMenuAnchorEl)}
           anchorEl={sortMenuAnchorEl}
-          onClose={() => setSortMenuAnchorEl(null)}
+          onClose={(_, reason) => {
+            if (selectMenuOpen) return;
+            setSortMenuAnchorEl(null);
+          }}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 340, maxHeight: 320, overflowY: 'auto' } }}
@@ -760,6 +764,7 @@ const UserTable = () => {
               setSort={setSort}
               onApply={() => setSortMenuAnchorEl(null)}
               onClear={clearSort}
+              setSelectMenuOpen={setSelectMenuOpen}
             />
           </div>
         </Menu>
