@@ -740,6 +740,7 @@ const UserTable = () => {
         {showSort && (
           <TableSort
             columns={columns}
+            visibleColumns={visibleColumns}
             sort={sort}
             setSort={setSort}
             onApply={handleApplySort}
