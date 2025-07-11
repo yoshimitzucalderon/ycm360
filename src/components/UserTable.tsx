@@ -20,7 +20,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { FaFilePdf } from 'react-icons/fa';
+import FaFilePdf from 'react-icons/fa/FaFilePdf';
 import { BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
