@@ -836,8 +836,8 @@ const UserTable = () => {
                           {col.label}
                           {sortRule && (
                             sortRule.direction === 'asc' ?
-                              <ArrowUp size={16} style={{ color: '#22c55e', marginLeft: 2 }} /> :
-                              <ArrowDown size={16} style={{ color: '#22c55e', marginLeft: 2 }} />
+                              <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> :
+                              <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
                           )}
                         </span>
                         {filtersByColumn[col.key] > 0 && (
@@ -845,7 +845,7 @@ const UserTable = () => {
                             position: 'absolute',
                             top: 6,
                             right: 4,
-                            background: '#3b82f6',
+                            background: '#22c55e', // verde para filtros
                             color: '#fff',
                             borderRadius: '50%',
                             fontSize: 10,
