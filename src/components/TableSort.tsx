@@ -3,12 +3,10 @@ import { TableColumn, TableSortRule } from "../hooks/useTableData";
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, X as XIcon, ArrowUp, ArrowDown } from 'lucide-react';
+import { GripVertical, X as XIcon, ArrowUp, ArrowDown, SortAsc } from 'lucide-react';
 
 const MinimalButton = styled(Button)({
   color: '#22c55e',
@@ -33,9 +31,10 @@ type Props = {
   setSortRules: (rules: TableSortRule[]) => void;
   onApply: () => void;
   onClear: () => void;
+  onRequestClose?: () => void;
 };
 
-const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSortRules, onApply, onClear }) => {
+const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSortRules, onApply, onClear, onRequestClose }) => {
   const [newColumn, setNewColumn] = useState("");
   const [newDirection, setNewDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -55,8 +54,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
     setSortRules(sortRules.filter((_, i) => i !== idx));
   };
 
-  const handleDirectionChange = (idx: number, dir: 'asc' | 'desc') => {
-    setSortRules(sortRules.map((rule, i) => i === idx ? { ...rule, direction: dir } : rule));
+  const handleDirectionChange = (idx: number) => {
+    setSortRules(sortRules.map((rule, i) => i === idx ? { ...rule, direction: rule.direction === 'asc' ? 'desc' : 'asc' } : rule));
   };
 
   const onDragEnd = (result: DropResult) => {
@@ -68,11 +67,26 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 180, maxWidth: 240, padding: 10 }}>
+    <div style={{ minWidth: 260, maxWidth: 340, padding: 0, background: '#fff', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      {/* Encabezado */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '10px 16px 8px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SortAsc size={18} style={{ color: '#22c55e' }} />
+          <span style={{ fontWeight: 600, fontSize: 15, color: '#222' }}>
+            {sortRules.length > 0 ? `Sorted by ${sortRules.length} rule${sortRules.length > 1 ? 's' : ''}` : 'No sorting'}
+          </span>
+        </div>
+        {onRequestClose && (
+          <Button onClick={onRequestClose} sx={{ minWidth: 28, color: '#888', p: 0, ml: 1 }}>
+            <XIcon size={18} />
+          </Button>
+        )}
+      </div>
+      {/* Lista de reglas */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sort-rules-droppable">
           {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
+            <div ref={provided.innerRef} {...provided.droppableProps} style={{ padding: '8px 0 0 0' }}>
               {sortRules.map((rule, idx) => {
                 const col = columns.find(c => c.key === rule.column);
                 return (
@@ -84,44 +98,38 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 6,
+                          gap: 8,
                           marginBottom: 6,
                           background: '#f8fafc',
-                          borderRadius: 5,
-                          padding: '4px 6px',
-                          border: '1.2px solid #e5e7eb',
+                          borderRadius: 6,
+                          padding: '6px 10px',
+                          border: '1.5px solid #e5e7eb',
                           ...dragProvided.draggableProps.style
                         }}
                       >
-                        <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888' }}>
-                          <GripVertical size={14} />
+                        <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888', marginRight: 2 }}>
+                          <GripVertical size={16} />
                         </span>
-                        <span style={{ fontWeight: 500, minWidth: 60, fontSize: 13 }}>{col?.label || rule.column}</span>
-                        <Button
-                          onClick={() => handleDirectionChange(idx, rule.direction === 'asc' ? 'desc' : 'asc')}
-                          sx={{
-                            minWidth: 24,
-                            height: 24,
-                            borderRadius: '50%',
-                            background: rule.direction === 'asc' ? '#e0fce0' : '#fee2e2',
-                            color: rule.direction === 'asc' ? '#16a34a' : '#dc2626',
-                            boxShadow: 'none',
-                            border: '1.2px solid #e5e7eb',
-                            '&:hover': {
-                              background: rule.direction === 'asc' ? '#bbf7d0' : '#fecaca',
-                            },
-                            ml: 1,
-                            p: 0,
-                          }}
-                          title={rule.direction === 'asc' ? 'Ascendente' : 'Descendente'}
-                        >
-                          {rule.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                        </Button>
+                        <span style={{ fontSize: 13, color: '#888', minWidth: 60, marginRight: 2 }}>
+                          {idx === 0 ? 'sort by' : 'then by'}
+                        </span>
+                        <span style={{ fontWeight: 500, minWidth: 80, fontSize: 14, color: '#222' }}>{col?.label || rule.column}</span>
+                        <Switch
+                          checked={rule.direction === 'asc'}
+                          onChange={() => handleDirectionChange(idx)}
+                          size="small"
+                          color="success"
+                          sx={{ ml: 1 }}
+                          inputProps={{ 'aria-label': 'ascendente/descendente' }}
+                        />
+                        <span style={{ fontSize: 12, color: '#888', minWidth: 60 }}>
+                          {rule.direction === 'asc' ? 'ascending' : 'descending'}
+                        </span>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
-                          sx={{ minWidth: 20, padding: 0, color: '#888', ml: 1 }}
+                          sx={{ minWidth: 24, padding: 0, color: '#888', ml: 1 }}
                         >
-                          <XIcon size={14} />
+                          <XIcon size={16} />
                         </Button>
                       </div>
                     )}
@@ -133,15 +141,16 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           )}
         </Droppable>
       </DragDropContext>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      {/* Selector para agregar regla */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px 0 12px' }}>
         <Select
           value={newColumn}
           onChange={e => setNewColumn(e.target.value as string)}
           displayEmpty
           size="small"
-          sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 80, height: 28 }}
+          sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 120, height: 28 }}
         >
-          <MenuItem value="">Agregar columna…</MenuItem>
+          <MenuItem value="">Pick another column to sort by</MenuItem>
           {availableColumns.map(col => (
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
@@ -149,20 +158,21 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
         <Button
           onClick={handleAddRule}
           disabled={!newColumn}
-          sx={{ minWidth: 28, px: 1, fontSize: 13, height: 28, borderRadius: 5 }}
+          sx={{ minWidth: 36, px: 2, fontSize: 13, height: 28, borderRadius: 5 }}
         >
-          Añadir
+          Add
         </Button>
       </div>
-      <div style={{ display: 'flex', gap: 6, marginTop: 6, justifyContent: 'flex-end' }}>
-        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 60, fontSize: 13, height: 28, borderRadius: 5 }}>
-          Aplicar
+      {/* Botón de aplicar */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'flex-end', padding: '10px 12px 10px 12px' }}>
+        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 80, fontSize: 13, height: 32, borderRadius: 6 }}>
+          Apply sorting
         </MinimalButton>
         <Button
           onClick={onClear}
-          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 5, background: '#fff', minWidth: 60, height: 28 }}
+          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 6, background: '#fff', minWidth: 60, height: 32 }}
         >
-          Limpiar
+          Clear
         </Button>
       </div>
     </div>
