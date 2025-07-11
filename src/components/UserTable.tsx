@@ -15,6 +15,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -370,7 +371,9 @@ const UserTable = () => {
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnOrder, setColumnOrder] = useState(getStoredColumnOrder());
   // Estado para el menú de orden
-  const [sortMenuAnchorEl, setSortMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [orderPanelOpen, setOrderPanelOpen] = useState(false);
+  const orderButtonRef = useRef<HTMLButtonElement>(null);
+  const [orderPanelPosition, setOrderPanelPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [selectMenuOpen, setSelectMenuOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
   const toggleRow = (id: string) => {
@@ -460,14 +463,14 @@ const UserTable = () => {
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
-    if (!sortMenuAnchorEl) return;
+    if (!orderButtonRef.current) return;
     const handleClick = (e: MouseEvent) => {
       if (!(e.target instanceof Node)) return;
-      if (!sortMenuAnchorEl || !sortMenuAnchorEl.contains(e.target)) setSortMenuAnchorEl(null);
+      if (!orderButtonRef.current || !orderButtonRef.current.contains(e.target)) setOrderPanelOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [sortMenuAnchorEl]);
+  }, [orderButtonRef.current]);
 
   // Fetch de Supabase con filtros AND/OR
   useEffect(() => {
@@ -721,12 +724,49 @@ const UserTable = () => {
           )}
           {/* En la barra de acciones (arriba a la derecha): */}
           <button
-            className={`action-button${Boolean(sortMenuAnchorEl) ? ' active' : ''}`}
-            onClick={e => setSortMenuAnchorEl(e.currentTarget)}
+            ref={orderButtonRef}
+            className={`action-button${orderPanelOpen ? ' active' : ''}`}
+            onClick={() => {
+              if (!orderPanelOpen && orderButtonRef.current) {
+                const rect = orderButtonRef.current.getBoundingClientRect();
+                setOrderPanelPosition({ top: rect.bottom + window.scrollY + 6, left: rect.left + window.scrollX });
+              }
+              setOrderPanelOpen(open => !open);
+            }}
             title="Ordenar"
           >
             <ArrowUpDown className="action-icon" />
           </button>
+          {orderPanelOpen && (
+            <ClickAwayListener onClickAway={() => setOrderPanelOpen(false)}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: orderPanelPosition.top,
+                  left: orderPanelPosition.left,
+                  minWidth: 260,
+                  borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1.5px solid #e5e7eb',
+                  padding: 16,
+                  maxWidth: 340,
+                  maxHeight: 320,
+                  overflowY: 'auto',
+                  background: '#fff',
+                  zIndex: 3000,
+                }}
+              >
+                <TableSort
+                  columns={columns}
+                  visibleColumns={visibleColumns}
+                  sort={sort}
+                  setSort={setSort}
+                  onApply={() => setOrderPanelOpen(false)}
+                  onClear={clearSort}
+                />
+              </div>
+            </ClickAwayListener>
+          )}
           {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
             <button className="btn-minimal" title="Agregar proveedor">
               <Plus className="btn-icon" />
@@ -742,32 +782,7 @@ const UserTable = () => {
           {/* No hay filtros abiertos */}
         </div>
         {/* Menu de Ordenamiento */}
-        <Menu
-          open={Boolean(sortMenuAnchorEl)}
-          anchorEl={sortMenuAnchorEl}
-          onClose={(_, reason) => {
-            if (selectMenuOpen) return;
-            setSortMenuAnchorEl(null);
-          }}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-          PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 340, maxHeight: 320, overflowY: 'auto' } }}
-          MenuListProps={{ sx: { padding: 0 } }}
-          disableEnforceFocus
-          disableAutoFocus
-        >
-          <div style={{ padding: 0 }}>
-            <TableSort
-              columns={columns}
-              visibleColumns={visibleColumns}
-              sort={sort}
-              setSort={setSort}
-              onApply={() => setSortMenuAnchorEl(null)}
-              onClear={clearSort}
-              setSelectMenuOpen={setSelectMenuOpen}
-            />
-          </div>
-        </Menu>
+        {/* Elimina cualquier Popover/Menu/Dialog de orden */}
         {/* Tabla o mensaje de no columnas seleccionadas */}
         {noneChecked ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
