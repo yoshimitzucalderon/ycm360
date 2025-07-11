@@ -22,6 +22,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { BsFiletypePdf, BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -880,7 +881,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16, color: '#e11d48' }}><BsFiletypePdf /></span>
+              <span style={{ fontSize: 18, color: '#e11d48', display: 'flex', alignItems: 'center' }}><PictureAsPdfIcon fontSize="inherit" /></span>
               Descargar PDF
             </button>
             <button
