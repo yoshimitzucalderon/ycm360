@@ -373,7 +373,7 @@ const UserTable = () => {
   // Estado para el menú de orden
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const orderButtonRef = useRef<HTMLButtonElement>(null);
-  const [orderPanelPosition, setOrderPanelPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [orderPanelPosition, setOrderPanelPosition] = useState<{ top: number | null; left: number | null }>({ top: null, left: null });
   const [selectMenuOpen, setSelectMenuOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
   const toggleRow = (id: string) => {
@@ -729,7 +729,10 @@ const UserTable = () => {
             onClick={() => {
               if (!orderPanelOpen && orderButtonRef.current) {
                 const rect = orderButtonRef.current.getBoundingClientRect();
-                setOrderPanelPosition({ top: rect.bottom + window.scrollY + 6, left: rect.left + window.scrollX });
+                const top = rect.bottom + window.scrollY + 6;
+                const left = rect.left + window.scrollX;
+                setOrderPanelPosition({ top, left });
+                console.log('OrderPanel position:', { top, left });
               }
               setOrderPanelOpen(open => !open);
             }}
@@ -742,20 +745,24 @@ const UserTable = () => {
               <div
                 style={{
                   position: 'absolute',
-                  top: orderPanelPosition.top,
-                  left: orderPanelPosition.left,
+                  top: orderPanelPosition.top !== null ? orderPanelPosition.top : '50%',
+                  left: orderPanelPosition.left !== null ? orderPanelPosition.left : '50%',
+                  transform: orderPanelPosition.top !== null && orderPanelPosition.left !== null ? undefined : 'translate(-50%, -50%)',
                   minWidth: 260,
                   borderRadius: 10,
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  border: '1.5px solid #e5e7eb',
+                  border: '2px solid red', // borde rojo para depuración
                   padding: 16,
                   maxWidth: 340,
                   maxHeight: 320,
                   overflowY: 'auto',
-                  background: '#fff',
+                  background: '#fffbe6', // fondo visible para depuración
                   zIndex: 3000,
                 }}
               >
+                <div style={{ color: 'red', fontSize: 12, marginBottom: 8 }}>
+                  Posición: top={orderPanelPosition.top}, left={orderPanelPosition.left}
+                </div>
                 <TableSort
                   columns={columns}
                   visibleColumns={visibleColumns}
