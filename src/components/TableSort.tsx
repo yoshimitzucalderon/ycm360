@@ -67,9 +67,9 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
   };
 
   return (
-    <div style={{ minWidth: 260, maxWidth: 340, padding: 0, borderRadius: 10 }}>
+    <div style={{ minWidth: 320, maxWidth: 400, padding: 0, borderRadius: 10 }}>
       {/* Encabezado */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '10px 16px 8px 12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '8px 16px 6px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <SortAsc size={18} style={{ color: '#22c55e' }} />
           <span style={{ fontWeight: 600, fontSize: 15, color: '#222' }}>
@@ -86,7 +86,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="sort-rules-droppable">
           {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps} style={{ padding: '8px 0 0 0' }}>
+            <div ref={provided.innerRef} {...provided.droppableProps} style={{ padding: '4px 0 0 0' }}>
               {sortRules.map((rule, idx) => {
                 const col = columns.find(c => c.key === rule.column);
                 return (
@@ -99,10 +99,10 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           display: 'flex',
                           alignItems: 'center',
                           gap: 8,
-                          marginBottom: 6,
+                          marginBottom: 4,
                           background: '#f8fafc',
                           borderRadius: 6,
-                          padding: '6px 10px',
+                          padding: '4px 8px',
                           border: '1.5px solid #e5e7eb',
                           ...dragProvided.draggableProps.style
                         }}
@@ -142,7 +142,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
         </Droppable>
       </DragDropContext>
       {/* Selector para agregar regla */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px 0 12px' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px 0 12px' }}>
         <Select
           value={newColumn}
           onChange={e => setNewColumn(e.target.value as string)}
@@ -164,7 +164,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
         </Button>
       </div>
       {/* Botón de aplicar */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'flex-end', padding: '10px 12px 10px 12px' }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 6, justifyContent: 'flex-end', padding: '8px 12px 8px 12px' }}>
         <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 80, fontSize: 13, height: 32, borderRadius: 6 }}>
           Aplicar orden
         </MinimalButton>
