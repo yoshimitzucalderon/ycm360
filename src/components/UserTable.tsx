@@ -747,7 +747,7 @@ const UserTable = () => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              zIndex: 3000,
+              zIndex: 2000, // antes 3000
               background: 'rgba(255,255,255,0.98)',
               borderRadius: 12,
               boxShadow: '0 8px 32px rgba(0,0,0,0.18)',

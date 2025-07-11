@@ -86,7 +86,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sort, setSort, on
         MenuProps={{
           PaperProps: {
             style: {
-              zIndex: 4000
+              zIndex: 9999
             }
           },
           container: () => document.body
