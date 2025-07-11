@@ -23,6 +23,8 @@ import { saveAs } from 'file-saver';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { BsFiletypePdf, BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import GridOnIcon from '@mui/icons-material/GridOn';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -903,7 +905,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16, color: '#22c55e' }}><BsFiletypeXls /></span>
+              <span style={{ fontSize: 18, color: '#22c55e', display: 'flex', alignItems: 'center' }}><TableChartIcon fontSize="inherit" /></span>
               Descargar XLSX
             </button>
             <button
@@ -925,7 +927,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16, color: '#2563eb' }}><BsFiletypeCsv /></span>
+              <span style={{ fontSize: 18, color: '#2563eb', display: 'flex', alignItems: 'center' }}><GridOnIcon fontSize="inherit" /></span>
               Descargar CSV
             </button>
           </Menu>
