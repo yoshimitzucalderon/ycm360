@@ -418,8 +418,8 @@ const UserTable = () => {
     data: filteredData,
     filters,
     setFilters,
-    sort,
-    setSort,
+    sortRules,
+    setSortRules,
     clearFilters,
     clearSort
   } = useTableData(data, columns);
@@ -511,15 +511,10 @@ const UserTable = () => {
   const handleApplyFilter = () => setPage(1);
   const handleApplySort = () => setPage(1);
 
-  // Ordenamiento rápido por header
-  const handleHeaderClick = (colKey: string) => {
-    if (sort && sort.column === colKey) {
-      setSort({ column: colKey, direction: sort.direction === "asc" ? "desc" : "asc" });
-    } else {
-      setSort({ column: colKey, direction: "asc" });
-    }
-    setPage(1);
-  };
+  // Ordenamiento rápido por header (deshabilitado para multi-sort, o puedes implementar lógica para agregar/quitar reglas aquí)
+  // const handleHeaderClick = (colKey: string) => {
+  //   // Implementar lógica de multi-sort si se desea
+  // };
 
   // Handler para resize
   const handleMouseDown = (e: React.MouseEvent, colKey: string) => {
@@ -561,7 +556,7 @@ const UserTable = () => {
     // setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement }); // This state is removed
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
-    setSort({ column: colKey, direction });
+    setSortRules({ column: colKey, direction });
     // setSortMenu({ colKey: null, anchor: null }); // This state is removed
     setPage(1);
   };
@@ -743,8 +738,8 @@ const UserTable = () => {
             <TableSort
               columns={columns}
               visibleColumns={visibleColumns}
-              sort={sort}
-              setSort={setSort}
+              sortRules={sortRules}
+              setSortRules={setSortRules}
               onApply={() => setSortAnchorEl(null)}
               onClear={clearSort}
             />
@@ -812,10 +807,11 @@ const UserTable = () => {
                       onDragStart={() => handleDragStart(col.key)}
                       onDragOver={e => handleDragOver(e, col.key)}
                       onDrop={e => handleDrop(e, col.key)}
-                      className={`user-table-header-cell${sort && sort.column === col.key ? ' sorted' : ''}`}
+                      className="user-table-header-cell"
                       style={{ position: 'relative' }}
                     >
                       {col.label}
+                      {/* Aquí podrías mostrar un icono si la columna está en sortRules */}
                       {filtersByColumn[col.key] > 0 && (
                         <span style={{
                           position: 'absolute',

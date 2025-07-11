@@ -12,14 +12,14 @@ export type TableFilter = {
   logicalOperator?: 'AND' | 'OR'; // Nuevo campo para AND/OR, opcional para el primer filtro
 };
 
-export type TableSort = {
+export type TableSortRule = {
   column: string;
   direction: "asc" | "desc";
 };
 
 export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   const [filters, setFilters] = useState<TableFilter[]>([]);
-  const [sort, setSort] = useState<TableSort | null>(null);
+  const [sortRules, setSortRules] = useState<TableSortRule[]>([]);
 
   // Filtrado tipo Supabase
   const filteredData = useMemo(() => {
@@ -152,23 +152,26 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
 
   // Ordenamiento
   const sortedData = useMemo(() => {
-    if (!sort) return filteredData;
+    if (!sortRules || sortRules.length === 0) return filteredData;
     return [...filteredData].sort((a, b) => {
-      const aValue = String((a as Record<string, any>)[sort.column] ?? "").toLowerCase();
-      const bValue = String((b as Record<string, any>)[sort.column] ?? "").toLowerCase();
-      if (aValue < bValue) return sort.direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return sort.direction === "asc" ? 1 : -1;
+      for (const rule of sortRules) {
+        const aValue = String((a as Record<string, any>)[rule.column] ?? "").toLowerCase();
+        const bValue = String((b as Record<string, any>)[rule.column] ?? "").toLowerCase();
+        if (aValue < bValue) return rule.direction === "asc" ? -1 : 1;
+        if (aValue > bValue) return rule.direction === "asc" ? 1 : -1;
+        // Si son iguales, sigue con la siguiente regla
+      }
       return 0;
     });
-  }, [filteredData, sort]);
+  }, [filteredData, sortRules]);
 
   return {
     data: sortedData,
     filters,
     setFilters,
-    sort,
-    setSort,
+    sortRules,
+    setSortRules,
     clearFilters: () => setFilters([]),
-    clearSort: () => setSort(null),
+    clearSort: () => setSortRules([]),
   };
 } 
