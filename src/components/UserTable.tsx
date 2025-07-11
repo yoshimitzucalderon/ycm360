@@ -526,9 +526,14 @@ const UserTable = () => {
   //   // Implementar lógica de multi-sort si se desea
   // };
 
-  // Handler para resize
+  // Estado para resizer hover/drag
+  const [resizingCol, setResizingCol] = useState<string | null>(null);
+  const [hoveredResizer, setHoveredResizer] = useState<string | null>(null);
+
+  // Modifica handleMouseDown para setResizingCol
   const handleMouseDown = (e: React.MouseEvent, colKey: string) => {
     e.preventDefault();
+    setResizingCol(colKey);
     const startX = e.clientX;
     const startWidth = colWidths[colKey] || 150;
     const onMouseMove = (moveEvent: MouseEvent) => {
@@ -536,6 +541,7 @@ const UserTable = () => {
       setColWidths((prev) => ({ ...prev, [colKey]: newWidth }));
     };
     const onMouseUp = () => {
+      setResizingCol(null);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
@@ -954,7 +960,15 @@ const UserTable = () => {
               <colgroup>
                 <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
                 {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                  <col key={col.key} />
+                  <col
+                    key={col.key}
+                    style={{
+                      width: colWidths[col.key] || 150,
+                      minWidth: 60,
+                      maxWidth: 600,
+                      transition: 'width 0.1s',
+                    }}
+                  />
                 ))}
               </colgroup>
               <thead>
@@ -990,7 +1004,13 @@ const UserTable = () => {
                         onDragOver={e => handleDragOver(e, col.key)}
                         onDrop={e => handleDrop(e, col.key)}
                         className="user-table-header-cell"
-                        style={{ position: 'relative' }}
+                        style={{
+                          position: 'relative',
+                          width: colWidths[col.key] || 150,
+                          minWidth: 60,
+                          maxWidth: 600,
+                          paddingRight: 0,
+                        }}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           {col.label}
@@ -1000,12 +1020,35 @@ const UserTable = () => {
                               <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
                           )}
                         </span>
+                        {/* Resizer minimalista visible en hover/drag */}
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                            height: '100%',
+                            width: 6,
+                            cursor: 'col-resize',
+                            zIndex: 10,
+                            userSelect: 'none',
+                            touchAction: 'none',
+                            background:
+                              resizingCol === col.key || hoveredResizer === col.key
+                                ? '#e5e7eb'
+                                : 'transparent',
+                            transition: 'background 0.15s',
+                            borderRadius: 3,
+                          }}
+                          onMouseDown={e => handleMouseDown(e, col.key)}
+                          onMouseEnter={() => setHoveredResizer(col.key)}
+                          onMouseLeave={() => setHoveredResizer(null)}
+                        />
                         {filtersByColumn[col.key] > 0 && (
                           <span style={{
                             position: 'absolute',
                             top: 6,
                             right: 4,
-                            background: '#22c55e', // verde para filtros
+                            background: '#22c55e',
                             color: '#fff',
                             borderRadius: '50%',
                             fontSize: 10,
