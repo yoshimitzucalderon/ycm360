@@ -20,7 +20,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import FaFilePdf from 'react-icons/fa/FaFilePdf';
+import { AiFillFilePdf } from 'react-icons/ai';
 import { BsFiletypeXls, BsFiletypeCsv } from 'react-icons/bs';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
@@ -880,7 +880,7 @@ const UserTable = () => {
               onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ fontSize: 16 }}><FaFilePdf /></span>
+              <span style={{ fontSize: 16 }}><AiFillFilePdf color="#e11d48" /></span>
               Descargar PDF
             </button>
             <button
