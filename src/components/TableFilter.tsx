@@ -279,12 +279,12 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
       <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>
         {getFilterSummary()}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {filters.map((filter, idx) => (
           <div
             key={idx}
             className="filter-row"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderRadius: 6, padding: '4px 8px', border: '1.2px solid #e5e7eb', marginBottom: 4 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderRadius: 6, padding: '4px 8px', border: '1.2px solid #e5e7eb', marginBottom: 2 }}
           >
             {idx > 0 && (
               <FormControl size="small" sx={{ minWidth: 48 }}>
