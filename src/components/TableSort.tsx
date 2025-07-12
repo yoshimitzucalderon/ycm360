@@ -103,6 +103,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           background: '#f8fafc',
                           borderRadius: 6,
                           padding: '4px 8px',
+                          paddingRight: 32, // espacio para la X
                           border: '2px solid red', // borde rojo para debug
                           position: 'relative', // para el botón absoluto
                           ...dragProvided.draggableProps.style
