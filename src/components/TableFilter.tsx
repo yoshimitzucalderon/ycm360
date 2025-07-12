@@ -269,9 +269,15 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           <div
             key={idx}
             className="filter-row"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderRadius: 6, padding: '4px 8px', border: '1.2px solid #e5e7eb', marginBottom: 4 }}
           >
-            <button onClick={() => removeFilter(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: 2 }}>
-              <X size={16} />
+            {/* X al final, minimalista y alineada a la derecha */}
+            <button
+              onClick={() => removeFilter(idx)}
+              className="filter-x"
+              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, marginLeft: 'auto', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s' }}
+            >
+              <X size={18} />
             </button>
             {idx > 0 && (
               <FormControl size="small" sx={{ minWidth: 70 }}>
@@ -312,6 +318,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
                 MenuProps={getMenuProps()}
+                renderValue={selected => OPERATORS.find(op => op.value === selected)?.value || selected}
               >
                 {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
               </MinimalSelect>
@@ -330,6 +337,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           </div>
         ))}
       </div>
+      {/* Línea divisoria sutil */}
+      <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '10px 0 0 0' }} />
       <div style={{ position: 'absolute', left: 16, bottom: 12, zIndex: 2 }}>
         <button
           onClick={addFilter}

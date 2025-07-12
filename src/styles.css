@@ -1084,3 +1084,15 @@ div.column-menu-item:hover, .column-menu-item:hover {
   color: #222;
   background: #e5e7eb;
 }
+.filter-row .filter-x {
+  color: #cbd5e1;
+  transition: color 0.15s, background 0.15s;
+  background: transparent;
+}
+.filter-row:hover .filter-x {
+  color: #888;
+}
+.filter-row .filter-x:hover {
+  color: #222;
+  background: #e5e7eb;
+}
