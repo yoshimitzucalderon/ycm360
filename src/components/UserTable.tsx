@@ -5,7 +5,7 @@ import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff, RotateCcw } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -340,7 +340,8 @@ const ColumnManager = ({
                 />
               ))}
             </FormGroup>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 8 }}>
+            <div style={{ borderTop: '1.5px solid #f1f5f9', marginTop: 10, marginBottom: 0 }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, gap: 8 }}>
               <Button
                 onClick={allChecked ? onHideAll : onShowAll}
                 sx={{
@@ -358,8 +359,24 @@ const ColumnManager = ({
               </Button>
               <Button
                 onClick={onReset}
-                sx={{ color: '#888', fontWeight: 500, fontSize: 14, textTransform: 'none' }}
+                sx={{
+                  color: '#888',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  textTransform: 'none',
+                  background: 'none',
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'color 0.15s',
+                  '&:hover': {
+                    background: 'none',
+                    color: '#ef4444',
+                  },
+                }}
               >
+                <RotateCcw size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
                 Resetear
               </Button>
             </div>
