@@ -323,7 +323,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       verticalAlign: 'middle',
-                    }}>{col ? col.label : selected}</span>
+                    }}>{col ? col.label : String(selected)}</span>
                   );
                 }}
               >
