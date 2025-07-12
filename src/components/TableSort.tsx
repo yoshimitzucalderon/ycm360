@@ -127,9 +127,9 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         </span>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
-                          sx={{ minWidth: 24, padding: 0, color: 'red', background: '#fff', borderRadius: '50%', ml: 2, border: '1.5px solid #e5e7eb', '&:hover': { background: '#fee2e2', color: '#b91c1c' } }}
+                          sx={{ minWidth: 28, padding: 0, color: 'red', background: 'yellow', borderRadius: '50%', ml: 2, border: '2px solid red', fontWeight: 900, fontSize: 22, lineHeight: 1, '&:hover': { background: '#fee2e2', color: '#b91c1c' } }}
                         >
-                          <XIcon size={22} />
+                          X
                         </Button>
                       </div>
                     )}
