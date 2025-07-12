@@ -9,16 +9,16 @@ import InputLabel from '@mui/material/InputLabel';
 import { styled } from '@mui/material/styles';
 
 const OPERATORS = [
-  { value: "=", label: "= (igual)" },
-  { value: "<>", label: "<> (diferente)" },
-  { value: ">", label: "> (mayor que)" },
-  { value: "<", label: "< (menor que)" },
-  { value: ">=", label: ">= (mayor o igual)" },
-  { value: "<=", label: "<= (menor o igual)" },
-  { value: "like", label: "LIKE (con % y _)" },
-  { value: "ilike", label: "ILIKE (sin distinguir mayúsculas)" },
-  { value: "in", label: "IN (lista separada por comas)" },
-  { value: "is", label: "IS (null, not null, true, false)" },
+  { value: "=", label: "=", description: "equals" },
+  { value: "<>", label: "<>", description: "not equal" },
+  { value: ">", label: ">", description: "greater than" },
+  { value: "<", label: "<", description: "less than" },
+  { value: ">=", label: ">=", description: "greater or equal" },
+  { value: "<=", label: "<=", description: "less or equal" },
+  { value: "like", label: "~*", description: "like operator" },
+  { value: "ilike", label: "~~*", description: "ilike operator" },
+  { value: "in", label: "in", description: "one of a list of values" },
+  { value: "is", label: "is", description: "checking for (null,not null,true,false)" },
 ];
 
 const LOGICALS = [
@@ -323,7 +323,12 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                   return op ? op.label : '';
                 }}
               >
-                {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
+                {OPERATORS.map(op => (
+                  <MinimalMenuItem key={op.value} value={op.value}>
+                    <span style={{ minWidth: 32, display: 'inline-block' }}>{op.label}</span>
+                    <span style={{ color: '#888', marginLeft: 8 }}>{op.description}</span>
+                  </MinimalMenuItem>
+                ))}
               </MinimalSelect>
             </FormControl>
             <input
