@@ -106,8 +106,13 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           padding: '4px 8px',
                           border: '1.5px solid #e5e7eb',
                           position: 'relative',
-                          ...dragProvided.draggableProps.style
+                          ...dragProvided.draggableProps.style,
+                          // Efecto hover para la X
+                          '--x-color': '#f8fafc',
+                          ...(dragProvided.isDragging ? { boxShadow: '0 2px 8px rgba(0,0,0,0.08)' } : {})
                         }}
+                        onMouseEnter={e => e.currentTarget.style.setProperty('--x-color', '#888')}
+                        onMouseLeave={e => e.currentTarget.style.setProperty('--x-color', '#f8fafc')}
                       >
                         <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888' }}>
                           <GripVertical size={16} />
@@ -136,20 +141,20 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                             width: 24,
                             height: 24,
                             padding: 0,
-                            color: '#888',
-                            background: '#fff',
+                            color: 'var(--x-color)',
+                            background: 'transparent',
                             borderRadius: '50%',
-                            border: '1.2px solid #e5e7eb',
+                            border: 'none',
                             fontWeight: 700,
                             fontSize: 16,
                             lineHeight: 1,
                             zIndex: 1,
                             boxShadow: 'none',
                             marginLeft: 'auto',
-                            '&:hover': { background: '#f3f4f6', color: '#222', borderColor: '#cbd5e1' }
+                            transition: 'color 0.15s',
                           }}
                         >
-                          X
+                          <XIcon size={18} />
                         </Button>
                       </div>
                     )}
