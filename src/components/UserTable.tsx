@@ -1055,10 +1055,10 @@ const UserTable = () => {
                             onBlur={handleCloseColumnMenu}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
-                              <FaArrowUp size={16} /> Ordenar ascendente
+                              <ArrowUp size={16} /> Ordenar ascendente
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
-                              <FaArrowDown size={16} /> Ordenar descendente
+                              <ArrowDown size={16} /> Ordenar descendente
                             </div>
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
