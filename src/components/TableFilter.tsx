@@ -271,14 +271,6 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             className="filter-row"
             style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderRadius: 6, padding: '4px 8px', border: '1.2px solid #e5e7eb', marginBottom: 4 }}
           >
-            {/* X al final, minimalista y alineada a la derecha */}
-            <button
-              onClick={() => removeFilter(idx)}
-              className="filter-x"
-              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, marginLeft: 'auto', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s' }}
-            >
-              <X size={18} />
-            </button>
             {idx > 0 && (
               <FormControl size="small" sx={{ minWidth: 70 }}>
                 <MinimalSelect
@@ -342,6 +334,13 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
               placeholder={getPlaceholder(filter.operator)}
               disabled={!filter.column}
             />
+            <button
+              onClick={() => removeFilter(idx)}
+              className="filter-x"
+              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s' }}
+            >
+              <X size={18} />
+            </button>
           </div>
         ))}
       </div>
