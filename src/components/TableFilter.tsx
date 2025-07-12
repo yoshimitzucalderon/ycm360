@@ -304,12 +304,25 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 ))}
               </MinimalSelect>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 100 }}>
+            <FormControl size="small" sx={{ minWidth: 60 }}>
               <MinimalSelect
                 value={filter.operator}
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
-                MenuProps={getMenuProps()}
+                MenuProps={{
+                  ...getMenuProps(),
+                  PaperProps: {
+                    style: {
+                      maxHeight: 240,
+                      minWidth: 60,
+                      width: 120,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                      borderRadius: 8,
+                      padding: 0,
+                      zIndex: 3000,
+                    },
+                  },
+                }}
                 renderValue={selected => {
                   const op = OPERATORS.find(op => op.value === selected);
                   return op ? op.label : '';
@@ -337,7 +350,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             <button
               onClick={() => removeFilter(idx)}
               className="filter-x"
-              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s' }}
+              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s', margin: 0 }}
             >
               <X size={18} />
             </button>
