@@ -67,7 +67,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
   };
 
   return (
-    <div style={{ minWidth: 380, maxWidth: 520, padding: 0, borderRadius: 10 }}>
+    <div style={{ minWidth: 380, maxWidth: 1000, padding: 0, borderRadius: 10 }}>
       {/* Encabezado */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '8px 16px 6px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -104,7 +104,6 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           borderRadius: 6,
                           padding: '4px 8px',
                           paddingRight: 32, // espacio para la X
-                          border: '2px solid red', // borde rojo para debug
                           position: 'relative', // para el botón absoluto
                           ...dragProvided.draggableProps.style
                         }}
