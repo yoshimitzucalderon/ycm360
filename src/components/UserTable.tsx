@@ -1080,7 +1080,7 @@ const UserTable = () => {
                       </div>
                     </td>
                     {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                      <td key={col.key}>{user[col.key]}</td>
+                      <td key={col.key} tabIndex={0}>{user[col.key]}</td>
                     ))}
                   </tr>
                 ))}
