@@ -1057,33 +1057,10 @@ table.user-table {
   position: relative;
 }
 .filter-row > * {
-  /* Nada especial para la primera línea */
-}
-/* Sangría en la segunda línea: */
-.filter-row {
-  /* Usar pseudo-elemento para crear espacio solo en líneas envueltas */
-}
-.filter-row {
-  /* Truco: padding-left en todos los hijos menos el primero, solo cuando se envuelven */
-}
-.filter-row > * {
-  /* Resetear indentación */
   text-indent: 0;
 }
 .filter-row > *:not(:first-child) {
-  /* Cuando se envuelven, la segunda línea empieza con sangría */
-  /* El valor debe coincidir con el ancho de la X + gap */
   margin-left: 0;
-}
-.filter-row {
-  /* Truco: si la fila se envuelve, la segunda línea empieza después de la X */
-}
-.filter-row {
-  /* Solución universal: usar padding-left en la fila y margin-left: -32px en el primer hijo */
-  padding-left: 32px;
-}
-.filter-row > *:first-child {
-  margin-left: -32px;
 }
 .user-table-header-cell:hover .header-menu-trigger {
   opacity: 1 !important;
