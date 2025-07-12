@@ -5,7 +5,7 @@ import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -400,6 +400,9 @@ const UserTable = () => {
   const [columnMenuSearch, setColumnMenuSearch] = useState("");
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
+  // Estado para el menú contextual de columna
+  const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
+  const [columnMenuKey, setColumnMenuKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (showSearch) {
@@ -626,21 +629,14 @@ const UserTable = () => {
   const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
   const handleCloseFilter = () => setFilterAnchorEl(null);
 
-  const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    if (spaceBelow < 350 && spaceAbove > spaceBelow) {
-      setPopoverPosition('up');
-    } else {
-      setPopoverPosition('down');
-    }
-    setColumnMenuAnchorEl(event.currentTarget);
-    setColumnMenuOpen(true);
+  // Handler para abrir/cerrar menú
+  const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
+    setColumnMenuAnchor(event.currentTarget);
+    setColumnMenuKey(colKey);
   };
   const handleCloseColumnMenu = () => {
-    setColumnMenuAnchorEl(null);
-    setColumnMenuSearch("");
+    setColumnMenuAnchor(null);
+    setColumnMenuKey(null);
   };
 
   const handleOpenDownload = (event: React.MouseEvent<HTMLElement>) => {
@@ -1019,6 +1015,55 @@ const UserTable = () => {
                               <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
                           )}
                         </span>
+                        {/* Icono de menú contextual, solo visible en hover */}
+                        <span
+                          className="header-menu-trigger"
+                          style={{
+                            position: 'absolute',
+                            right: 6,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            cursor: 'pointer',
+                            opacity: 0,
+                            transition: 'opacity 0.15s',
+                            zIndex: 3,
+                          }}
+                          onClick={e => handleOpenColumnMenu(e, col.key)}
+                        >
+                          <MoreVertical size={18} />
+                        </span>
+                        {/* Resizer y badge de filtro ... */}
+                        {/* Menú contextual minimalista */}
+                        {columnMenuAnchor && columnMenuKey === col.key && (
+                          <div
+                            style={{
+                              position: 'fixed',
+                              top: columnMenuAnchor.getBoundingClientRect().bottom + 4,
+                              left: columnMenuAnchor.getBoundingClientRect().left,
+                              minWidth: 170,
+                              background: '#fff',
+                              border: '1.5px solid #e5e7eb',
+                              borderRadius: 8,
+                              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                              zIndex: 10000,
+                              fontSize: 14,
+                              padding: 4,
+                            }}
+                            tabIndex={-1}
+                            onBlur={handleCloseColumnMenu}
+                          >
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>↑ Ordenar ascendente</div>
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>↓ Ordenar descendente</div>
+                            <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>📌 Fijar a la izquierda</div>
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>📌 Fijar a la derecha</div>
+                            <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>🔎 Filtrar</div>
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>🙈 Ocultar columna</div>
+                            <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>▤ Administrar columnas</div>
+                          </div>
+                        )}
                         {/* Resizer minimalista visible en hover/drag */}
                         <div
                           style={{

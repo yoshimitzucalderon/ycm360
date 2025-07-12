@@ -1085,3 +1085,6 @@ table.user-table {
 .filter-row > *:first-child {
   margin-left: -32px;
 }
+.user-table-header-cell:hover .header-menu-trigger {
+  opacity: 1 !important;
+}
