@@ -1072,3 +1072,10 @@ div.column-menu-item:hover, .column-menu-item:hover {
 .user-table-header-cell:hover .header-menu-trigger {
   opacity: 1 !important;
 }
+.sort-row .sort-x {
+  color: #f8fafc;
+  transition: color 0.15s;
+}
+.sort-row:hover .sort-x {
+  color: #888;
+}

@@ -95,6 +95,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                       <div
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
+                        className="sort-row"
                         style={{
                           display: 'grid',
                           gridTemplateColumns: '28px 80px 1fr 48px 90px 32px',
@@ -106,13 +107,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           padding: '4px 8px',
                           border: '1.5px solid #e5e7eb',
                           position: 'relative',
-                          ...dragProvided.draggableProps.style,
-                          // Efecto hover para la X
-                          '--x-color': '#f8fafc',
-                          ...(dragProvided.isDragging ? { boxShadow: '0 2px 8px rgba(0,0,0,0.08)' } : {})
+                          ...dragProvided.draggableProps.style
                         }}
-                        onMouseEnter={e => e.currentTarget.style.setProperty('--x-color', '#888')}
-                        onMouseLeave={e => e.currentTarget.style.setProperty('--x-color', '#f8fafc')}
                       >
                         <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888' }}>
                           <GripVertical size={16} />
@@ -136,12 +132,12 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         </span>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
+                          className="sort-x"
                           sx={{
                             minWidth: 24,
                             width: 24,
                             height: 24,
                             padding: 0,
-                            color: 'var(--x-color)',
                             background: 'transparent',
                             borderRadius: '50%',
                             border: 'none',
