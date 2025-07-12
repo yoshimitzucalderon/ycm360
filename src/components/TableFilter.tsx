@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Filter } from 'lucide-react';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -276,8 +276,19 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         zIndex: 2000,
       }}
     >
-      <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>
-        {getFilterSummary()}
+      {/* Encabezado con resumen y línea divisoria */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', padding: '8px 16px 6px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Filter size={18} style={{ color: '#22c55e' }} />
+          <span style={{ fontWeight: 600, fontSize: 15, color: '#222' }}>
+            {(() => {
+              const activos = filters.filter(f => f.column && f.operator && f.value);
+              return activos.length > 0
+                ? `Filtrando por ${activos.length} criterio${activos.length > 1 ? 's' : ''}`
+                : 'Filtros';
+            })()}
+          </span>
+        </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {filters.map((filter, idx) => (
