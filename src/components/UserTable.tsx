@@ -368,7 +368,7 @@ const ColumnManager = ({
                   boxShadow: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 0,
                   transition: 'color 0.15s',
                   '&:hover': {
                     background: 'none',
