@@ -146,6 +146,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         >
                           X
                         </Button>
+                        <span style={{ color: 'blue', fontWeight: 900, fontSize: 18, marginLeft: 8 }}>PRUEBA</span>
                       </div>
                     )}
                   </Draggable>
