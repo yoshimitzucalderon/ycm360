@@ -661,16 +661,17 @@ const UserTable = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (columnMenuAnchor && !columnMenuAnchor.contains(event.target as Node)) {
+        console.log('Click fuera del menú, cerrando...');
         handleCloseColumnMenu();
       }
     };
 
     if (columnMenuAnchor) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('click', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, [columnMenuAnchor]);
 
@@ -1086,6 +1087,10 @@ const UserTable = () => {
                             }}
                             tabIndex={-1}
                             onBlur={handleCloseColumnMenu}
+                            onClick={(e) => {
+                              console.log('Click en el menú desplegable');
+                              e.stopPropagation();
+                            }}
                           >
                             <div 
                               className="column-menu-item" 
@@ -1099,8 +1104,11 @@ const UserTable = () => {
                                 color: sortRule?.direction === 'asc' ? '#22c55e' : '#374151',
                                 fontWeight: sortRule?.direction === 'asc' ? 600 : 400
                               }} 
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 console.log('Click en Ordenar ascendente para columna:', col.key);
+                                alert('Ordenar ascendente: ' + col.key); // Prueba simple
                                 handleSortOption(col.key, 'asc');
                                 handleCloseColumnMenu();
                               }}
@@ -1121,8 +1129,11 @@ const UserTable = () => {
                                 color: sortRule?.direction === 'desc' ? '#22c55e' : '#374151',
                                 fontWeight: sortRule?.direction === 'desc' ? 600 : 400
                               }} 
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 console.log('Click en Ordenar descendente para columna:', col.key);
+                                alert('Ordenar descendente: ' + col.key); // Prueba simple
                                 handleSortOption(col.key, 'desc');
                                 handleCloseColumnMenu();
                               }}
