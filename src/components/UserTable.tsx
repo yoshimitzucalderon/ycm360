@@ -26,7 +26,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { BsFillPinFill } from 'react-icons/bs';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa6';
+import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
