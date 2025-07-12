@@ -162,8 +162,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           )}
         </Droppable>
       </DragDropContext>
-      {/* Selector para agregar regla */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px 0 12px' }}>
+      {/* Selector para agregar regla y botones de acción en una sola fila */}
+      <div style={{ borderTop: '1.5px solid #f1f5f9', marginTop: 10, paddingTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
         <Select
           value={newColumn}
           onChange={e => {
@@ -177,23 +177,19 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
           }}
           displayEmpty
           size="small"
-          sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 120, height: 28 }}
+          sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 120, flex: 1, height: 32 }}
         >
           <MenuItem value="">Selecciona otra columna para ordenar</MenuItem>
           {availableColumns.map(col => (
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
         </Select>
-        {/* Botón Añadir eliminado */}
-      </div>
-      {/* Botón de aplicar */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 6, justifyContent: 'flex-end', padding: '8px 12px 8px 12px' }}>
-        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 80, fontSize: 13, height: 32, borderRadius: 6 }}>
+        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 90, fontSize: 13, height: 32, borderRadius: 6 }}>
           Aplicar orden
         </MinimalButton>
         <Button
           onClick={onClear}
-          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 6, background: '#fff', minWidth: 60, height: 32 }}
+          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 6, background: '#fff', minWidth: 70, height: 32 }}
         >
           Limpiar
         </Button>
