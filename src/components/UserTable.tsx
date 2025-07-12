@@ -5,7 +5,7 @@ import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin } from 'lucide-react';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff } from 'lucide-react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -1068,7 +1068,13 @@ const UserTable = () => {
                               <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
                             </div>
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                            <div style={{ padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>🙈 Ocultar columna</div>
+                            <div
+                              className="column-menu-item column-menu-hide"
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }}
+                              onClick={handleCloseColumnMenu}
+                            >
+                              <EyeOff size={16} /> Ocultar columna
+                            </div>
                           </div>
                         )}
                         {/* Resizer minimalista visible en hover/drag */}

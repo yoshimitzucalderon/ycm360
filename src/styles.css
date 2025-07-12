@@ -1013,6 +1013,11 @@ table.user-table {
   display: block;
 }
 
+.column-menu-item.column-menu-hide:hover {
+  background-color: #f3f4f6;
+  background-image: repeating-linear-gradient(135deg, #e5e7eb 0 2px, transparent 2px 8px);
+}
+
 /* Scrollbar delgado para el menú de columnas */
 [style*="overflow-y: auto"][style*="max-height: 340px"] {
   scrollbar-width: thin;
