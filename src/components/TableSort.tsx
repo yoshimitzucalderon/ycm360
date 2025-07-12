@@ -165,7 +165,15 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px 0 12px' }}>
         <Select
           value={newColumn}
-          onChange={e => setNewColumn(e.target.value as string)}
+          onChange={e => {
+            const col = e.target.value as string;
+            setNewColumn(col);
+            if (col) {
+              setSortRules([...sortRules, { column: col, direction: newDirection }]);
+              setNewColumn("");
+              setNewDirection('asc');
+            }
+          }}
           displayEmpty
           size="small"
           sx={{ background: '#fff', borderRadius: 2, fontSize: 13, minWidth: 120, height: 28 }}
@@ -175,13 +183,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
         </Select>
-        <Button
-          onClick={handleAddRule}
-          disabled={!newColumn}
-          sx={{ minWidth: 36, px: 2, fontSize: 13, height: 28, borderRadius: 5 }}
-        >
-          Añadir
-        </Button>
+        {/* Botón Añadir eliminado */}
       </div>
       {/* Botón de aplicar */}
       <div style={{ display: 'flex', gap: 8, marginTop: 6, justifyContent: 'flex-end', padding: '8px 12px 8px 12px' }}>
