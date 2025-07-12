@@ -333,7 +333,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 ))}
               </MinimalSelect>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 48, width: 70 }}>
+            <FormControl size="small" sx={{ minWidth: 48, width: 70, marginRight: 1 }}>
               <MinimalSelect
                 value={filter.operator}
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
@@ -365,6 +365,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 ))}
               </MinimalSelect>
             </FormControl>
+            <div style={{ width: 8 }} />
             <input
               type="text"
               value={filter.value}
@@ -430,13 +431,19 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             fontWeight: 500,
             cursor: 'pointer',
             fontSize: 14,
-            textDecoration: 'underline',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
+            transition: 'color 0.15s',
+          }}
+          onMouseOver={e => {
+            (e.currentTarget as HTMLButtonElement).style.color = '#166534';
+          }}
+          onMouseOut={e => {
+            (e.currentTarget as HTMLButtonElement).style.color = '#22c55e';
           }}
         >
-          <Trash2 size={18} style={{ marginRight: 4 }} />
+          <Trash2 size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
           Borrar filtros
         </button>
       </div>
