@@ -365,7 +365,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 ))}
               </MinimalSelect>
             </FormControl>
-            <div style={{ width: 8 }} />
+            <div style={{ width: 4 }} />
             <input
               type="text"
               value={filter.value}
@@ -427,7 +427,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           style={{
             background: 'none',
             border: 'none',
-            color: '#22c55e',
+            color: '#888',
             fontWeight: 500,
             cursor: 'pointer',
             fontSize: 14,
@@ -437,10 +437,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             transition: 'color 0.15s',
           }}
           onMouseOver={e => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#166534';
+            (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
           }}
           onMouseOut={e => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#22c55e';
+            (e.currentTarget as HTMLButtonElement).style.color = '#888';
           }}
         >
           <Trash2 size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
