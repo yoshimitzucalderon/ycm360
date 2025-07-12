@@ -283,9 +283,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
           <span style={{ fontWeight: 600, fontSize: 15, color: '#222' }}>
             {(() => {
               const activos = filters.filter(f => f.column && f.operator && f.value);
+              if (filters.length === 1 && !activos.length) return 'Sin filtros';
               return activos.length > 0
                 ? `Filtrando por ${activos.length} criterio${activos.length > 1 ? 's' : ''}`
-                : 'Filtros';
+                : 'Sin filtros';
             })()}
           </span>
         </div>
