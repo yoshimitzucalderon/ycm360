@@ -1073,9 +1073,14 @@ div.column-menu-item:hover, .column-menu-item:hover {
   opacity: 1 !important;
 }
 .sort-row .sort-x {
-  color: #f8fafc;
-  transition: color 0.15s;
+  color: #cbd5e1;
+  transition: color 0.15s, background 0.15s;
+  background: transparent;
 }
 .sort-row:hover .sort-x {
   color: #888;
+}
+.sort-row .sort-x:hover {
+  color: #222;
+  background: #e5e7eb;
 }
