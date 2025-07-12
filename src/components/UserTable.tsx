@@ -376,7 +376,7 @@ const ColumnManager = ({
                   },
                 }}
               >
-                <RotateCcw size={18} style={{ marginRight: 3, transition: 'color 0.15s' }} />
+                <RotateCcw size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
                 Resetear
               </Button>
             </div>
