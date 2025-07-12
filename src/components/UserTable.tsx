@@ -577,8 +577,18 @@ const UserTable = () => {
     // setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement }); // This state is removed
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
-    setSortRules([{ column: colKey, direction }]);
-    // setSortMenu({ colKey: null, anchor: null }); // This state is removed
+    // Verificar si ya existe una regla para esta columna
+    const existingRuleIndex = sortRules.findIndex(rule => rule.column === colKey);
+    
+    if (existingRuleIndex >= 0) {
+      // Si ya existe, actualizar la dirección
+      const newSortRules = [...sortRules];
+      newSortRules[existingRuleIndex] = { column: colKey, direction };
+      setSortRules(newSortRules);
+    } else {
+      // Si no existe, agregar como nueva regla
+      setSortRules([...sortRules, { column: colKey, direction }]);
+    }
     setPage(1);
   };
 
@@ -640,6 +650,23 @@ const UserTable = () => {
     setColumnMenuAnchor(null);
     setColumnMenuKey(null);
   };
+
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (columnMenuAnchor && !columnMenuAnchor.contains(event.target as Node)) {
+        handleCloseColumnMenu();
+      }
+    };
+
+    if (columnMenuAnchor) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [columnMenuAnchor]);
 
   const handleOpenDownload = (event: React.MouseEvent<HTMLElement>) => {
     setDownloadAnchorEl(event.currentTarget);
@@ -1070,7 +1097,7 @@ const UserTable = () => {
                                 handleSortOption(col.key, 'asc');
                                 handleCloseColumnMenu();
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <ArrowUp size={16} /> Ordenar ascendente
@@ -1091,20 +1118,38 @@ const UserTable = () => {
                                 handleSortOption(col.key, 'desc');
                                 handleCloseColumnMenu();
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <ArrowDown size={16} /> Ordenar descendente
                             </div>
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                            <div className="column-menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
+                            <div 
+                              className="column-menu-item" 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              onClick={handleCloseColumnMenu}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
                               <Pin size={16} /> Fijar a la izquierda
                             </div>
-                            <div className="column-menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
+                            <div 
+                              className="column-menu-item" 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              onClick={handleCloseColumnMenu}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
                               <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
                             </div>
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                            <div className="column-menu-item column-menu-hide" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
+                            <div 
+                              className="column-menu-item column-menu-hide" 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              onClick={handleCloseColumnMenu}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
                               <EyeOff size={16} /> Ocultar columna
                             </div>
                           </div>
