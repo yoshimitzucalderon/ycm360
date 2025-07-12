@@ -1013,9 +1013,12 @@ table.user-table {
   display: block;
 }
 
-.column-menu-item.column-menu-hide:hover {
+.column-menu-item:hover {
   background-color: #f3f4f6;
-  background-image: repeating-linear-gradient(135deg, #e5e7eb 0 2px, transparent 2px 8px);
+  background-image: none;
+}
+.column-menu-item.column-menu-hide:hover {
+  background-image: none;
 }
 
 /* Scrollbar delgado para el menú de columnas */
