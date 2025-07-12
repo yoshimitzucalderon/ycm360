@@ -960,6 +960,12 @@ table.user-table {
   vertical-align: middle !important;
 }
 
+.user-table td:focus, .user-table td:focus-visible, .user-table td:active {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+  z-index: 2;
+}
+
 .table-filter, .table-sort, .table-filter-row, .table-filter-controls select, .table-filter-controls input, .table-sort-controls select {
   font-size: 14px !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
