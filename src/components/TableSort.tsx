@@ -129,10 +129,6 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         <Button
                           onClick={() => handleRemoveRule(idx)}
                           sx={{
-                            position: 'absolute',
-                            right: 4,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
                             minWidth: 24,
                             width: 24,
                             height: 24,
@@ -144,8 +140,9 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                             fontWeight: 700,
                             fontSize: 16,
                             lineHeight: 1,
-                            zIndex: 1000,
+                            zIndex: 1,
                             boxShadow: 'none',
+                            marginLeft: 'auto',
                             '&:hover': { background: '#f3f4f6', color: '#222', borderColor: '#cbd5e1' }
                           }}
                         >
