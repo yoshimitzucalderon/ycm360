@@ -387,7 +387,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         ))}
       </div>
       {/* Línea divisoria sutil */}
-      <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '8px 0 0 0' }} />
+      <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '2px 0 0 0' }} />
       <div style={{ position: 'absolute', left: 16, bottom: 12, zIndex: 2 }}>
         <button
           onClick={addFilter}
