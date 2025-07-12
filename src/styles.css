@@ -961,7 +961,7 @@ table.user-table {
 }
 
 .user-table td:focus, .user-table td:focus-visible, .user-table td:active {
-  outline: 2px solid #2563eb;
+  outline: 1.5px solid #2563eb;
   outline-offset: -2px;
   z-index: 2;
 }
