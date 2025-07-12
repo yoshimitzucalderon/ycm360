@@ -103,7 +103,8 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           background: '#f8fafc',
                           borderRadius: 6,
                           padding: '4px 8px',
-                          border: '1.5px solid #e5e7eb',
+                          border: '2px solid red', // borde rojo para debug
+                          position: 'relative', // para el botón absoluto
                           ...dragProvided.draggableProps.style
                         }}
                       >
@@ -127,7 +128,23 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         </span>
                         <Button
                           onClick={() => handleRemoveRule(idx)}
-                          sx={{ minWidth: 28, padding: 0, color: 'red', background: 'yellow', borderRadius: '50%', ml: 2, border: '2px solid red', fontWeight: 900, fontSize: 22, lineHeight: 1, '&:hover': { background: '#fee2e2', color: '#b91c1c' } }}
+                          sx={{
+                            position: 'absolute',
+                            right: 4,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            minWidth: 28,
+                            padding: 0,
+                            color: 'red',
+                            background: 'yellow',
+                            borderRadius: '50%',
+                            border: '2px solid red',
+                            fontWeight: 900,
+                            fontSize: 22,
+                            lineHeight: 1,
+                            zIndex: 1000,
+                            '&:hover': { background: '#fee2e2', color: '#b91c1c' }
+                          }}
                         >
                           X
                         </Button>
