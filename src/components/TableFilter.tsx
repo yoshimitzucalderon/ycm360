@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -431,9 +431,13 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             cursor: 'pointer',
             fontSize: 14,
             textDecoration: 'underline',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
           }}
         >
-          Reestablecer filtros
+          <Trash2 size={18} style={{ marginRight: 4 }} />
+          Borrar filtros
         </button>
       </div>
     </div>,
