@@ -577,6 +577,9 @@ const UserTable = () => {
     // setSortMenu({ colKey, anchor: e.currentTarget as HTMLElement }); // This state is removed
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
+    console.log('handleSortOption ejecutado:', colKey, direction);
+    console.log('sortRules actuales:', sortRules);
+    
     // Verificar si ya existe una regla para esta columna
     const existingRuleIndex = sortRules.findIndex(rule => rule.column === colKey);
     
@@ -584,10 +587,12 @@ const UserTable = () => {
       // Si ya existe, actualizar la dirección
       const newSortRules = [...sortRules];
       newSortRules[existingRuleIndex] = { column: colKey, direction };
+      console.log('Actualizando regla existente:', newSortRules);
       setSortRules(newSortRules);
     } else {
       // Si no existe, agregar como nueva regla
       const newSortRules = [...sortRules, { column: colKey, direction }];
+      console.log('Agregando nueva regla:', newSortRules);
       setSortRules(newSortRules);
     }
     setPage(1);
@@ -1095,10 +1100,11 @@ const UserTable = () => {
                                 fontWeight: sortRule?.direction === 'asc' ? 600 : 400
                               }} 
                               onClick={() => {
+                                console.log('Click en Ordenar ascendente para columna:', col.key);
                                 handleSortOption(col.key, 'asc');
                                 handleCloseColumnMenu();
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <ArrowUp size={16} /> Ordenar ascendente
@@ -1116,10 +1122,11 @@ const UserTable = () => {
                                 fontWeight: sortRule?.direction === 'desc' ? 600 : 400
                               }} 
                               onClick={() => {
+                                console.log('Click en Ordenar descendente para columna:', col.key);
                                 handleSortOption(col.key, 'desc');
                                 handleCloseColumnMenu();
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <ArrowDown size={16} /> Ordenar descendente
@@ -1129,7 +1136,7 @@ const UserTable = () => {
                               className="column-menu-item" 
                               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
                               onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <Pin size={16} /> Fijar a la izquierda
@@ -1138,7 +1145,7 @@ const UserTable = () => {
                               className="column-menu-item" 
                               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
                               onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
@@ -1148,7 +1155,7 @@ const UserTable = () => {
                               className="column-menu-item column-menu-hide" 
                               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
                               onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             >
                               <EyeOff size={16} /> Ocultar columna
