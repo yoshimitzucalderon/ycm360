@@ -372,14 +372,14 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 const val = e.target.value;
                 setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
               }}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120 }}
+              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120, flex: 1 }}
               placeholder={getPlaceholder(filter.operator)}
               disabled={!filter.column}
             />
             <button
               onClick={() => removeFilter(idx)}
               className="filter-x"
-              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s', margin: 0 }}
+              style={{ minWidth: 24, width: 24, height: 24, padding: 0, background: 'transparent', borderRadius: '50%', border: 'none', fontWeight: 700, fontSize: 16, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s, background 0.15s', marginLeft: 'auto' }}
             >
               <X size={18} />
             </button>
