@@ -248,6 +248,19 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
     container: popoverRef.current || undefined,
   });
 
+  // Generar resumen de filtros aplicados
+  const getFilterSummary = () => {
+    const activos = filters.filter(f => f.column && f.operator && f.value);
+    if (activos.length === 0) return 'Filtros';
+    return 'Filtrando por: ' + activos.map((f, i) => {
+      const op = OPERATORS.find(o => o.value === f.operator);
+      const col = columns.find(c => c.key === f.column)?.label || f.column;
+      const val = f.value ? `"${f.value}"` : '';
+      const logic = i > 0 && f.logicalOperator ? `${f.logicalOperator} ` : '';
+      return `${logic}${col} ${op ? op.label : f.operator} ${val}`.trim();
+    }).join(', ');
+  };
+
   return ReactDOM.createPortal(
     <div
       ref={popoverRef}
@@ -263,7 +276,9 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
         zIndex: 2000,
       }}
     >
-      <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Filtros</div>
+      <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 8 }}>
+        {getFilterSummary()}
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filters.map((filter, idx) => (
           <div
