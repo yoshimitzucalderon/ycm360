@@ -299,6 +299,40 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 </MinimalSelect>
               </FormControl>
             )}
+            <FormControl size="small" sx={{ minWidth: 90, maxWidth: 160, flex: 1 }}>
+              <MinimalSelect
+                value={filter.column}
+                displayEmpty
+                onChange={e => {
+                  const col = e.target.value as string;
+                  if (!col) {
+                    setFilters(filters.filter((_, i) => i !== idx));
+                  } else {
+                    setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
+                  }
+                }}
+                MenuProps={getMenuProps()}
+                renderValue={selected => {
+                  if (!selected) return 'Columna...';
+                  const col = columns.find(c => c.key === selected);
+                  return (
+                    <span style={{
+                      display: 'inline-block',
+                      maxWidth: 110,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      verticalAlign: 'middle',
+                    }}>{col ? col.label : selected}</span>
+                  );
+                }}
+              >
+                <MinimalMenuItem value="">Columna...</MinimalMenuItem>
+                {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
+                  <MinimalMenuItem key={col.key} value={col.key}>{col.label}</MinimalMenuItem>
+                ))}
+              </MinimalSelect>
+            </FormControl>
             <FormControl size="small" sx={{ minWidth: 48, width: 70 }}>
               <MinimalSelect
                 value={filter.operator}
