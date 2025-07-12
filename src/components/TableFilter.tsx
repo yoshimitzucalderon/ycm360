@@ -318,7 +318,10 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
                 disabled={!filter.column}
                 MenuProps={getMenuProps()}
-                renderValue={selected => OPERATORS.find(op => op.value === selected)?.value || selected}
+                renderValue={selected => {
+                  const op = OPERATORS.find(op => op.value === selected);
+                  return op ? op.label : '';
+                }}
               >
                 {OPERATORS.map(op => <MinimalMenuItem key={op.value} value={op.value}>{op.label}</MinimalMenuItem>)}
               </MinimalSelect>
