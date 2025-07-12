@@ -153,6 +153,7 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   // Ordenamiento
   const sortedData = useMemo(() => {
     if (!sortRules || sortRules.length === 0) return filteredData;
+    
     return [...filteredData].sort((a, b) => {
       for (const rule of sortRules) {
         const aValue = String((a as Record<string, any>)[rule.column] ?? "").toLowerCase();

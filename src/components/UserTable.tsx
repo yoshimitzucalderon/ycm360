@@ -587,7 +587,8 @@ const UserTable = () => {
       setSortRules(newSortRules);
     } else {
       // Si no existe, agregar como nueva regla
-      setSortRules([...sortRules, { column: colKey, direction }]);
+      const newSortRules = [...sortRules, { column: colKey, direction }];
+      setSortRules(newSortRules);
     }
     setPage(1);
   };
