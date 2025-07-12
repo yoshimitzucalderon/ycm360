@@ -578,22 +578,24 @@ const UserTable = () => {
   };
   const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
     console.log('handleSortOption ejecutado:', colKey, direction);
-    console.log('sortRules actuales:', sortRules);
-    
+    console.log('sortRules antes:', sortRules);
     // Verificar si ya existe una regla para esta columna
     const existingRuleIndex = sortRules.findIndex(rule => rule.column === colKey);
-    
     if (existingRuleIndex >= 0) {
       // Si ya existe, actualizar la dirección
       const newSortRules = [...sortRules];
       newSortRules[existingRuleIndex] = { column: colKey, direction };
-      console.log('Actualizando regla existente:', newSortRules);
       setSortRules(newSortRules);
+      setTimeout(() => {
+        console.log('sortRules después (update):', newSortRules);
+      }, 0);
     } else {
       // Si no existe, agregar como nueva regla
       const newSortRules = [...sortRules, { column: colKey, direction }];
-      console.log('Agregando nueva regla:', newSortRules);
       setSortRules(newSortRules);
+      setTimeout(() => {
+        console.log('sortRules después (add):', newSortRules);
+      }, 0);
     }
     setPage(1);
   };
@@ -1108,7 +1110,6 @@ const UserTable = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 console.log('Click en Ordenar ascendente para columna:', col.key);
-                                alert('Ordenar ascendente: ' + col.key); // Prueba simple
                                 handleSortOption(col.key, 'asc');
                                 handleCloseColumnMenu();
                               }}
@@ -1133,7 +1134,6 @@ const UserTable = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 console.log('Click en Ordenar descendente para columna:', col.key);
-                                alert('Ordenar descendente: ' + col.key); // Prueba simple
                                 handleSortOption(col.key, 'desc');
                                 handleCloseColumnMenu();
                               }}
