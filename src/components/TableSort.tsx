@@ -133,17 +133,20 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                             right: 4,
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            minWidth: 28,
+                            minWidth: 24,
+                            width: 24,
+                            height: 24,
                             padding: 0,
-                            color: 'red',
-                            background: 'yellow',
+                            color: '#888',
+                            background: '#fff',
                             borderRadius: '50%',
-                            border: '2px solid red',
-                            fontWeight: 900,
-                            fontSize: 22,
+                            border: '1.2px solid #e5e7eb',
+                            fontWeight: 700,
+                            fontSize: 16,
                             lineHeight: 1,
                             zIndex: 1000,
-                            '&:hover': { background: '#fee2e2', color: '#b91c1c' }
+                            boxShadow: 'none',
+                            '&:hover': { background: '#f3f4f6', color: '#222', borderColor: '#cbd5e1' }
                           }}
                         >
                           X
