@@ -1054,10 +1054,46 @@ const UserTable = () => {
                             tabIndex={-1}
                             onBlur={handleCloseColumnMenu}
                           >
-                            <div className="column-menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
+                            <div 
+                              className="column-menu-item" 
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 8, 
+                                padding: '7px 12px', 
+                                cursor: 'pointer', 
+                                borderRadius: 5,
+                                color: sortRule?.direction === 'asc' ? '#22c55e' : '#374151',
+                                fontWeight: sortRule?.direction === 'asc' ? 600 : 400
+                              }} 
+                              onClick={() => {
+                                handleSortOption(col.key, 'asc');
+                                handleCloseColumnMenu();
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
                               <ArrowUp size={16} /> Ordenar ascendente
                             </div>
-                            <div className="column-menu-item" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} onClick={handleCloseColumnMenu}>
+                            <div 
+                              className="column-menu-item" 
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 8, 
+                                padding: '7px 12px', 
+                                cursor: 'pointer', 
+                                borderRadius: 5,
+                                color: sortRule?.direction === 'desc' ? '#22c55e' : '#374151',
+                                fontWeight: sortRule?.direction === 'desc' ? 600 : 400
+                              }} 
+                              onClick={() => {
+                                handleSortOption(col.key, 'desc');
+                                handleCloseColumnMenu();
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
                               <ArrowDown size={16} /> Ordenar descendente
                             </div>
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />

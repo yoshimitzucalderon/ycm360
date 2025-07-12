@@ -1014,7 +1014,7 @@ table.user-table {
 }
 
 div.column-menu-item:hover, .column-menu-item:hover {
-  background-color: #f3f4f6 !important;
+  background-color: red !important;
 }
 .column-menu-item.column-menu-hide:hover {
   background-image: none;
