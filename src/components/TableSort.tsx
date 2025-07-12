@@ -96,25 +96,28 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         style={{
-                          display: 'flex',
+                          display: 'grid',
+                          gridTemplateColumns: '28px 80px 1fr 48px 90px 32px',
                           alignItems: 'center',
                           gap: 8,
                           marginBottom: 4,
                           background: '#f8fafc',
                           borderRadius: 6,
                           padding: '4px 8px',
-                          paddingRight: 32, // espacio para la X
-                          position: 'relative', // para el botón absoluto
+                          border: '1.5px solid #e5e7eb',
+                          position: 'relative',
                           ...dragProvided.draggableProps.style
                         }}
                       >
-                        <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888', marginRight: 2 }}>
+                        <span {...dragProvided.dragHandleProps} style={{ cursor: 'grab', color: '#888' }}>
                           <GripVertical size={16} />
                         </span>
-                        <span style={{ fontSize: 13, color: '#888', minWidth: 60, marginRight: 2 }}>
+                        <span style={{ fontSize: 13, color: '#888', minWidth: 60 }}>
                           {idx === 0 ? 'ordenar por' : 'luego por'}
                         </span>
-                        <span style={{ fontWeight: 500, minWidth: 80, fontSize: 14, color: '#222' }}>{col?.label || rule.column}</span>
+                        <span style={{ fontWeight: 500, fontSize: 14, color: '#222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {col?.label || rule.column}
+                        </span>
                         <Switch
                           checked={rule.direction === 'asc'}
                           onChange={() => handleDirectionChange(idx)}
@@ -123,7 +126,7 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
                           sx={{ ml: 1 }}
                           inputProps={{ 'aria-label': 'ascendente/descendente' }}
                         />
-                        <span style={{ fontSize: 12, color: '#888', minWidth: 60 }}>
+                        <span style={{ fontSize: 12, color: '#888' }}>
                           {rule.direction === 'asc' ? 'ascendente' : 'descendente'}
                         </span>
                         <Button
