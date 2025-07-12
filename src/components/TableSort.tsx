@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, X as XIcon, ArrowUp, ArrowDown, SortAsc } from 'lucide-react';
+import { GripVertical, X as XIcon, ArrowUp, ArrowDown, SortAsc, RotateCcw } from 'lucide-react';
 
 const MinimalButton = styled(Button)({
   color: '#22c55e',
@@ -184,14 +184,30 @@ const TableSort: React.FC<Props> = ({ columns, visibleColumns, sortRules, setSor
             <MenuItem key={col.key} value={col.key}>{col.label}</MenuItem>
           ))}
         </Select>
-        <MinimalButton onClick={onApply} disabled={sortRules.length === 0} sx={{ minWidth: 90, fontSize: 13, height: 32, borderRadius: 6 }}>
-          Aplicar orden
-        </MinimalButton>
         <Button
           onClick={onClear}
-          sx={{ color: '#888', fontWeight: 500, fontSize: 13, textTransform: 'none', border: '1.2px solid #e5e7eb', borderRadius: 6, background: '#fff', minWidth: 70, height: 32 }}
+          sx={{
+            color: '#888',
+            fontWeight: 500,
+            fontSize: 13,
+            textTransform: 'none',
+            background: 'none',
+            boxShadow: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0,
+            transition: 'color 0.15s',
+            minWidth: 70,
+            height: 32,
+            border: 'none',
+            '&:hover': {
+              background: 'none',
+              color: '#ef4444',
+            },
+          }}
         >
-          Limpiar
+          <RotateCcw size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
+          Resetear
         </Button>
       </div>
     </div>
