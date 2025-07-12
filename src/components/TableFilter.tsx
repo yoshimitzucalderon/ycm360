@@ -287,7 +287,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
             style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderRadius: 6, padding: '4px 8px', border: '1.2px solid #e5e7eb', marginBottom: 4 }}
           >
             {idx > 0 && (
-              <FormControl size="small" sx={{ minWidth: 70 }}>
+              <FormControl size="small" sx={{ minWidth: 48 }}>
                 <MinimalSelect
                   value={filter.logicalOperator || 'AND'}
                   onChange={e => setLogicalOperator(idx, (e.target.value as string))}
@@ -299,27 +299,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 </MinimalSelect>
               </FormControl>
             )}
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <MinimalSelect
-                value={filter.column}
-                displayEmpty
-                onChange={e => {
-                  const col = e.target.value as string;
-                  if (!col) {
-                    setFilters(filters.filter((_, i) => i !== idx));
-                  } else {
-                    setFilters(filters.map((f, i) => i === idx ? { ...f, column: col } : f));
-                  }
-                }}
-                MenuProps={getMenuProps()}
-              >
-                <MinimalMenuItem value="">Columna...</MinimalMenuItem>
-                {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
-                  <MinimalMenuItem key={col.key} value={col.key}>{col.label}</MinimalMenuItem>
-                ))}
-              </MinimalSelect>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 60 }}>
+            <FormControl size="small" sx={{ minWidth: 48, width: 70 }}>
               <MinimalSelect
                 value={filter.operator}
                 onChange={e => setFilters(filters.map((f, i) => i === idx ? { ...f, operator: (e.target.value as string) } : f))}
@@ -329,8 +309,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                   PaperProps: {
                     style: {
                       maxHeight: 240,
-                      minWidth: 60,
-                      width: 120,
+                      minWidth: 70,
+                      width: 110,
                       boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                       borderRadius: 8,
                       padding: 0,
