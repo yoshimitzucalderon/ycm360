@@ -966,7 +966,6 @@ const UserTable = () => {
                       width: colWidths[col.key] || 150,
                       minWidth: 60,
                       maxWidth: 600,
-                      transition: 'width 0.1s',
                     }}
                   />
                 ))}
