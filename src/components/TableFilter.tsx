@@ -365,7 +365,6 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 ))}
               </MinimalSelect>
             </FormControl>
-            <div style={{ width: 4 }} />
             <input
               type="text"
               value={filter.value}
@@ -373,7 +372,7 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
                 const val = e.target.value;
                 setFilters(filters.map((f, i) => i === idx ? { ...f, value: val } : f));
               }}
-              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px', minWidth: 60, maxWidth: 120, flex: 1 }}
+              style={{ fontSize: 13, borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff', padding: '2px 6px 2px 6px', minWidth: 60, maxWidth: 120, flex: 1 }}
               placeholder={getPlaceholder(filter.operator)}
               disabled={!filter.column}
             />
