@@ -1013,8 +1013,8 @@ table.user-table {
   display: block;
 }
 
-.column-menu-item:hover {
-  background-color: #f3f4f6 !important;
+div.column-menu-item:hover, .column-menu-item:hover {
+  background-color: red !important;
 }
 .column-menu-item.column-menu-hide:hover {
   background-image: none;
