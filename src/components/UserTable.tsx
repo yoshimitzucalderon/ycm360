@@ -1085,7 +1085,7 @@ const UserTable = () => {
                           }}
                           onClick={e => handleOpenColumnMenu(e, col.key)}
                         >
-                          <MoreVertical size={18} />
+                          <MoreVertical size={18} style={{ color: '#2563eb' }} />
                         </span>
                         {/* Resizer y badge de filtro ... */}
                         {/* Menú contextual minimalista */}
@@ -1120,8 +1120,8 @@ const UserTable = () => {
                                 padding: '7px 12px', 
                                 cursor: 'pointer', 
                                 borderRadius: 5,
-                                color: sortRule?.direction === 'asc' ? '#22c55e' : '#374151',
-                                fontWeight: sortRule?.direction === 'asc' ? 600 : 400
+                                color: '#555',
+                                fontWeight: 400
                               }} 
                               onClick={(e) => {
                                 e.preventDefault();
@@ -1144,8 +1144,8 @@ const UserTable = () => {
                                 padding: '7px 12px', 
                                 cursor: 'pointer', 
                                 borderRadius: 5,
-                                color: sortRule?.direction === 'desc' ? '#22c55e' : '#374151',
-                                fontWeight: sortRule?.direction === 'desc' ? 600 : 400
+                                color: '#555',
+                                fontWeight: 400
                               }} 
                               onClick={(e) => {
                                 e.preventDefault();
@@ -1162,7 +1162,7 @@ const UserTable = () => {
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
                             <div 
                               className="column-menu-item" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
                               onClick={handleCloseColumnMenu}
                               onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -1171,7 +1171,7 @@ const UserTable = () => {
                             </div>
                             <div 
                               className="column-menu-item" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
                               onClick={handleCloseColumnMenu}
                               onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -1181,7 +1181,7 @@ const UserTable = () => {
                             <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
                             <div 
                               className="column-menu-item column-menu-hide" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5 }} 
+                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
                               onClick={handleCloseColumnMenu}
                               onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
