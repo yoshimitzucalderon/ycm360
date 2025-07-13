@@ -27,6 +27,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { BsFillPinFill } from 'react-icons/bs';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import ReactDOM from 'react-dom';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -1089,106 +1090,111 @@ const UserTable = () => {
                         </span>
                         {/* Resizer y badge de filtro ... */}
                         {/* Menú contextual minimalista */}
-                        {columnMenuAnchor && columnMenuKey === col.key && (
-                          <div
-                            style={{
-                              position: 'fixed',
-                              top: columnMenuAnchor.getBoundingClientRect().bottom + 4,
-                              left: columnMenuAnchor.getBoundingClientRect().left,
-                              minWidth: 170,
-                              background: '#fff',
-                              border: '1.5px solid #e5e7eb',
-                              borderRadius: 8,
-                              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                              zIndex: 10000,
-                              fontSize: 14,
-                              padding: 4,
-                            }}
-                            tabIndex={-1}
-                            onBlur={handleCloseColumnMenu}
-                            onClick={(e) => {
-                              console.log('Click en el menú desplegable');
-                              e.stopPropagation();
-                            }}
-                          >
-                            <div 
-                              className="column-menu-item" 
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 8, 
-                                padding: '7px 12px', 
-                                cursor: 'pointer', 
-                                borderRadius: 5,
-                                color: '#555',
-                                fontWeight: 400
-                              }} 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Click en Ordenar ascendente para columna:', col.key);
-                                handleSortOption(col.key, 'asc');
-                                handleCloseColumnMenu();
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <ArrowUp size={16} /> Ordenar ascendente
-                            </div>
-                            <div 
-                              className="column-menu-item" 
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: 8, 
-                                padding: '7px 12px', 
-                                cursor: 'pointer', 
-                                borderRadius: 5,
-                                color: '#555',
-                                fontWeight: 400
-                              }} 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Click en Ordenar descendente para columna:', col.key);
-                                handleSortOption(col.key, 'desc');
-                                handleCloseColumnMenu();
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <ArrowDown size={16} /> Ordenar descendente
-                            </div>
-                            <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                            <div 
-                              className="column-menu-item" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                              onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <Pin size={16} /> Fijar a la izquierda
-                            </div>
-                            <div 
-                              className="column-menu-item" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                              onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                            </div>
-                            <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                            <div 
-                              className="column-menu-item column-menu-hide" 
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                              onClick={handleCloseColumnMenu}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <EyeOff size={16} /> Ocultar columna
-                            </div>
-                          </div>
+                        {columnMenuAnchor && columnMenuKey === col.key && ReactDOM.createPortal(
+                          (() => {
+                            const rect = columnMenuAnchor.getBoundingClientRect();
+                            return (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: rect.bottom + 4 + window.scrollY,
+                                  left: rect.left + window.scrollX,
+                                  minWidth: 170,
+                                  background: '#fff',
+                                  border: '1.5px solid #e5e7eb',
+                                  borderRadius: 8,
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                  zIndex: 10000,
+                                  fontSize: 14,
+                                  padding: 4,
+                                }}
+                                tabIndex={-1}
+                                onBlur={handleCloseColumnMenu}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <div 
+                                  className="column-menu-item" 
+                                  style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 8, 
+                                    padding: '7px 12px', 
+                                    cursor: 'pointer', 
+                                    borderRadius: 5,
+                                    color: '#555',
+                                    fontWeight: 400
+                                  }} 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Click en Ordenar ascendente para columna:', col.key);
+                                    handleSortOption(col.key, 'asc');
+                                    handleCloseColumnMenu();
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <ArrowUp size={16} /> Ordenar ascendente
+                                </div>
+                                <div 
+                                  className="column-menu-item" 
+                                  style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 8, 
+                                    padding: '7px 12px', 
+                                    cursor: 'pointer', 
+                                    borderRadius: 5,
+                                    color: '#555',
+                                    fontWeight: 400
+                                  }} 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Click en Ordenar descendente para columna:', col.key);
+                                    handleSortOption(col.key, 'desc');
+                                    handleCloseColumnMenu();
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <ArrowDown size={16} /> Ordenar descendente
+                                </div>
+                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                <div 
+                                  className="column-menu-item" 
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                  onClick={handleCloseColumnMenu}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <Pin size={16} /> Fijar a la izquierda
+                                </div>
+                                <div 
+                                  className="column-menu-item" 
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                  onClick={handleCloseColumnMenu}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                </div>
+                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                <div 
+                                  className="column-menu-item column-menu-hide" 
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                  onClick={handleCloseColumnMenu}
+                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
+                                  <EyeOff size={16} /> Ocultar columna
+                                </div>
+                              </div>
+                            );
+                          })(),
+                          document.body
                         )}
                         {/* Resizer minimalista visible en hover/drag */}
                         <div
