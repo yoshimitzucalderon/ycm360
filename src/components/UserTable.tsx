@@ -1110,9 +1110,9 @@ const UserTable = () => {
                     const isPinnedLeft = pinnedColumns.includes(col.key);
                     const isPinnedRight = pinnedColumnsRight.includes(col.key);
                     const stickyStyle = isPinnedLeft
-                      ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 2, background: '#e0edff' }
+                      ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 2, background: '#f9fafb' }
                       : isPinnedRight
-                        ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 2, background: '#e0edff' }
+                        ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 2, background: '#f9fafb' }
                         : {};
                     return (
                       <th
@@ -1365,9 +1365,9 @@ const UserTable = () => {
                       const isPinnedLeft = pinnedColumns.includes(col.key);
                       const isPinnedRight = pinnedColumnsRight.includes(col.key);
                       const stickyStyle = isPinnedLeft
-                        ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 1, background: '#e0edff' }
+                        ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 1, background: '#f0f6ff' }
                         : isPinnedRight
-                          ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 1, background: '#e0edff' }
+                          ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 1, background: '#f0f6ff' }
                           : {};
                       return (
                         <td key={col.key} tabIndex={0} style={stickyStyle}>{user[col.key]}</td>

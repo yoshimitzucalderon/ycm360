@@ -16,6 +16,12 @@ body {
   box-sizing: border-box;
 }
 
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+}
+
 th:hover .header-menu-trigger {
   opacity: 1 !important;
 }
