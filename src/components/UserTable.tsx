@@ -5,8 +5,8 @@ import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
-import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff, RotateCcw } from 'lucide-react';
-import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine, RiUnpinLine } from 'react-icons/ri';
+import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff, RotateCcw, PinOff } from 'lucide-react';
+import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -1221,7 +1221,7 @@ const UserTable = () => {
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                   >
-                                    <RiUnpinLine size={16} /> Desfijar
+                                    <PinOff size={16} /> Desfijar
                                   </div>
                                 )}
                                 {!pinnedColumnsRight.includes(col.key) && !pinnedColumns.includes(col.key) && (
@@ -1253,7 +1253,7 @@ const UserTable = () => {
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                   >
-                                    <RiUnpinLine size={16} /> Desfijar
+                                    <PinOff size={16} /> Desfijar
                                   </div>
                                 )}
                                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
