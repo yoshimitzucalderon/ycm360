@@ -6,6 +6,7 @@ import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff, RotateCcw, PinOff } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -79,7 +80,7 @@ const columnMap: Record<string, string> = {
   responsableLegal: 'nombre_completo_responsable_legal',
   direccionLegal: 'direccion_responsable_legal',
   correoLegal: 'correo_electronico_responsable_legal',
-  telefonoLegal: 'telefono responsable legal',
+  telefonoLegal: 'telefono_responsable_legal',
   responsableAdmin: 'nombre_completo_responsable_administrativo',
   correoAdmin: 'correo_electronico_responsable_administrativo',
   telefonoAdmin: 'telefono_responsable_administrativo',
@@ -120,7 +121,7 @@ const mapProveedor = (row: any) => ({
   responsableLegal: row.nombre_completo_responsable_legal,
   direccionLegal: row.direccion_responsable_legal,
   correoLegal: row.correo_electronico_responsable_legal,
-  telefonoLegal: row["telefono responsable legal"],
+  telefonoLegal: row.telefono_responsable_legal,
   responsableAdmin: row.nombre_completo_responsable_administrativo,
   correoAdmin: row.correo_electronico_responsable_administrativo,
   telefonoAdmin: row.telefono_responsable_administrativo,
@@ -785,6 +786,35 @@ const UserTable = () => {
 
   const dummyRef = useRef<HTMLElement>(null);
 
+  // Función para calcular el offset left de una columna fijada a la izquierda
+  const getLeftOffset = (colKey: string) => {
+    let offset = 0;
+    for (const key of pinnedColumns) {
+      if (key === colKey) break;
+      const th = document.querySelector(`th[data-col-key='${key}']`) as HTMLElement;
+      offset += th ? th.offsetWidth : 120; // fallback a 120px si no está renderizado
+    }
+    return offset;
+  };
+  // Función para calcular el offset right de una columna fijada a la derecha
+  const getRightOffset = (colKey: string) => {
+    let offset = 0;
+    let found = false;
+    for (let i = pinnedColumnsRight.length - 1; i >= 0; i--) {
+      const key = pinnedColumnsRight[i];
+      if (key === colKey) {
+        found = true;
+        break;
+      }
+      const th = document.querySelector(`th[data-col-key='${key}']`) as HTMLElement;
+      offset += th ? th.offsetWidth : 120;
+    }
+    return found ? offset : 0;
+  };
+
+  // Helper para sticky position
+  const stickyPosition = 'sticky' as CSSProperties['position'];
+
   return (
     <div className="table-container">
         <div className="user-table-header table-controls">
@@ -1077,22 +1107,18 @@ const UserTable = () => {
                     ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
                   ].map((col: TableColumn) => {
                     const sortRule = sortRules.find(r => r.column === col.key);
+                    const isPinnedLeft = pinnedColumns.includes(col.key);
+                    const isPinnedRight = pinnedColumnsRight.includes(col.key);
+                    const stickyStyle = isPinnedLeft
+                      ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 2, background: '#e0edff' }
+                      : isPinnedRight
+                        ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 2, background: '#e0edff' }
+                        : {};
                     return (
                       <th
                         key={col.key}
-                        draggable
-                        onDragStart={() => handleDragStart(col.key)}
-                        onDragOver={e => handleDragOver(e, col.key)}
-                        onDrop={e => handleDrop(e, col.key)}
-                        className="user-table-header-cell"
-                        style={{
-                          position: 'relative',
-                          width: colWidths[col.key] || 150,
-                          minWidth: 60,
-                          maxWidth: 600,
-                          paddingRight: 0,
-                          background: (pinnedColumns.includes(col.key) || pinnedColumnsRight.includes(col.key)) ? '#e0edff' : undefined,
-                        }}
+                        data-col-key={col.key}
+                        style={stickyStyle}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           {col.label}
@@ -1335,9 +1361,18 @@ const UserTable = () => {
                       ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
                       ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
                       ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                    ].map((col: TableColumn) => (
-                      <td key={col.key} tabIndex={0} style={{ background: (pinnedColumns.includes(col.key) || pinnedColumnsRight.includes(col.key)) ? '#e0edff' : undefined }}>{user[col.key]}</td>
-                    ))}
+                    ].map((col: TableColumn) => {
+                      const isPinnedLeft = pinnedColumns.includes(col.key);
+                      const isPinnedRight = pinnedColumnsRight.includes(col.key);
+                      const stickyStyle = isPinnedLeft
+                        ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 1, background: '#e0edff' }
+                        : isPinnedRight
+                          ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 1, background: '#e0edff' }
+                          : {};
+                      return (
+                        <td key={col.key} tabIndex={0} style={stickyStyle}>{user[col.key]}</td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
