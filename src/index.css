@@ -22,6 +22,14 @@ body {
   position: relative;
 }
 
+.table-data-area {
+  width: 100%;
+  overflow-x: auto;
+}
+.user-table {
+  min-width: 1000px;
+}
+
 th:hover .header-menu-trigger {
   opacity: 1 !important;
 }
