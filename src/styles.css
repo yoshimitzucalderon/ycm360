@@ -303,6 +303,45 @@ body {
   color: #10b981;
 }
 
+/* Estilos para el botón de pin de la primera columna */
+.header-pin-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-right: 8px;
+  color: #64748b;
+}
+
+.header-pin-button:hover {
+  background: #f1f5f9;
+  color: #22c55e;
+}
+
+.header-pin-button.pinned {
+  color: #22c55e;
+  background: #f0fdf4;
+}
+
+.header-pin-button.pinned:hover {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.pin-icon {
+  transition: transform 0.15s ease;
+}
+
+.header-pin-button:hover .pin-icon {
+  transform: scale(1.1);
+}
+
 .header-breadcrumb {
   color: #888;
   font-size: 0.95rem;

@@ -20,6 +20,7 @@ export type TableSortRule = {
 export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
   const [filters, setFilters] = useState<TableFilter[]>([]);
   const [sortRules, setSortRules] = useState<TableSortRule[]>([]);
+  const [isFirstColumnPinned, setIsFirstColumnPinned] = useState(false);
 
   // Filtrado tipo Supabase
   const filteredData = useMemo(() => {
@@ -166,6 +167,11 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
     });
   }, [filteredData, sortRules]);
 
+  // Función para alternar el pin de la primera columna
+  const toggleFirstColumnPin = () => {
+    setIsFirstColumnPinned(prev => !prev);
+  };
+
   return {
     data: sortedData,
     filters,
@@ -174,5 +180,7 @@ export function useTableData<T>(initialData: T[], columns: TableColumn[]) {
     setSortRules,
     clearFilters: () => setFilters([]),
     clearSort: () => setSortRules([]),
+    isFirstColumnPinned,
+    toggleFirstColumnPin,
   };
 } 

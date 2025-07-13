@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { Search, X as XIcon, Bell, CircleUserRound } from 'lucide-react';
+import { Search, X as XIcon, Bell, CircleUserRound, Pin, PinOff } from 'lucide-react';
 
-const Header = () => {
+interface HeaderProps {
+  isFirstColumnPinned?: boolean;
+  onToggleFirstColumnPin?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFirstColumnPin }) => {
   const [search, setSearch] = useState("");
+  
   return (
     <header className="header">
       <div className="header-left">
@@ -33,6 +39,21 @@ const Header = () => {
         </div>
       </div>
       <div className="header-right">
+        {/* Botón para pin/unpin de la primera columna */}
+        {onToggleFirstColumnPin && (
+          <button
+            className={`header-pin-button ${isFirstColumnPinned ? 'pinned' : ''}`}
+            onClick={onToggleFirstColumnPin}
+            title={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
+            aria-label={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
+          >
+            {isFirstColumnPinned ? (
+              <PinOff size={20} className="pin-icon" />
+            ) : (
+              <Pin size={20} className="pin-icon" />
+            )}
+          </button>
+        )}
         <span className="header-icon"><Bell size={24} /></span>
         <span className="header-icon"><CircleUserRound size={24} /></span>
       </div>

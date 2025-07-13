@@ -389,7 +389,11 @@ const ColumnManager = ({
   );
 };
 
-const UserTable = () => {
+interface UserTableProps {
+  isFirstColumnPinned?: boolean;
+}
+
+const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) => {
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
   const [showSort, setShowSort] = useState(false);
@@ -789,11 +793,28 @@ const UserTable = () => {
   // Función para calcular el offset left de una columna fijada a la izquierda
   const getLeftOffset = (colKey: string) => {
     let offset = 0;
+    
+    // Obtener la primera columna visible
+    const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
+    
+    // Si la primera columna está pinneada y es la columna actual, retornar 0
+    if (isFirstColumnPinned && firstVisibleColumn && colKey === firstVisibleColumn.key) {
+      return 0;
+    }
+    
+    // Calcular offset para columnas pinneadas normales
     for (const key of pinnedColumns) {
       if (key === colKey) break;
       const th = document.querySelector(`th[data-col-key='${key}']`) as HTMLElement;
       offset += th ? th.offsetWidth : 120; // fallback a 120px si no está renderizado
     }
+    
+    // Si la primera columna está pinneada, agregar su ancho al offset
+    if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
+      const firstColTh = document.querySelector(`th[data-col-key='${firstVisibleColumn.key}']`) as HTMLElement;
+      offset += firstColTh ? firstColTh.offsetWidth : 120;
+    }
+    
     return offset;
   };
   // Función para calcular el offset right de una columna fijada a la derecha
@@ -1092,15 +1113,36 @@ const UserTable = () => {
                         />
                       </div>
                     </th>
-                    {[
-                      ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
-                      ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
-                      ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                    ].map((col: TableColumn) => {
+                    {(() => {
+                      // Obtener la primera columna visible
+                      const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
+                      
+                      // Construir el array de columnas considerando el pin de la primera columna
+                      let columnsToRender = [
+                        ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
+                        ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
+                        ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
+                      ];
+
+                      // Si la primera columna está pinneada y no está ya en pinnedColumns, la movemos al inicio
+                      if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
+                        // Remover la primera columna de su posición actual
+                        columnsToRender = columnsToRender.filter(col => col.key !== firstVisibleColumn.key);
+                        // Agregarla al inicio
+                        columnsToRender.unshift(firstVisibleColumn);
+                      }
+
+                      return columnsToRender;
+                    })().map((col: TableColumn) => {
                       const sortRule = sortRules.find(r => r.column === col.key);
                       const isPinnedLeft = pinnedColumns.includes(col.key);
                       const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                      const stickyStyle = isPinnedLeft
+                      
+                      // Determinar si la primera columna está pinneada
+                      const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
+                      const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
+                      
+                      const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
                         ? { left: getLeftOffset(col.key) }
                         : isPinnedRight
                           ? { right: getRightOffset(col.key) }
@@ -1109,7 +1151,7 @@ const UserTable = () => {
                         <th
                           key={col.key}
                           data-col-key={col.key}
-                          className={isPinnedLeft || isPinnedRight ? 'sticky' : ''}
+                          className={isPinnedLeft || isPinnedRight || isFirstColumnPinnedLeft ? 'sticky' : ''}
                           style={stickyStyle}
                         >
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1349,14 +1391,35 @@ const UserTable = () => {
                           />
                         </div>
                       </td>
-                      {[
-                        ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
-                        ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
-                        ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                      ].map((col: TableColumn) => {
+                      {(() => {
+                        // Obtener la primera columna visible
+                        const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
+                        
+                        // Construir el array de columnas considerando el pin de la primera columna
+                        let columnsToRender = [
+                          ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
+                          ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
+                          ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
+                        ];
+
+                        // Si la primera columna está pinneada y no está ya en pinnedColumns, la movemos al inicio
+                        if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
+                          // Remover la primera columna de su posición actual
+                          columnsToRender = columnsToRender.filter(col => col.key !== firstVisibleColumn.key);
+                          // Agregarla al inicio
+                          columnsToRender.unshift(firstVisibleColumn);
+                        }
+
+                        return columnsToRender;
+                      })().map((col: TableColumn) => {
                         const isPinnedLeft = pinnedColumns.includes(col.key);
                         const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                        const stickyStyle = isPinnedLeft
+                        
+                        // Determinar si la primera columna está pinneada
+                        const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
+                        const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
+                        
+                        const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
                           ? { left: getLeftOffset(col.key) }
                           : isPinnedRight
                             ? { right: getRightOffset(col.key) }
@@ -1365,7 +1428,7 @@ const UserTable = () => {
                           <td
                             key={col.key}
                             tabIndex={0}
-                            className={isPinnedLeft || isPinnedRight ? 'sticky' : ''}
+                            className={isPinnedLeft || isPinnedRight || isFirstColumnPinnedLeft ? 'sticky' : ''}
                             style={stickyStyle}
                           >
                             {user[col.key]}
