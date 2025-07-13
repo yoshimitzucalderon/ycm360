@@ -394,8 +394,6 @@ interface UserTableProps {
 }
 
 const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) => {
-  console.log('UserTable - isFirstColumnPinned:', isFirstColumnPinned, 'typeof:', typeof isFirstColumnPinned, 'value:', isFirstColumnPinned);
-
   const [page, setPage] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
   const [showSort, setShowSort] = useState(false);
@@ -1143,31 +1141,32 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                       // Determinar si la primera columna está pinneada
                       const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
                       const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
+                      const isFirstPinned = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
                       
-                      const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
-                        ? { 
-                            position: 'sticky' as const,
-                            left: getLeftOffset(col.key),
-                            zIndex: 2,
-                            background: '#f9fafb'
-                          }
-                        : isPinnedRight
+                                              const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
                           ? { 
                               position: 'sticky' as const,
-                              right: getRightOffset(col.key),
+                              left: getLeftOffset(col.key),
                               zIndex: 2,
-                              background: '#f9fafb'
+                              background: '#f9fafb',
+                              boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
                             }
-                          : {};
+                          : isPinnedRight
+                            ? { 
+                                position: 'sticky' as const,
+                                right: getRightOffset(col.key),
+                                zIndex: 2,
+                                background: '#f9fafb',
+                                boxShadow: '-2px 0 4px rgba(0,0,0,0.1)'
+                              }
+                            : {};
                       
-                      // Debug: mostrar información en consola
-                      if (isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key) {
-                        console.log('First column pinned:', col.key, 'offset:', getLeftOffset(col.key), 'stickyStyle:', stickyStyle);
-                      }
+
                       return (
                         <th
                           key={col.key}
                           data-col-key={col.key}
+                          className={isFirstPinned ? 'first-pinned-column' : ''}
                           style={stickyStyle}
                         >
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1434,26 +1433,30 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                         // Determinar si la primera columna está pinneada
                         const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
                         const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
+                        const isFirstPinned = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
                         
                         const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
                           ? { 
                               position: 'sticky' as const,
                               left: getLeftOffset(col.key),
                               zIndex: 1,
-                              background: '#f0f6ff'
+                              background: '#f0f6ff',
+                              boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
                             }
                           : isPinnedRight
                             ? { 
                                 position: 'sticky' as const,
                                 right: getRightOffset(col.key),
                                 zIndex: 1,
-                                background: '#f0f6ff'
+                                background: '#f0f6ff',
+                                boxShadow: '-2px 0 4px rgba(0,0,0,0.1)'
                               }
                             : {};
                         return (
                           <td
                             key={col.key}
                             tabIndex={0}
+                            className={isFirstPinned ? 'first-pinned-column' : ''}
                             style={stickyStyle}
                           >
                             {user[col.key]}

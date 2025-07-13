@@ -64,3 +64,28 @@ td.sticky {
 th.sticky:first-of-type, td.sticky:first-of-type {
   left: 40px !important; /* Offset para la columna de checkbox */
 }
+
+/* Asegurar que el contenedor de la tabla tenga el comportamiento correcto */
+.table-scroll-outer {
+  overflow-x: auto !important;
+  position: relative !important;
+}
+
+.table-scroll-inner {
+  position: relative !important;
+  min-width: 1000px !important;
+}
+
+/* Estilos específicos para la primera columna pinneada */
+.first-pinned-column {
+  position: sticky !important;
+  left: 40px !important;
+  z-index: 10 !important;
+  background: #f9fafb !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+}
+
+td.first-pinned-column {
+  background: #f0f6ff !important;
+  z-index: 5 !important;
+}

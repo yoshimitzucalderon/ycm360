@@ -11,10 +11,7 @@ const App = () => {
 
   const handleToggleFirstColumnPin = () => {
     setIsFirstColumnPinned(prev => !prev);
-    console.log('Toggle first column pin');
   };
-
-  console.log('App - isFirstColumnPinned:', isFirstColumnPinned, 'typeof:', typeof isFirstColumnPinned, 'value:', isFirstColumnPinned);
 
   return (
     <div className="app-layout">
