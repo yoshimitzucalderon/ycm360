@@ -1272,7 +1272,7 @@ const UserTable = () => {
                 fontSize: 16,
                 pointerEvents: 'none',
                 background: 'rgba(255,255,255,0.96)',
-                zIndex: 2000
+                zIndex: 10
                 // Eliminados: boxShadow y borderRadius
               }}>
                 No se encontraron resultados para los criterios seleccionados.
