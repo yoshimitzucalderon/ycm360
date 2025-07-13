@@ -1063,341 +1063,320 @@ const UserTable = () => {
             </div>
           </div>
         ) : (
-          <div className="table-data-area" style={{ minHeight: 240 }}>
-            <table className="user-table" ref={tableRef}>
-              <colgroup>
-                <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}
-                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                  <col
-                    key={col.key}
-                    style={{
-                      width: colWidths[col.key] || 150,
-                      minWidth: 60,
-                      maxWidth: 600,
-                    }}
-                  />
-                ))}
-              </colgroup>
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      minWidth: 40,
-                      maxWidth: 40,
-                      width: 40,
-                      padding: 0,
-                      background: '#f8fafc',
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                      <input
-                        type="checkbox"
-                        className="user-checkbox"
-                        checked={allVisibleSelected}
-                        ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
-                        onChange={toggleAllVisible}
-                      />
-                    </div>
-                  </th>
-                  {[
-                    ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
-                    ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
-                    ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                  ].map((col: TableColumn) => {
-                    const sortRule = sortRules.find(r => r.column === col.key);
-                    const isPinnedLeft = pinnedColumns.includes(col.key);
-                    const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                    const stickyStyle = isPinnedLeft
-                      ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 2, background: '#f9fafb' }
-                      : isPinnedRight
-                        ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 2, background: '#f9fafb' }
-                        : {};
-                    return (
-                      <th
-                        key={col.key}
-                        data-col-key={col.key}
-                        style={stickyStyle}
-                      >
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          {col.label}
-                          {sortRule && (
-                            sortRule.direction === 'asc' ?
-                              <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> :
-                              <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
-                          )}
-                        </span>
-                        {/* Icono de menú contextual, solo visible en hover */}
-                        <span
-                          className="header-menu-trigger"
-                          style={{
-                            position: 'absolute',
-                            right: 6,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            cursor: 'pointer',
-                            opacity: 0,
-                            transition: 'opacity 0.15s',
-                            zIndex: 3,
-                          }}
-                          onClick={e => handleOpenColumnMenu(e, col.key)}
-                        >
-                          <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                        </span>
-                        {/* Resizer y badge de filtro ... */}
-                        {/* Menú contextual minimalista */}
-                        {columnMenuAnchor && columnMenuKey === col.key && ReactDOM.createPortal(
-                          (() => {
-                            const rect = columnMenuAnchor.getBoundingClientRect();
-                            return (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: rect.bottom + 4 + window.scrollY,
-                                  left: rect.left + window.scrollX,
-                                  minWidth: 170,
-                                  background: '#fff',
-                                  border: '1.5px solid #e5e7eb',
-                                  borderRadius: 8,
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                  zIndex: 10000,
-                                  fontSize: 14,
-                                  padding: 4,
-                                }}
-                                tabIndex={-1}
-                                onBlur={handleCloseColumnMenu}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <div 
-                                  className="column-menu-item" 
-                                  style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 8, 
-                                    padding: '7px 12px', 
-                                    cursor: 'pointer', 
-                                    borderRadius: 5,
-                                    color: '#555',
-                                    fontWeight: 400
-                                  }} 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleSortOption(col.key, 'asc');
-                                    handleCloseColumnMenu();
-                                  }}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  <ArrowUp size={16} /> Ordenar ascendente
-                                </div>
-                                <div 
-                                  className="column-menu-item" 
-                                  style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 8, 
-                                    padding: '7px 12px', 
-                                    cursor: 'pointer', 
-                                    borderRadius: 5,
-                                    color: '#555',
-                                    fontWeight: 400
-                                  }} 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleSortOption(col.key, 'desc');
-                                    handleCloseColumnMenu();
-                                  }}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  <ArrowDown size={16} /> Ordenar descendente
-                                </div>
-                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                                {!pinnedColumns.includes(col.key) && !pinnedColumnsRight.includes(col.key) && (
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      pinColumnLeft(col.key);
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <Pin size={16} /> Fijar a la izquierda
-                                  </div>
-                                )}
-                                {pinnedColumns.includes(col.key) && (
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      unpinColumn(col.key);
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <PinOff size={16} /> Desfijar
-                                  </div>
-                                )}
-                                {!pinnedColumnsRight.includes(col.key) && !pinnedColumns.includes(col.key) && (
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      pinColumnRight(col.key);
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                                  </div>
-                                )}
-                                {pinnedColumnsRight.includes(col.key) && (
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      unpinColumn(col.key);
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <PinOff size={16} /> Desfijar
-                                  </div>
-                                )}
-                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                                <div 
-                                  className="column-menu-item column-menu-hide" 
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                  onClick={handleCloseColumnMenu}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  <EyeOff size={16} /> Ocultar columna
-                                </div>
-                              </div>
-                            );
-                          })(),
-                          document.body
-                        )}
-                        {/* Resizer minimalista visible en hover/drag */}
-                        <div
-                          style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: 0,
-                            height: '100%',
-                            width: 6,
-                            cursor: 'col-resize',
-                            zIndex: 10,
-                            userSelect: 'none',
-                            touchAction: 'none',
-                            background:
-                              resizingCol === col.key || hoveredResizer === col.key
-                                ? '#e5e7eb'
-                                : 'transparent',
-                            transition: 'background 0.15s',
-                            borderRadius: 3,
-                          }}
-                          onMouseDown={e => handleMouseDown(e, col.key)}
-                          onMouseEnter={() => setHoveredResizer(col.key)}
-                          onMouseLeave={() => setHoveredResizer(null)}
-                        />
-                        {filtersByColumn[col.key] > 0 && (
-                          <span style={{
-                            position: 'absolute',
-                            top: 6,
-                            right: 4,
-                            background: '#22c55e',
-                            color: '#fff',
-                            borderRadius: '50%',
-                            fontSize: 10,
-                            minWidth: 15,
-                            height: 15,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 600,
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                            zIndex: 2
-                          }}>{filtersByColumn[col.key]}</span>
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.map((user, idx) => (
-                  <tr key={user.id || idx}>
-                    <td className="user-table-checkbox-cell">
+          <div className="table-scroll-outer">
+            <div className="table-scroll-inner">
+              <table className="user-table" ref={tableRef}>
+                <colgroup>
+                  <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} />
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                    <col
+                      key={col.key}
+                      style={{
+                        width: colWidths[col.key] || 150,
+                        minWidth: 60,
+                        maxWidth: 600,
+                      }}
+                    />
+                  ))}
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th style={{ minWidth: 40, maxWidth: 40, width: 40, padding: 0, background: '#f8fafc', textAlign: 'center', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                         <input
                           type="checkbox"
-                          checked={!!selectedRows[user.id]}
-                          onChange={() => toggleRow(user.id)}
                           className="user-checkbox"
+                          checked={allVisibleSelected}
+                          ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
+                          onChange={toggleAllVisible}
                         />
                       </div>
-                    </td>
+                    </th>
                     {[
                       ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
                       ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
                       ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
                     ].map((col: TableColumn) => {
+                      const sortRule = sortRules.find(r => r.column === col.key);
                       const isPinnedLeft = pinnedColumns.includes(col.key);
                       const isPinnedRight = pinnedColumnsRight.includes(col.key);
                       const stickyStyle = isPinnedLeft
-                        ? { position: stickyPosition, left: getLeftOffset(col.key), zIndex: 1, background: '#f0f6ff' }
+                        ? { left: getLeftOffset(col.key) }
                         : isPinnedRight
-                          ? { position: stickyPosition, right: getRightOffset(col.key), zIndex: 1, background: '#f0f6ff' }
+                          ? { right: getRightOffset(col.key) }
                           : {};
                       return (
-                        <td key={col.key} tabIndex={0} style={stickyStyle}>{user[col.key]}</td>
+                        <th
+                          key={col.key}
+                          data-col-key={col.key}
+                          className={isPinnedLeft || isPinnedRight ? 'sticky' : ''}
+                          style={stickyStyle}
+                        >
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            {col.label}
+                            {sortRule && (
+                              sortRule.direction === 'asc' ?
+                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> :
+                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
+                            )}
+                          </span>
+                          {/* Icono de menú contextual, solo visible en hover */}
+                          <span
+                            className="header-menu-trigger"
+                            style={{
+                              position: 'absolute',
+                              right: 6,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              cursor: 'pointer',
+                              opacity: 0,
+                              transition: 'opacity 0.15s',
+                              zIndex: 3,
+                            }}
+                            onClick={e => handleOpenColumnMenu(e, col.key)}
+                          >
+                            <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                          </span>
+                          {/* Resizer y badge de filtro ... */}
+                          {/* Menú contextual minimalista */}
+                          {columnMenuAnchor && columnMenuKey === col.key && ReactDOM.createPortal(
+                            (() => {
+                              const rect = columnMenuAnchor.getBoundingClientRect();
+                              return (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: rect.bottom + 4 + window.scrollY,
+                                    left: rect.left + window.scrollX,
+                                    minWidth: 170,
+                                    background: '#fff',
+                                    border: '1.5px solid #e5e7eb',
+                                    borderRadius: 8,
+                                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                    zIndex: 10000,
+                                    fontSize: 14,
+                                    padding: 4,
+                                  }}
+                                  tabIndex={-1}
+                                  onBlur={handleCloseColumnMenu}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      gap: 8, 
+                                      padding: '7px 12px', 
+                                      cursor: 'pointer', 
+                                      borderRadius: 5,
+                                      color: '#555',
+                                      fontWeight: 400
+                                    }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleSortOption(col.key, 'asc');
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <ArrowUp size={16} /> Ordenar ascendente
+                                  </div>
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      gap: 8, 
+                                      padding: '7px 12px', 
+                                      cursor: 'pointer', 
+                                      borderRadius: 5,
+                                      color: '#555',
+                                      fontWeight: 400
+                                    }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleSortOption(col.key, 'desc');
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <ArrowDown size={16} /> Ordenar descendente
+                                  </div>
+                                  <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                  {!pinnedColumns.includes(col.key) && !pinnedColumnsRight.includes(col.key) && (
+                                    <div 
+                                      className="column-menu-item" 
+                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        pinColumnLeft(col.key);
+                                        handleCloseColumnMenu();
+                                      }}
+                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                      <Pin size={16} /> Fijar a la izquierda
+                                    </div>
+                                  )}
+                                  {pinnedColumns.includes(col.key) && (
+                                    <div 
+                                      className="column-menu-item" 
+                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        unpinColumn(col.key);
+                                        handleCloseColumnMenu();
+                                      }}
+                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                      <PinOff size={16} /> Desfijar
+                                    </div>
+                                  )}
+                                  {!pinnedColumnsRight.includes(col.key) && !pinnedColumns.includes(col.key) && (
+                                    <div 
+                                      className="column-menu-item" 
+                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        pinColumnRight(col.key);
+                                        handleCloseColumnMenu();
+                                      }}
+                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                      <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                    </div>
+                                  )}
+                                  {pinnedColumnsRight.includes(col.key) && (
+                                    <div 
+                                      className="column-menu-item" 
+                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        unpinColumn(col.key);
+                                        handleCloseColumnMenu();
+                                      }}
+                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                      <PinOff size={16} /> Desfijar
+                                    </div>
+                                  )}
+                                  <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                  <div 
+                                    className="column-menu-item column-menu-hide" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                    onClick={handleCloseColumnMenu}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <EyeOff size={16} /> Ocultar columna
+                                  </div>
+                                </div>
+                              );
+                            })(),
+                            document.body
+                          )}
+                          {/* Resizer minimalista visible en hover/drag */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              right: 0,
+                              top: 0,
+                              height: '100%',
+                              width: 6,
+                              cursor: 'col-resize',
+                              zIndex: 10,
+                              userSelect: 'none',
+                              touchAction: 'none',
+                              background:
+                                resizingCol === col.key || hoveredResizer === col.key
+                                  ? '#e5e7eb'
+                                  : 'transparent',
+                              transition: 'background 0.15s',
+                              borderRadius: 3,
+                            }}
+                            onMouseDown={e => handleMouseDown(e, col.key)}
+                            onMouseEnter={() => setHoveredResizer(col.key)}
+                            onMouseLeave={() => setHoveredResizer(null)}
+                          />
+                          {filtersByColumn[col.key] > 0 && (
+                            <span style={{
+                              position: 'absolute',
+                              top: 6,
+                              right: 4,
+                              background: '#22c55e',
+                              color: '#fff',
+                              borderRadius: '50%',
+                              fontSize: 10,
+                              minWidth: 15,
+                              height: 15,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 600,
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                              zIndex: 2
+                            }}>{filtersByColumn[col.key]}</span>
+                          )}
+                        </th>
                       );
                     })}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {paginatedData.length === 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                minWidth: 320,
-                minHeight: 80,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#888',
-                fontSize: 16,
-                pointerEvents: 'none',
-                background: 'rgba(255,255,255,0.96)',
-                zIndex: 10
-                // Eliminados: boxShadow y borderRadius
-              }}>
-                No se encontraron resultados para los criterios seleccionados.
-              </div>
-            )}
+                </thead>
+                <tbody>
+                  {paginatedData.map((user, idx) => (
+                    <tr key={user.id || idx}>
+                      <td className="user-table-checkbox-cell">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedRows[user.id]}
+                            onChange={() => toggleRow(user.id)}
+                            className="user-checkbox"
+                          />
+                        </div>
+                      </td>
+                      {[
+                        ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
+                        ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
+                        ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
+                      ].map((col: TableColumn) => {
+                        const isPinnedLeft = pinnedColumns.includes(col.key);
+                        const isPinnedRight = pinnedColumnsRight.includes(col.key);
+                        const stickyStyle = isPinnedLeft
+                          ? { left: getLeftOffset(col.key) }
+                          : isPinnedRight
+                            ? { right: getRightOffset(col.key) }
+                            : {};
+                        return (
+                          <td
+                            key={col.key}
+                            tabIndex={0}
+                            className={isPinnedLeft || isPinnedRight ? 'sticky' : ''}
+                            style={stickyStyle}
+                          >
+                            {user[col.key]}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

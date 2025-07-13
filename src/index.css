@@ -33,3 +33,22 @@ body {
 th:hover .header-menu-trigger {
   opacity: 1 !important;
 }
+
+.table-scroll-outer {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+}
+.table-scroll-inner {
+  min-width: 1000px;
+  display: table;
+}
+th.sticky, td.sticky {
+  position: sticky;
+  z-index: 2;
+  background: #f9fafb;
+}
+td.sticky {
+  background: #f0f6ff;
+  z-index: 1;
+}
