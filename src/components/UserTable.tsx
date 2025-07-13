@@ -6,7 +6,7 @@ import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 import { supabase } from "../supabaseClient";
 import { Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, MoreVertical, Pin, EyeOff, RotateCcw } from 'lucide-react';
-import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine } from 'react-icons/ri';
+import { RiArrowDownSLine, RiArrowUpLine, RiArrowDownLine, RiUnpinLine } from 'react-icons/ri';
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -423,6 +423,10 @@ const UserTable = () => {
   // Estado para el menú contextual de columna
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
   const [columnMenuKey, setColumnMenuKey] = useState<string | null>(null);
+  // Estado para columnas fijadas a la izquierda
+  const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
+  // Estado para columnas fijadas a la derecha
+  const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
 
   useEffect(() => {
     if (showSearch) {
@@ -494,6 +498,28 @@ const UserTable = () => {
   const showAllColumns = () => setVisibleColumns(columns.map(c => c.key));
   const hideAllColumns = () => setVisibleColumns([]);
   const resetColumns = () => setVisibleColumns(columns.map(c => c.key));
+
+  // Función para fijar columna a la izquierda
+  const pinColumnLeft = (colKey: string) => {
+    setPinnedColumns(prev => {
+      const filtered = prev.filter(key => key !== colKey);
+      return [colKey, ...filtered];
+    });
+  };
+
+  // Función para fijar columna a la derecha
+  const pinColumnRight = (colKey: string) => {
+    setPinnedColumnsRight(prev => {
+      const filtered = prev.filter(key => key !== colKey);
+      return [...filtered, colKey];
+    });
+  };
+
+  // Función para desfijar columna
+  const unpinColumn = (colKey: string) => {
+    setPinnedColumns(prev => prev.filter(key => key !== colKey));
+    setPinnedColumnsRight(prev => prev.filter(key => key !== colKey));
+  };
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
@@ -1045,8 +1071,12 @@ const UserTable = () => {
                       />
                     </div>
                   </th>
-                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => {
-                    const sortRule = sortRules.find(rule => rule.column === col.key);
+                  {[
+                    ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
+                    ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
+                    ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
+                  ].map((col: TableColumn) => {
+                    const sortRule = sortRules.find(r => r.column === col.key);
                     return (
                       <th
                         key={col.key}
@@ -1061,6 +1091,7 @@ const UserTable = () => {
                           minWidth: 60,
                           maxWidth: 600,
                           paddingRight: 0,
+                          background: (pinnedColumns.includes(col.key) || pinnedColumnsRight.includes(col.key)) ? '#e0edff' : undefined,
                         }}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1129,7 +1160,6 @@ const UserTable = () => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Click en Ordenar ascendente para columna:', col.key);
                                     handleSortOption(col.key, 'asc');
                                     handleCloseColumnMenu();
                                   }}
@@ -1153,7 +1183,6 @@ const UserTable = () => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Click en Ordenar descendente para columna:', col.key);
                                     handleSortOption(col.key, 'desc');
                                     handleCloseColumnMenu();
                                   }}
@@ -1163,24 +1192,70 @@ const UserTable = () => {
                                   <ArrowDown size={16} /> Ordenar descendente
                                 </div>
                                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                                <div 
-                                  className="column-menu-item" 
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                  onClick={handleCloseColumnMenu}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  <Pin size={16} /> Fijar a la izquierda
-                                </div>
-                                <div 
-                                  className="column-menu-item" 
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                  onClick={handleCloseColumnMenu}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                >
-                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                                </div>
+                                {!pinnedColumns.includes(col.key) && !pinnedColumnsRight.includes(col.key) && (
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      pinColumnLeft(col.key);
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <Pin size={16} /> Fijar a la izquierda
+                                  </div>
+                                )}
+                                {pinnedColumns.includes(col.key) && (
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      unpinColumn(col.key);
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <RiUnpinLine size={16} /> Desfijar
+                                  </div>
+                                )}
+                                {!pinnedColumnsRight.includes(col.key) && !pinnedColumns.includes(col.key) && (
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      pinColumnRight(col.key);
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                  </div>
+                                )}
+                                {pinnedColumnsRight.includes(col.key) && (
+                                  <div 
+                                    className="column-menu-item" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      unpinColumn(col.key);
+                                      handleCloseColumnMenu();
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <RiUnpinLine size={16} /> Desfijar
+                                  </div>
+                                )}
                                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
                                 <div 
                                   className="column-menu-item column-menu-hide" 
@@ -1256,8 +1331,12 @@ const UserTable = () => {
                         />
                       </div>
                     </td>
-                    {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                      <td key={col.key} tabIndex={0}>{user[col.key]}</td>
+                    {[
+                      ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
+                      ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
+                      ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
+                    ].map((col: TableColumn) => (
+                      <td key={col.key} tabIndex={0} style={{ background: (pinnedColumns.includes(col.key) || pinnedColumnsRight.includes(col.key)) ? '#e0edff' : undefined }}>{user[col.key]}</td>
                     ))}
                   </tr>
                 ))}
