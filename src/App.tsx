@@ -7,22 +7,13 @@ import RightPanel from "./components/RightPanel";
 import "./styles.css";
 
 const App = () => {
-  const [isFirstColumnPinned, setIsFirstColumnPinned] = useState(false);
-
-  const handleToggleFirstColumnPin = () => {
-    setIsFirstColumnPinned(prev => !prev);
-  };
-
   return (
     <div className="app-layout">
       <Sidebar />
       <div className="main-content">
-        <Header 
-          isFirstColumnPinned={isFirstColumnPinned}
-          onToggleFirstColumnPin={handleToggleFirstColumnPin}
-        />
+        <Header />
         <Tabs />
-        <UserTable isFirstColumnPinned={isFirstColumnPinned} />
+        <UserTable />
       </div>
       <RightPanel />
     </div>

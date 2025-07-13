@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { Search, X as XIcon, Bell, CircleUserRound, Pin, PinOff } from 'lucide-react';
 
 interface HeaderProps {
-  isFirstColumnPinned?: boolean;
-  onToggleFirstColumnPin?: () => void;
+  // Elimina todo el bloque relacionado con el pin/unpin de la primera columna en el header:
+  // - Propiedades isFirstColumnPinned y onToggleFirstColumnPin
+  // - El botón y el icono de pin en el JSX
 }
 
-const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFirstColumnPin }) => {
+const Header: React.FC<HeaderProps> = ({ }) => {
   const [search, setSearch] = useState("");
 
   return (
@@ -40,20 +41,9 @@ const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFi
       </div>
       <div className="header-right">
         {/* Botón para pin/unpin de la primera columna */}
-        {onToggleFirstColumnPin && (
-          <button
-            className={`header-pin-button ${isFirstColumnPinned ? 'pinned' : ''}`}
-            onClick={onToggleFirstColumnPin}
-            title={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
-            aria-label={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
-          >
-            {isFirstColumnPinned ? (
-              <PinOff size={20} className="pin-icon pin-icon-blue" />
-            ) : (
-              <Pin size={20} className="pin-icon pin-icon-blue" />
-            )}
-          </button>
-        )}
+        {/* Elimina todo el bloque relacionado con el pin/unpin de la primera columna en el header:
+        - Propiedades isFirstColumnPinned y onToggleFirstColumnPin
+        - El botón y el icono de pin en el JSX */}
         <span className="header-icon"><Bell size={24} /></span>
         <span className="header-icon"><CircleUserRound size={24} /></span>
       </div>

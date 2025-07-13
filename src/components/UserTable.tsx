@@ -432,6 +432,9 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
   // Estado para columnas fijadas a la derecha
   const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
+  // Estado para el panel de gestión de columnas fijadas
+  const [pinPanelAnchorEl, setPinPanelAnchorEl] = useState<null | HTMLElement>(null);
+  const pinPanelOpen = Boolean(pinPanelAnchorEl);
 
   useEffect(() => {
     if (showSearch) {
@@ -846,6 +849,24 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
 
   // EJEMPLO MÍNIMO DE TABLA STICKY PARA DEPURACIÓN
 
+  const handleOpenPinPanel = (event: React.MouseEvent<HTMLElement>) => {
+    setPinPanelAnchorEl(event.currentTarget);
+  };
+  const handleClosePinPanel = () => {
+    setPinPanelAnchorEl(null);
+  };
+
+  const handleTogglePin = (colKey: string) => {
+    if (pinnedColumns.includes(colKey)) {
+      unpinColumn(colKey);
+    } else {
+      pinColumnLeft(colKey);
+    }
+  };
+  const handleUnpinAll = () => {
+    pinnedColumns.forEach(unpinColumn);
+    handleClosePinPanel();
+  };
 
   return (
     <>
@@ -986,6 +1007,91 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
               <button className="btn-minimal" title="Agregar proveedor">
                 <Plus className="btn-icon" />
               </button>
+            {/* Botón de pin en la barra de acciones: */}
+            <button
+              className="action-button"
+              title="Columnas fijadas"
+              style={{ position: 'relative', marginLeft: 4 }}
+              onClick={handleOpenPinPanel}
+            >
+              <Pin className="action-icon" style={{ color: '#22c55e', width: 20, height: 20 }} />
+              {pinnedColumns.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#22c55e',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 11,
+                  minWidth: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{pinnedColumns.length}</span>
+              )}
+            </button>
+            <Popover
+              open={pinPanelOpen}
+              anchorEl={pinPanelAnchorEl}
+              onClose={handleClosePinPanel}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              PaperProps={{
+                style: {
+                  minWidth: 220,
+                  borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1.5px solid #e5e7eb',
+                  padding: 12,
+                  maxHeight: 340,
+                  overflowY: 'auto',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#d1d5db #f8fafc',
+                },
+              }}
+            >
+              <div style={{ minWidth: 200 }}>
+                <div style={{ fontWeight: 500, fontSize: 15, marginBottom: 8 }}>Columnas fijadas</div>
+                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                  <div key={col.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <Checkbox
+                      checked={pinnedColumns.includes(col.key)}
+                      onChange={() => handleTogglePin(col.key)}
+                      sx={{ color: '#22c55e', '&.Mui-checked': { color: '#22c55e' } }}
+                    />
+                    <span style={{ fontSize: 14 }}>{col.label}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '10px 0' }} />
+                <button
+                  onClick={handleUnpinAll}
+                  style={{
+                    color: '#22c55e',
+                    fontWeight: 500,
+                    fontSize: 14,
+                    textTransform: 'none',
+                    background: 'none',
+                    border: 'none',
+                    boxShadow: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer',
+                    padding: 4,
+                    borderRadius: 6,
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  <PinOff size={18} style={{ marginRight: 4 }} />
+                  Desfijar todas
+                </button>
+              </div>
+            </Popover>
             <button 
               className={`btn-minimal${Boolean(downloadAnchorEl) ? ' active' : ''}`} 
               title="Descargar"
