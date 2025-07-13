@@ -1063,7 +1063,7 @@ const UserTable = () => {
             </div>
           </div>
         ) : (
-          <div className="table-data-area" style={{ minHeight: 240, overflow: 'auto' }}>
+          <div className="table-data-area" style={{ minHeight: 240 }}>
             <table className="user-table" ref={tableRef}>
               <colgroup>
                 <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} /> {/* Para el checkbox */}

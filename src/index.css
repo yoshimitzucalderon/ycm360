@@ -23,8 +23,8 @@ body {
 }
 
 .table-data-area {
-  width: 100%;
-  overflow-x: auto;
+  /* width: 100%; */
+  /* overflow-x: auto; */
 }
 .user-table {
   min-width: 1000px;
