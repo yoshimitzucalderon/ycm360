@@ -406,13 +406,7 @@ body {
   background: #e6f9f2;
   color: #059669;
 }
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
+/* Removed old table-wrapper styles that were causing sticky column issues */
 .table-container {
   padding: 0;
   background: #fff;
@@ -426,6 +420,8 @@ body {
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   table-layout: auto;
+  min-width: 1200px;
+  width: max-content;
 }
 table.user-table {
   table-layout: fixed;
@@ -1134,4 +1130,12 @@ div.column-menu-item:hover, .column-menu-item:hover {
 .filter-row .filter-x:hover {
   color: #222;
   background: #e5e7eb;
+}
+
+.pin-icon-blue {
+  color: #2563eb !important;
+}
+
+.user-table th.first-pinned-column, .user-table td.first-pinned-column {
+  overflow: visible !important;
 }

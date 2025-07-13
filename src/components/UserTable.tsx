@@ -29,6 +29,7 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import { BsFillPinFill } from 'react-icons/bs';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import ReactDOM from 'react-dom';
+import StickyTest from './StickyTest';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -792,29 +793,21 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
 
   // Función para calcular el offset left de una columna fijada a la izquierda
   const getLeftOffset = (colKey: string) => {
-    let offset = 40; // Offset inicial para la columna de checkbox
-    
     // Obtener la primera columna visible
     const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-    
-    // Si la primera columna está pinneada y es la columna actual, retornar solo el offset del checkbox
-    if (isFirstColumnPinned && firstVisibleColumn && colKey === firstVisibleColumn.key) {
-      return 40; // Solo el ancho de la columna de checkbox
+
+    // Si la columna actual es la primera visible, el offset debe ser 0
+    if (firstVisibleColumn && colKey === firstVisibleColumn.key) {
+      return 0;
     }
-    
+
+    let offset = 0;
     // Calcular offset para columnas pinneadas normales
     for (const key of pinnedColumns) {
       if (key === colKey) break;
       const th = document.querySelector(`th[data-col-key='${key}']`) as HTMLElement;
       offset += th ? th.offsetWidth : 120; // fallback a 120px si no está renderizado
     }
-    
-    // Si la primera columna está pinneada, agregar su ancho al offset
-    if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
-      const firstColTh = document.querySelector(`th[data-col-key='${firstVisibleColumn.key}']`) as HTMLElement;
-      offset += firstColTh ? firstColTh.offsetWidth : 120;
-    }
-    
     return offset;
   };
   // Función para calcular el offset right de una columna fijada a la derecha
@@ -836,651 +829,656 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   // Helper para sticky position
   const stickyPosition = 'sticky' as CSSProperties['position'];
 
-  return (
-    <div className="table-container">
-        <div className="user-table-header table-controls">
-        <div className="controls-left"></div>
-        <div className="controls-right search-flex-group">
-          {searchVisible ? (
-            <div
-              className={`search-animate${showSearch ? ' expanded' : ''}`}
-              ref={searchContainerRef}
-            >
-              <Search className="search-icon-inside" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Buscar..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                autoFocus={showSearch}
-              />
-              {search && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearch("")}
-                  tabIndex={-1}
-                  aria-label="Limpiar búsqueda"
-                >
-                  <XIcon className="search-clear-icon" />
-                </button>
-              )}
-            </div>
-          ) : null}
-          {!searchVisible && (
-            <button
-              className={`action-button`}
-              onClick={() => setShowSearch(s => !s)}
-              title="Buscar"
-              aria-label="Buscar"
-              style={{ zIndex: 2 }}
-            >
-              <Search className="action-icon" />
-            </button>
-          )}
-          {/* Botón Seleccionar Columnas */}
-          <ColumnManager
-            columns={columns}
-            visibleColumns={visibleColumns}
-            onToggleColumn={toggleColumn}
-            onShowAll={showAllColumns}
-            onHideAll={hideAllColumns}
-            onReset={resetColumns}
-          />
-          <button
-            className={`action-button${filterOpen ? ' active' : ''}`}
-            onClick={handleOpenFilter}
-            title="Filtrar"
-            style={{ position: 'relative' }}
-          >
-            <Filter className="action-icon" />
-            {totalFilters > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: -6,
-                right: -6,
-                background: '#22c55e',
-                color: '#fff',
-                borderRadius: '50%',
-                fontSize: 10,
-                minWidth: 15,
-                height: 15,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 600,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                zIndex: 2
-              }}>{totalFilters}</span>
-            )}
-          </button>
-          {filterAnchorEl && (
-            <TableFilterPopover
-              columns={columns}
-              visibleColumns={visibleColumns}
-              filters={filters}
-              setFilters={setFilters}
-              anchorRef={{ current: filterAnchorEl }}
-              onClose={handleCloseFilter}
-            />
-          )}
-          {/* En la barra de acciones (arriba a la derecha): */}
-          <button
-            className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
-            onClick={e => setSortAnchorEl(e.currentTarget)}
-            title="Ordenar"
-            style={{ position: 'relative' }}
-          >
-            <ArrowUpDown className="action-icon" />
-            {sortRules.length > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: -6,
-                right: -6,
-                background: '#2563eb', // azul más oscuro para sort
-                color: '#fff',
-                borderRadius: '50%',
-                fontSize: 11,
-                minWidth: 18,
-                height: 18,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 600,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                zIndex: 2
-              }}>{sortRules.length}</span>
-            )}
-          </button>
-          {/* Popover de Ordenamiento */}
-          <Popover
-            open={Boolean(sortAnchorEl)}
-            anchorEl={sortAnchorEl}
-            onClose={() => setSortAnchorEl(null)}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-            PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 1000, maxHeight: 320, overflowY: 'auto' } }}
-          >
-            <TableSort
-              columns={columns}
-              visibleColumns={visibleColumns}
-              sortRules={sortRules}
-              setSortRules={setSortRules}
-              onApply={() => setSortAnchorEl(null)}
-              onClear={clearSort}
-            />
-          </Popover>
-          {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
-            <button className="btn-minimal" title="Agregar proveedor">
-              <Plus className="btn-icon" />
-            </button>
-          <button 
-            className={`btn-minimal${Boolean(downloadAnchorEl) ? ' active' : ''}`} 
-            title="Descargar"
-            onClick={handleOpenDownload}
-          >
-            <Download className="btn-icon" />
-          </button>
-          {/* Menu de Descarga */}
-          <Menu
-            anchorEl={downloadAnchorEl}
-            open={Boolean(downloadAnchorEl)}
-            onClose={handleCloseDownload}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            PaperProps={{
-              style: {
-                minWidth: 140,
-                borderRadius: 8,
-                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                border: '1px solid #e5e7eb',
-                padding: 4
-              }
-            }}
-          >
-            <button
-              onClick={handleDownloadPDF}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: 4,
-                fontSize: 13,
-                color: '#374151',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                textAlign: 'left'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              <span style={{ fontSize: 18, color: '#e11d48', display: 'flex', alignItems: 'center' }}><PictureAsPdfIcon fontSize="inherit" /></span>
-              Descargar PDF
-            </button>
-            <button
-              onClick={handleDownloadXLSX}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: 4,
-                fontSize: 13,
-                color: '#374151',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                textAlign: 'left'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              <span style={{ fontSize: 18, color: '#22c55e', display: 'flex', alignItems: 'center' }}><TableChartIcon fontSize="inherit" /></span>
-              Descargar XLSX
-            </button>
-            <button
-              onClick={handleDownloadCSV}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: 4,
-                fontSize: 13,
-                color: '#374151',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                textAlign: 'left'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              <span style={{ fontSize: 18, color: '#2563eb', display: 'flex', alignItems: 'center' }}><GridOnIcon fontSize="inherit" /></span>
-              Descargar CSV
-            </button>
-          </Menu>
-        </div>
-      </div>
-      <div className="table-wrapper" style={{ position: 'relative' }}>
-        {/* Filtros y orden siempre renderizados */}
-        <div style={{ position: 'relative', zIndex: 100 }}>
-          {/* No hay filtros abiertos */}
-        </div>
-        {/* Menu de Ordenamiento */}
-        {/* Elimina cualquier Popover/Menu/Dialog de orden */}
-        {/* Tabla o mensaje de no columnas seleccionadas */}
-        {noneChecked ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, color: '#222', fontSize: 15, background: '#fafbfc' }}>
-            <div style={{ marginBottom: 8 }}>No hay columnas seleccionadas</div>
-            <div style={{ color: '#10b981', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', fontSize: 15 }} onClick={() => setColumnMenuAnchorEl(null)}>
-              Seleccionar columnas a través del botón correspondiente
-            </div>
-          </div>
-        ) : (
-          <div className="table-scroll-outer">
-            <div className="table-scroll-inner">
-              <table className="user-table" ref={tableRef}>
-                <colgroup>
-                  <col style={{ width: 40, minWidth: 40, maxWidth: 40 }} />
-                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
-                    <col
-                      key={col.key}
-                      style={{
-                        width: colWidths[col.key] || 150,
-                        minWidth: 60,
-                        maxWidth: 600,
-                      }}
-                    />
-                  ))}
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: 40, maxWidth: 40, width: 40, padding: 0, background: '#f8fafc', textAlign: 'center', verticalAlign: 'middle' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                        <input
-                          type="checkbox"
-                          className="user-checkbox"
-                          checked={allVisibleSelected}
-                          ref={el => { if (el) el.indeterminate = someVisibleSelected; }}
-                          onChange={toggleAllVisible}
-                        />
-                      </div>
-                    </th>
-                    {(() => {
-                      // Obtener la primera columna visible
-                      const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-                      
-                      // Construir el array de columnas considerando el pin de la primera columna
-                      let columnsToRender = [
-                        ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
-                        ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
-                        ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                      ];
-
-                      // Si la primera columna está pinneada y no está ya en pinnedColumns, la movemos al inicio
-                      if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
-                        // Remover la primera columna de su posición actual
-                        columnsToRender = columnsToRender.filter(col => col.key !== firstVisibleColumn.key);
-                        // Agregarla al inicio
-                        columnsToRender.unshift(firstVisibleColumn);
-                      }
-
-                      return columnsToRender;
-                    })().map((col: TableColumn) => {
-                      const sortRule = sortRules.find(r => r.column === col.key);
-                      const isPinnedLeft = pinnedColumns.includes(col.key);
-                      const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                      
-                      // Determinar si la primera columna está pinneada
-                      const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-                      const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
-                      const isFirstPinned = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
-                      
-                                              const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
-                          ? { 
-                              position: 'sticky' as const,
-                              left: getLeftOffset(col.key),
-                              zIndex: 2,
-                              background: '#f9fafb',
-                              boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
-                            }
-                          : isPinnedRight
-                            ? { 
-                                position: 'sticky' as const,
-                                right: getRightOffset(col.key),
-                                zIndex: 2,
-                                background: '#f9fafb',
-                                boxShadow: '-2px 0 4px rgba(0,0,0,0.1)'
-                              }
-                            : {};
-                      
-
-                      return (
-                        <th
-                          key={col.key}
-                          data-col-key={col.key}
-                          className={isFirstPinned ? 'first-pinned-column' : ''}
-                          style={stickyStyle}
-                        >
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                            {col.label}
-                            {sortRule && (
-                              sortRule.direction === 'asc' ?
-                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> :
-                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />
-                            )}
-                          </span>
-                          {/* Icono de menú contextual, solo visible en hover */}
-                          <span
-                            className="header-menu-trigger"
-                            style={{
-                              position: 'absolute',
-                              right: 6,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              cursor: 'pointer',
-                              opacity: 0,
-                              transition: 'opacity 0.15s',
-                              zIndex: 3,
-                            }}
-                            onClick={e => handleOpenColumnMenu(e, col.key)}
-                          >
-                            <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                          </span>
-                          {/* Resizer y badge de filtro ... */}
-                          {/* Menú contextual minimalista */}
-                          {columnMenuAnchor && columnMenuKey === col.key && ReactDOM.createPortal(
-                            (() => {
-                              const rect = columnMenuAnchor.getBoundingClientRect();
-                              return (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: rect.bottom + 4 + window.scrollY,
-                                    left: rect.left + window.scrollX,
-                                    minWidth: 170,
-                                    background: '#fff',
-                                    border: '1.5px solid #e5e7eb',
-                                    borderRadius: 8,
-                                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                    zIndex: 10000,
-                                    fontSize: 14,
-                                    padding: 4,
-                                  }}
-                                  tabIndex={-1}
-                                  onBlur={handleCloseColumnMenu}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      gap: 8, 
-                                      padding: '7px 12px', 
-                                      cursor: 'pointer', 
-                                      borderRadius: 5,
-                                      color: '#555',
-                                      fontWeight: 400
-                                    }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleSortOption(col.key, 'asc');
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <ArrowUp size={16} /> Ordenar ascendente
-                                  </div>
-                                  <div 
-                                    className="column-menu-item" 
-                                    style={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      gap: 8, 
-                                      padding: '7px 12px', 
-                                      cursor: 'pointer', 
-                                      borderRadius: 5,
-                                      color: '#555',
-                                      fontWeight: 400
-                                    }} 
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleSortOption(col.key, 'desc');
-                                      handleCloseColumnMenu();
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <ArrowDown size={16} /> Ordenar descendente
-                                  </div>
-                                  <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                                  {!pinnedColumns.includes(col.key) && !pinnedColumnsRight.includes(col.key) && (
-                                    <div 
-                                      className="column-menu-item" 
-                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        pinColumnLeft(col.key);
-                                        handleCloseColumnMenu();
-                                      }}
-                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                      <Pin size={16} /> Fijar a la izquierda
-                                    </div>
-                                  )}
-                                  {pinnedColumns.includes(col.key) && (
-                                    <div 
-                                      className="column-menu-item" 
-                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        unpinColumn(col.key);
-                                        handleCloseColumnMenu();
-                                      }}
-                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                      <PinOff size={16} /> Desfijar
-                                    </div>
-                                  )}
-                                  {!pinnedColumnsRight.includes(col.key) && !pinnedColumns.includes(col.key) && (
-                                    <div 
-                                      className="column-menu-item" 
-                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        pinColumnRight(col.key);
-                                        handleCloseColumnMenu();
-                                      }}
-                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                      <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                                    </div>
-                                  )}
-                                  {pinnedColumnsRight.includes(col.key) && (
-                                    <div 
-                                      className="column-menu-item" 
-                                      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        unpinColumn(col.key);
-                                        handleCloseColumnMenu();
-                                      }}
-                                      onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                      <PinOff size={16} /> Desfijar
-                                    </div>
-                                  )}
-                                  <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                                  <div 
-                                    className="column-menu-item column-menu-hide" 
-                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
-                                    onClick={handleCloseColumnMenu}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    <EyeOff size={16} /> Ocultar columna
-                                  </div>
-                                </div>
-                              );
-                            })(),
-                            document.body
-                          )}
-                          {/* Resizer minimalista visible en hover/drag */}
-                          <div
-                            style={{
-                              position: 'absolute',
-                              right: 0,
-                              top: 0,
-                              height: '100%',
-                              width: 6,
-                              cursor: 'col-resize',
-                              zIndex: 10,
-                              userSelect: 'none',
-                              touchAction: 'none',
-                              background:
-                                resizingCol === col.key || hoveredResizer === col.key
-                                  ? '#e5e7eb'
-                                  : 'transparent',
-                              transition: 'background 0.15s',
-                              borderRadius: 3,
-                            }}
-                            onMouseDown={e => handleMouseDown(e, col.key)}
-                            onMouseEnter={() => setHoveredResizer(col.key)}
-                            onMouseLeave={() => setHoveredResizer(null)}
-                          />
-                          {filtersByColumn[col.key] > 0 && (
-                            <span style={{
-                              position: 'absolute',
-                              top: 6,
-                              right: 4,
-                              background: '#22c55e',
-                              color: '#fff',
-                              borderRadius: '50%',
-                              fontSize: 10,
-                              minWidth: 15,
-                              height: 15,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                              zIndex: 2
-                            }}>{filtersByColumn[col.key]}</span>
-                          )}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedData.map((user, idx) => (
-                    <tr key={user.id || idx}>
-                      <td className="user-table-checkbox-cell">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                          <input
-                            type="checkbox"
-                            checked={!!selectedRows[user.id]}
-                            onChange={() => toggleRow(user.id)}
-                            className="user-checkbox"
-                          />
-                        </div>
-                      </td>
-                      {(() => {
-                        // Obtener la primera columna visible
-                        const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-                        
-                        // Construir el array de columnas considerando el pin de la primera columna
-                        let columnsToRender = [
-                          ...pinnedColumns.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean),
-                          ...columnOrder.filter((c: TableColumn) => visibleColumns.includes(c.key) && !pinnedColumns.includes(c.key) && !pinnedColumnsRight.includes(c.key)),
-                          ...pinnedColumnsRight.map(key => columnOrder.find((c: TableColumn) => c.key === key)).filter(Boolean)
-                        ];
-
-                        // Si la primera columna está pinneada y no está ya en pinnedColumns, la movemos al inicio
-                        if (isFirstColumnPinned && firstVisibleColumn && !pinnedColumns.includes(firstVisibleColumn.key)) {
-                          // Remover la primera columna de su posición actual
-                          columnsToRender = columnsToRender.filter(col => col.key !== firstVisibleColumn.key);
-                          // Agregarla al inicio
-                          columnsToRender.unshift(firstVisibleColumn);
-                        }
-
-                        return columnsToRender;
-                      })().map((col: TableColumn) => {
-                        const isPinnedLeft = pinnedColumns.includes(col.key);
-                        const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                        
-                        // Determinar si la primera columna está pinneada
-                        const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-                        const isFirstColumnPinnedLeft = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
-                        const isFirstPinned = isFirstColumnPinned && firstVisibleColumn && col.key === firstVisibleColumn.key;
-                        
-                        const stickyStyle = isPinnedLeft || isFirstColumnPinnedLeft
-                          ? { 
-                              position: 'sticky' as const,
-                              left: getLeftOffset(col.key),
-                              zIndex: 1,
-                              background: '#f0f6ff',
-                              boxShadow: '2px 0 4px rgba(0,0,0,0.1)'
-                            }
-                          : isPinnedRight
-                            ? { 
-                                position: 'sticky' as const,
-                                right: getRightOffset(col.key),
-                                zIndex: 1,
-                                background: '#f0f6ff',
-                                boxShadow: '-2px 0 4px rgba(0,0,0,0.1)'
-                              }
-                            : {};
-                        return (
-                          <td
-                            key={col.key}
-                            tabIndex={0}
-                            className={isFirstPinned ? 'first-pinned-column' : ''}
-                            style={stickyStyle}
-                          >
-                            {user[col.key]}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="table-footer">
-        <TablePagination
-          page={page}
-          setPage={setPage}
-          totalPages={totalPages}
-          totalItems={searchedData.length}
-          pageSize={PAGE_SIZE}
-        />
-      </div>
+  // EJEMPLO MÍNIMO DE TABLA STICKY PARA DEPURACIÓN
+  const StickyMinimalTest = () => (
+    <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
+      <table style={{ minWidth: 600, width: 'max-content', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky</th>
+            <th style={{ border: '1px solid #e5e7eb' }}>Col 2</th>
+            <th style={{ border: '1px solid #e5e7eb' }}>Col 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky 1</td>
+            <td style={{ border: '1px solid #e5e7eb' }}>Data 2</td>
+            <td style={{ border: '1px solid #e5e7eb' }}>Data 3</td>
+          </tr>
+          <tr>
+            <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky 2</td>
+            <td style={{ border: '1px solid #e5e7eb' }}>Data 2</td>
+            <td style={{ border: '1px solid #e5e7eb' }}>Data 3</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  );
+
+  // EJEMPLO MÍNIMO DE TABLA STICKY CON MUCHAS COLUMNAS PARA DEPURACIÓN
+  const StickyWideTest = () => (
+    <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
+      <table style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky</th>
+            {Array.from({ length: 15 }).map((_, i) => (
+              <th key={i} style={{ border: '1px solid #e5e7eb' }}>Col {i + 2}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }).map((_, row) => (
+            <tr key={row}>
+              <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky {row + 1}</td>
+              {Array.from({ length: 15 }).map((_, col) => (
+                <td key={col} style={{ border: '1px solid #e5e7eb' }}>Data {col + 2}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <>
+      <StickyMinimalTest />
+      <StickyWideTest />
+      <div className="table-container">
+        <div className="user-table-header table-controls">
+          <div className="controls-left">
+            {searchVisible ? (
+              <div
+                className={`search-animate${showSearch ? ' expanded' : ''}`}
+                ref={searchContainerRef}
+              >
+                <Search className="search-icon-inside" />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Buscar..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  autoFocus={showSearch}
+                />
+                {search && (
+                  <button
+                    type="button"
+                    className="search-clear-btn"
+                    onClick={() => setSearch("")}
+                    tabIndex={-1}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <XIcon className="search-clear-icon" />
+                  </button>
+                )}
+              </div>
+            ) : null}
+            {!searchVisible && (
+              <button
+                className={`action-button`}
+                onClick={() => setShowSearch(s => !s)}
+                title="Buscar"
+                aria-label="Buscar"
+                style={{ zIndex: 2 }}
+              >
+                <Search className="action-icon" />
+              </button>
+            )}
+            {/* Botón Seleccionar Columnas */}
+            <ColumnManager
+              columns={columns}
+              visibleColumns={visibleColumns}
+              onToggleColumn={toggleColumn}
+              onShowAll={showAllColumns}
+              onHideAll={hideAllColumns}
+              onReset={resetColumns}
+            />
+            <button
+              className={`action-button${filterOpen ? ' active' : ''}`}
+              onClick={handleOpenFilter}
+              title="Filtrar"
+              style={{ position: 'relative' }}
+            >
+              <Filter className="action-icon" />
+              {totalFilters > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#22c55e',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 10,
+                  minWidth: 15,
+                  height: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{totalFilters}</span>
+              )}
+            </button>
+            {filterAnchorEl && (
+              <TableFilterPopover
+                columns={columns}
+                visibleColumns={visibleColumns}
+                filters={filters}
+                setFilters={setFilters}
+                anchorRef={{ current: filterAnchorEl }}
+                onClose={handleCloseFilter}
+              />
+            )}
+            {/* En la barra de acciones (arriba a la derecha): */}
+            <button
+              className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
+              onClick={e => setSortAnchorEl(e.currentTarget)}
+              title="Ordenar"
+              style={{ position: 'relative' }}
+            >
+              <ArrowUpDown className="action-icon" />
+              {sortRules.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#2563eb', // azul más oscuro para sort
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 11,
+                  minWidth: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{sortRules.length}</span>
+              )}
+            </button>
+            {/* Popover de Ordenamiento */}
+            <Popover
+              open={Boolean(sortAnchorEl)}
+              anchorEl={sortAnchorEl}
+              onClose={() => setSortAnchorEl(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 1000, maxHeight: 320, overflowY: 'auto' } }}
+            >
+              <TableSort
+                columns={columns}
+                visibleColumns={visibleColumns}
+                sortRules={sortRules}
+                setSortRules={setSortRules}
+                onApply={() => setSortAnchorEl(null)}
+                onClear={clearSort}
+              />
+            </Popover>
+            {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
+              <button className="btn-minimal" title="Agregar proveedor">
+                <Plus className="btn-icon" />
+              </button>
+            <button 
+              className={`btn-minimal${Boolean(downloadAnchorEl) ? ' active' : ''}`} 
+              title="Descargar"
+              onClick={handleOpenDownload}
+            >
+              <Download className="btn-icon" />
+            </button>
+            {/* Menu de Descarga */}
+            <Menu
+              anchorEl={downloadAnchorEl}
+              open={Boolean(downloadAnchorEl)}
+              onClose={handleCloseDownload}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              PaperProps={{
+                style: {
+                  minWidth: 140,
+                  borderRadius: 8,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1px solid #e5e7eb',
+                  padding: 4
+                }
+              }}
+            >
+              <button
+                onClick={handleDownloadPDF}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#e11d48', display: 'flex', alignItems: 'center' }}><PictureAsPdfIcon fontSize="inherit" /></span>
+                Descargar PDF
+              </button>
+              <button
+                onClick={handleDownloadXLSX}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#22c55e', display: 'flex', alignItems: 'center' }}><TableChartIcon fontSize="inherit" /></span>
+                Descargar XLSX
+              </button>
+              <button
+                onClick={handleDownloadCSV}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#2563eb', display: 'flex', alignItems: 'center' }}><GridOnIcon fontSize="inherit" /></span>
+                Descargar CSV
+              </button>
+            </Menu>
+          </div>
+        </div>
+        
+        {/* ESTRUCTURA MIGRADA DESDE LA TABLA QUE FUNCIONA */}
+        <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
+          <table style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {/* Primera columna sticky */}
+                <th style={{ 
+                  position: isFirstColumnPinned ? 'sticky' : 'static', 
+                  left: isFirstColumnPinned ? 0 : 'auto', 
+                  background: isFirstColumnPinned ? '#f0f6ff' : '#f8fafc', 
+                  zIndex: isFirstColumnPinned ? 10 : 1, 
+                  border: '1px solid #e5e7eb',
+                  padding: '6px 12px',
+                  textAlign: 'left',
+                  fontWeight: 500,
+                  boxShadow: isFirstColumnPinned ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                  if (trigger) trigger.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                  if (trigger) trigger.style.opacity = '0';
+                }}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    Proveedor
+                    {(() => {
+                      const sortRule = sortRules.find(r => r.column === 'name');
+                      if (sortRule) {
+                        return sortRule.direction === 'asc' ? 
+                          <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
+                          <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
+                      }
+                      return null;
+                    })()}
+                  </span>
+                  <span
+                    className="header-menu-trigger"
+                    style={{
+                      position: 'absolute',
+                      right: 6,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      cursor: 'pointer',
+                      opacity: 0,
+                      transition: 'opacity 0.15s',
+                      zIndex: 3,
+                    }}
+                    onClick={e => handleOpenColumnMenu(e, 'name')}
+                  >
+                    <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                  </span>
+                  {/* Badge de filtros aplicados */}
+                  {filtersByColumn['name'] > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 6,
+                      right: 4,
+                      background: '#22c55e',
+                      color: '#fff',
+                      borderRadius: '50%',
+                      fontSize: 10,
+                      minWidth: 15,
+                      height: 15,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 600,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                      zIndex: 2
+                    }}>{filtersByColumn['name']}</span>
+                  )}
+                </th>
+                {/* Resto de columnas */}
+                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
+                  <th key={col.key} style={{ 
+                    border: '1px solid #e5e7eb',
+                    padding: '6px 12px',
+                    textAlign: 'left',
+                    fontWeight: 500,
+                    position: 'relative'
+                  }}
+                  onMouseEnter={(e) => {
+                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                    if (trigger) trigger.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                    if (trigger) trigger.style.opacity = '0';
+                  }}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {col.label}
+                      {(() => {
+                        const sortRule = sortRules.find(r => r.column === col.key);
+                        if (sortRule) {
+                          return sortRule.direction === 'asc' ? 
+                            <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
+                            <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
+                        }
+                        return null;
+                      })()}
+                    </span>
+                    <span
+                      className="header-menu-trigger"
+                      style={{
+                        position: 'absolute',
+                        right: 6,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        cursor: 'pointer',
+                        opacity: 0,
+                        transition: 'opacity 0.15s',
+                        zIndex: 3,
+                      }}
+                      onClick={e => handleOpenColumnMenu(e, col.key)}
+                    >
+                      <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                    </span>
+                    {/* Badge de filtros aplicados */}
+                    {filtersByColumn[col.key] > 0 && (
+                      <span style={{
+                        position: 'absolute',
+                        top: 6,
+                        right: 4,
+                        background: '#22c55e',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        fontSize: 10,
+                        minWidth: 15,
+                        height: 15,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                        zIndex: 2
+                      }}>{filtersByColumn[col.key]}</span>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {searchedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((row, index) => (
+                <tr key={row.id || index} style={{ 
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s'
+                }} 
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  {/* Primera celda sticky */}
+                  <td style={{ 
+                    position: isFirstColumnPinned ? 'sticky' : 'static', 
+                    left: isFirstColumnPinned ? 0 : 'auto', 
+                    background: isFirstColumnPinned ? '#f0f6ff' : '#fff', 
+                    zIndex: isFirstColumnPinned ? 10 : 1, 
+                    border: '1px solid #e5e7eb',
+                    padding: '6px 12px',
+                    boxShadow: isFirstColumnPinned ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
+                  }}>
+                    {row.name || 'Sin nombre'}
+                  </td>
+                  {/* Resto de celdas */}
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
+                    <td key={col.key} style={{ 
+                      border: '1px solid #e5e7eb',
+                      padding: '6px 12px'
+                    }}>
+                      {row[col.key] || '-'}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Menú contextual para columnas */}
+        {columnMenuAnchor && columnMenuKey && ReactDOM.createPortal(
+          (() => {
+            const rect = columnMenuAnchor.getBoundingClientRect();
+            const column = columnOrder.find((col: TableColumn) => col.key === columnMenuKey);
+            
+            return (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: rect.bottom + 4 + window.scrollY,
+                  left: rect.left + window.scrollX,
+                  minWidth: 170,
+                  background: '#fff',
+                  border: '1.5px solid #e5e7eb',
+                  borderRadius: 8,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  zIndex: 10000,
+                  fontSize: 14,
+                  padding: 4,
+                }}
+                tabIndex={-1}
+                onBlur={handleCloseColumnMenu}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                {/* Opciones de ordenamiento */}
+                <div 
+                  className="column-menu-item" 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 8, 
+                    padding: '7px 12px', 
+                    cursor: 'pointer', 
+                    borderRadius: 5,
+                    color: '#555',
+                    fontWeight: 400
+                  }} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSortOption(columnMenuKey, 'asc');
+                    handleCloseColumnMenu();
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <ArrowUp size={16} /> Ordenar ascendente
+                </div>
+                <div 
+                  className="column-menu-item" 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 8, 
+                    padding: '7px 12px', 
+                    cursor: 'pointer', 
+                    borderRadius: 5,
+                    color: '#555',
+                    fontWeight: 400
+                  }} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSortOption(columnMenuKey, 'desc');
+                    handleCloseColumnMenu();
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <ArrowDown size={16} /> Ordenar descendente
+                </div>
+                
+                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                
+                {/* Opciones de fijación */}
+                {columnMenuKey !== 'name' && (
+                  <>
+                    {!pinnedColumns.includes(columnMenuKey) && !pinnedColumnsRight.includes(columnMenuKey) && (
+                      <div 
+                        className="column-menu-item" 
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          pinColumnLeft(columnMenuKey);
+                          handleCloseColumnMenu();
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <Pin size={16} /> Fijar a la izquierda
+                      </div>
+                    )}
+                    {pinnedColumns.includes(columnMenuKey) && (
+                      <div 
+                        className="column-menu-item" 
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          unpinColumn(columnMenuKey);
+                          handleCloseColumnMenu();
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <PinOff size={16} /> Desfijar
+                      </div>
+                    )}
+                    {!pinnedColumnsRight.includes(columnMenuKey) && !pinnedColumns.includes(columnMenuKey) && (
+                      <div 
+                        className="column-menu-item" 
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          pinColumnRight(columnMenuKey);
+                          handleCloseColumnMenu();
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                      </div>
+                    )}
+                    {pinnedColumnsRight.includes(columnMenuKey) && (
+                      <div 
+                        className="column-menu-item" 
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          unpinColumn(columnMenuKey);
+                          handleCloseColumnMenu();
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <PinOff size={16} /> Desfijar
+                      </div>
+                    )}
+                    <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                  </>
+                )}
+                
+                {/* Opción de ocultar columna */}
+                <div 
+                  className="column-menu-item column-menu-hide" 
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleColumn(columnMenuKey);
+                    handleCloseColumnMenu();
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <EyeOff size={16} /> Ocultar columna
+                </div>
+              </div>
+            );
+          })(),
+          document.body
+        )}
+        
+        <div className="table-footer">
+          <TablePagination
+            page={page}
+            setPage={setPage}
+            totalPages={totalPages}
+            totalItems={searchedData.length}
+            pageSize={PAGE_SIZE}
+          />
+        </div>
+      </div>
+      <StickyTest />
+    </>
   );
 };
 

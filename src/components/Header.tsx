@@ -48,9 +48,9 @@ const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFi
             aria-label={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
           >
             {isFirstColumnPinned ? (
-              <PinOff size={20} className="pin-icon" />
+              <PinOff size={20} className="pin-icon pin-icon-blue" />
             ) : (
-              <Pin size={20} className="pin-icon" />
+              <Pin size={20} className="pin-icon pin-icon-blue" />
             )}
           </button>
         )}
