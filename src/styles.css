@@ -444,8 +444,6 @@ table.user-table {
 .user-table th {
   background: #f8fafc;
   font-weight: 500;
-  position: relative;
-  z-index: 1;
 }
 .user-table .col-resizer {
   position: absolute;

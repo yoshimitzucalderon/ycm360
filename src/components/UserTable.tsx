@@ -792,22 +792,19 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
 
   // Función para calcular el offset left de una columna fijada a la izquierda
   const getLeftOffset = (colKey: string) => {
-    // Obtener la primera columna visible
-    const firstVisibleColumn = columnOrder.find((c: TableColumn) => visibleColumns.includes(c.key));
-
-    // Si la columna actual es la primera visible, el offset debe ser 0
-    if (firstVisibleColumn && colKey === firstVisibleColumn.key) {
-      return 0;
+    // Obtener el orden de las columnas visibles
+    const orderedPinned = columnOrder
+      .filter((col: TableColumn) => visibleColumns.includes(col.key) && pinnedColumns.includes(col.key));
+    // Buscar el índice de la columna actual entre las pinneadas
+    const idx = orderedPinned.findIndex((col: TableColumn) => col.key === colKey);
+    if (idx === -1) return 0;
+    // Sumar los anchos de todas las columnas pinneadas a la izquierda que están antes de la actual
+    let left = 0;
+    for (let i = 0; i < idx; i++) {
+      const key = orderedPinned[i].key;
+      left += colWidths[key] || 150; // Usa el ancho real o un valor por defecto
     }
-
-    let offset = 0;
-    // Calcular offset para columnas pinneadas normales
-    for (const key of pinnedColumns) {
-      if (key === colKey) break;
-      const th = document.querySelector(`th[data-col-key='${key}']`) as HTMLElement;
-      offset += th ? th.offsetWidth : 120; // fallback a 120px si no está renderizado
-    }
-    return offset;
+    return left;
   };
   // Función para calcular el offset right de una columna fijada a la derecha
   const getRightOffset = (colKey: string) => {
@@ -827,6 +824,25 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
 
   // Helper para sticky position
   const stickyPosition = 'sticky' as CSSProperties['position'];
+
+  // Calcula el z-index para columnas sticky: la más a la izquierda tiene el mayor z-index
+  function getPinnedZIndex(colKey: string) {
+    // Obtener todas las columnas visibles en el orden que aparecen en la tabla
+    const visibleOrder = columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key));
+    
+    // Filtrar solo las que están fijadas, manteniendo el orden de aparición en la tabla
+    const pinnedVisible = visibleOrder.filter((col: TableColumn) => pinnedColumns.includes(col.key));
+    
+    const idx = pinnedVisible.findIndex((col: TableColumn) => col.key === colKey);
+    if (idx === -1) return 1; // No sticky
+    
+    // Debug: mostrar el orden de las columnas fijadas
+    console.log('Pinned columns order:', pinnedVisible.map((col: TableColumn) => col.key));
+    console.log(`Column ${colKey} has index ${idx}, z-index: ${1000 - idx}`);
+    
+    // El más a la derecha (último en pinnedVisible) tiene el mayor z-index
+    return 1000 - (pinnedVisible.length - 1 - idx); // 1000, 999, 998, ...
+  }
 
   // EJEMPLO MÍNIMO DE TABLA STICKY PARA DEPURACIÓN
 
@@ -1065,89 +1081,22 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
         </div>
         
         {/* ESTRUCTURA MIGRADA DESDE LA TABLA QUE FUNCIONA */}
+        {/* IMPORTANTE: No poner z-index, position: relative ni transform en el contenedor de scroll ni en wrappers de la tabla para evitar stacking context que rompa el sticky. */}
         <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
           <table style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {/* Primera columna sticky */}
-                <th style={{ 
-                  position: isFirstColumnPinned ? 'sticky' : 'static', 
-                  left: isFirstColumnPinned ? 0 : 'auto', 
-                  background: isFirstColumnPinned ? '#f0f6ff' : '#f8fafc', 
-                  zIndex: isFirstColumnPinned ? 10 : 1, 
-                  border: '1px solid #e5e7eb',
-                  padding: '6px 12px',
-                  textAlign: 'left',
-                  fontWeight: 500,
-                  boxShadow: isFirstColumnPinned ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                  if (trigger) trigger.style.opacity = '1';
-                }}
-                onMouseLeave={(e) => {
-                  const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                  if (trigger) trigger.style.opacity = '0';
-                }}
-                >
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      Proveedor
-                      {(() => {
-                        const sortRule = sortRules.find(r => r.column === 'name');
-                        if (sortRule) {
-                          return sortRule.direction === 'asc' ? 
-                            <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
-                            <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
-                        }
-                        return null;
-                      })()}
-                    </span>
-                    <span
-                      className="header-menu-trigger"
-                      style={{
-                        position: 'absolute',
-                        right: 6,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        cursor: 'pointer',
-                        opacity: 0,
-                        transition: 'opacity 0.15s',
-                        zIndex: 3,
-                      }}
-                      onClick={e => handleOpenColumnMenu(e, 'name')}
-                    >
-                      <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                    </span>
-                    {/* Badge de filtros aplicados */}
-                    {filtersByColumn['name'] > 0 && (
-                      <span style={{
-                        position: 'absolute',
-                        top: 6,
-                        right: 4,
-                        background: '#22c55e',
-                        color: '#fff',
-                        borderRadius: '50%',
-                        fontSize: 10,
-                        minWidth: 15,
-                        height: 15,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 600,
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                        zIndex: 2
-                      }}>{filtersByColumn['name']}</span>
-                    )}
-                  </div>
-                </th>
-                {/* Resto de columnas */}
-                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
-                  <th key={col.key} style={{ 
+                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                  <th key={col.key} style={{
+                    position: pinnedColumns.includes(col.key) ? 'sticky' : 'static',
+                    left: pinnedColumns.includes(col.key) ? getLeftOffset(col.key) : 'auto',
+                    background: pinnedColumns.includes(col.key) ? '#f0f6ff' : '#f8fafc',
+                    zIndex: pinnedColumns.includes(col.key) ? getPinnedZIndex(col.key) : 1,
                     border: '1px solid #e5e7eb',
                     padding: '6px 12px',
                     textAlign: 'left',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    boxShadow: pinnedColumns.includes(col.key) ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
@@ -1221,25 +1170,17 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  {/* Primera celda sticky */}
-                  <td style={{ 
-                    position: isFirstColumnPinned ? 'sticky' : 'static', 
-                    left: isFirstColumnPinned ? 0 : 'auto', 
-                    background: isFirstColumnPinned ? '#f0f6ff' : '#fff', 
-                    zIndex: isFirstColumnPinned ? 10 : 1, 
-                    border: '1px solid #e5e7eb',
-                    padding: '6px 12px',
-                    boxShadow: isFirstColumnPinned ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
-                  }}>
-                    {row.name || 'Sin nombre'}
-                  </td>
-                  {/* Resto de celdas */}
-                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
-                    <td key={col.key} style={{ 
+                  {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key)).map((col: TableColumn) => (
+                    <td key={col.key} style={{
+                      position: pinnedColumns.includes(col.key) ? 'sticky' : 'static',
+                      left: pinnedColumns.includes(col.key) ? getLeftOffset(col.key) : 'auto',
+                      background: pinnedColumns.includes(col.key) ? '#f0f6ff' : '#fff',
+                      zIndex: pinnedColumns.includes(col.key) ? getPinnedZIndex(col.key) : 1,
                       border: '1px solid #e5e7eb',
-                      padding: '6px 12px'
+                      padding: '6px 12px',
+                      boxShadow: pinnedColumns.includes(col.key) ? '2px 0 4px rgba(0,0,0,0.1)' : 'none'
                     }}>
-                      {row[col.key] || '-'}
+                      {row[col.key] || (col.key === 'name' ? row.name || 'Sin nombre' : '-')}
                     </td>
                   ))}
                 </tr>
@@ -1326,7 +1267,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
                 
                 {/* Opciones de fijación */}
-                {columnMenuKey !== 'name' && (
+                {(
                   <>
                     {!pinnedColumns.includes(columnMenuKey) && !pinnedColumnsRight.includes(columnMenuKey) && (
                       <div 
