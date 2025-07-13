@@ -38,17 +38,29 @@ th:hover .header-menu-trigger {
   width: 100%;
   overflow-x: auto;
   position: relative;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  /* Asegurar que el sticky funcione correctamente */
+  contain: layout style paint;
 }
 .table-scroll-inner {
   min-width: 1000px;
   display: table;
 }
 th.sticky, td.sticky {
-  position: sticky;
+  position: sticky !important;
   z-index: 2;
-  background: #f9fafb;
+  background: #f9fafb !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
 }
+
 td.sticky {
-  background: #f0f6ff;
+  background: #f0f6ff !important;
   z-index: 1;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos específicos para la primera columna pinneada */
+th.sticky:first-of-type, td.sticky:first-of-type {
+  left: 40px !important; /* Offset para la columna de checkbox */
 }

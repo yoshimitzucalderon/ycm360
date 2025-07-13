@@ -8,7 +8,8 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFirstColumnPin }) => {
   const [search, setSearch] = useState("");
-  
+  console.log('Header - isFirstColumnPinned:', isFirstColumnPinned, 'typeof:', typeof isFirstColumnPinned, 'value:', isFirstColumnPinned);
+
   return (
     <header className="header">
       <div className="header-left">
@@ -43,7 +44,10 @@ const Header: React.FC<HeaderProps> = ({ isFirstColumnPinned = false, onToggleFi
         {onToggleFirstColumnPin && (
           <button
             className={`header-pin-button ${isFirstColumnPinned ? 'pinned' : ''}`}
-            onClick={onToggleFirstColumnPin}
+            onClick={() => {
+              console.log('Pin button clicked!');
+              onToggleFirstColumnPin?.();
+            }}
             title={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
             aria-label={isFirstColumnPinned ? "Desfijar primera columna" : "Fijar primera columna"}
           >
