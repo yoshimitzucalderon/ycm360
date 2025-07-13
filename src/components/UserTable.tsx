@@ -1090,77 +1090,11 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                   if (trigger) trigger.style.opacity = '0';
                 }}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    Proveedor
-                    {(() => {
-                      const sortRule = sortRules.find(r => r.column === 'name');
-                      if (sortRule) {
-                        return sortRule.direction === 'asc' ? 
-                          <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
-                          <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
-                      }
-                      return null;
-                    })()}
-                  </span>
-                  <span
-                    className="header-menu-trigger"
-                    style={{
-                      position: 'absolute',
-                      right: 6,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      cursor: 'pointer',
-                      opacity: 0,
-                      transition: 'opacity 0.15s',
-                      zIndex: 3,
-                    }}
-                    onClick={e => handleOpenColumnMenu(e, 'name')}
-                  >
-                    <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                  </span>
-                  {/* Badge de filtros aplicados */}
-                  {filtersByColumn['name'] > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: 6,
-                      right: 4,
-                      background: '#22c55e',
-                      color: '#fff',
-                      borderRadius: '50%',
-                      fontSize: 10,
-                      minWidth: 15,
-                      height: 15,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 600,
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                      zIndex: 2
-                    }}>{filtersByColumn['name']}</span>
-                  )}
-                </th>
-                {/* Resto de columnas */}
-                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
-                  <th key={col.key} style={{ 
-                    border: '1px solid #e5e7eb',
-                    padding: '6px 12px',
-                    textAlign: 'left',
-                    fontWeight: 500,
-                    position: 'relative'
-                  }}
-                  onMouseEnter={(e) => {
-                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                    if (trigger) trigger.style.opacity = '1';
-                  }}
-                  onMouseLeave={(e) => {
-                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                    if (trigger) trigger.style.opacity = '0';
-                  }}
-                  >
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      {col.label}
+                      Proveedor
                       {(() => {
-                        const sortRule = sortRules.find(r => r.column === col.key);
+                        const sortRule = sortRules.find(r => r.column === 'name');
                         if (sortRule) {
                           return sortRule.direction === 'asc' ? 
                             <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
@@ -1181,12 +1115,12 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                         transition: 'opacity 0.15s',
                         zIndex: 3,
                       }}
-                      onClick={e => handleOpenColumnMenu(e, col.key)}
+                      onClick={e => handleOpenColumnMenu(e, 'name')}
                     >
                       <MoreVertical size={18} style={{ color: '#2563eb' }} />
                     </span>
                     {/* Badge de filtros aplicados */}
-                    {filtersByColumn[col.key] > 0 && (
+                    {filtersByColumn['name'] > 0 && (
                       <span style={{
                         position: 'absolute',
                         top: 6,
@@ -1203,8 +1137,77 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                         fontWeight: 600,
                         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                         zIndex: 2
-                      }}>{filtersByColumn[col.key]}</span>
+                      }}>{filtersByColumn['name']}</span>
                     )}
+                  </div>
+                </th>
+                {/* Resto de columnas */}
+                {columnOrder.filter((col: TableColumn) => visibleColumns.includes(col.key) && col.key !== 'name').map((col: TableColumn) => (
+                  <th key={col.key} style={{ 
+                    border: '1px solid #e5e7eb',
+                    padding: '6px 12px',
+                    textAlign: 'left',
+                    fontWeight: 500
+                  }}
+                  onMouseEnter={(e) => {
+                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                    if (trigger) trigger.style.opacity = '1';
+                  }}
+                  onMouseLeave={(e) => {
+                    const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
+                    if (trigger) trigger.style.opacity = '0';
+                  }}
+                  >
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {col.label}
+                        {(() => {
+                          const sortRule = sortRules.find(r => r.column === col.key);
+                          if (sortRule) {
+                            return sortRule.direction === 'asc' ? 
+                              <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
+                              <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
+                          }
+                          return null;
+                        })()}
+                      </span>
+                      <span
+                        className="header-menu-trigger"
+                        style={{
+                          position: 'absolute',
+                          right: 6,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          cursor: 'pointer',
+                          opacity: 0,
+                          transition: 'opacity 0.15s',
+                          zIndex: 3,
+                        }}
+                        onClick={e => handleOpenColumnMenu(e, col.key)}
+                      >
+                        <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                      </span>
+                      {/* Badge de filtros aplicados */}
+                      {filtersByColumn[col.key] > 0 && (
+                        <span style={{
+                          position: 'absolute',
+                          top: 6,
+                          right: 4,
+                          background: '#22c55e',
+                          color: '#fff',
+                          borderRadius: '50%',
+                          fontSize: 10,
+                          minWidth: 15,
+                          height: 15,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 600,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                          zIndex: 2
+                        }}>{filtersByColumn[col.key]}</span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
