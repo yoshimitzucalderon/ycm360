@@ -29,7 +29,6 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import { BsFillPinFill } from 'react-icons/bs';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import ReactDOM from 'react-dom';
-import StickyTest from './StickyTest';
 
 const ArrowDownIcon = RiArrowDownSLine as React.ElementType;
 const ArrowUpLineIcon = RiArrowUpLine as React.ElementType;
@@ -830,62 +829,10 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   const stickyPosition = 'sticky' as CSSProperties['position'];
 
   // EJEMPLO MÍNIMO DE TABLA STICKY PARA DEPURACIÓN
-  const StickyMinimalTest = () => (
-    <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
-      <table style={{ minWidth: 600, width: 'max-content', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky</th>
-            <th style={{ border: '1px solid #e5e7eb' }}>Col 2</th>
-            <th style={{ border: '1px solid #e5e7eb' }}>Col 3</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky 1</td>
-            <td style={{ border: '1px solid #e5e7eb' }}>Data 2</td>
-            <td style={{ border: '1px solid #e5e7eb' }}>Data 3</td>
-          </tr>
-          <tr>
-            <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky 2</td>
-            <td style={{ border: '1px solid #e5e7eb' }}>Data 2</td>
-            <td style={{ border: '1px solid #e5e7eb' }}>Data 3</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
 
-  // EJEMPLO MÍNIMO DE TABLA STICKY CON MUCHAS COLUMNAS PARA DEPURACIÓN
-  const StickyWideTest = () => (
-    <div style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
-      <table style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky</th>
-            {Array.from({ length: 15 }).map((_, i) => (
-              <th key={i} style={{ border: '1px solid #e5e7eb' }}>Col {i + 2}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: 5 }).map((_, row) => (
-            <tr key={row}>
-              <td style={{ position: 'sticky', left: 0, background: '#fff', zIndex: 10, border: '1px solid #e5e7eb' }}>Sticky {row + 1}</td>
-              {Array.from({ length: 15 }).map((_, col) => (
-                <td key={col} style={{ border: '1px solid #e5e7eb' }}>Data {col + 2}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
 
   return (
     <>
-      <StickyMinimalTest />
-      <StickyWideTest />
       <div className="table-container">
         <div className="user-table-header table-controls">
           <div className="controls-left">
@@ -1477,7 +1424,6 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
           />
         </div>
       </div>
-      <StickyTest />
     </>
   );
 };
