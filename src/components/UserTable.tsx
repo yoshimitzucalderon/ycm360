@@ -478,75 +478,130 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     return reordered;
   };
 
-  // useEffect para forzar aplicación de estilos sticky después del renderizado
+  // Función mejorada para calcular offset izquierdo
+  const getLeftOffset = (colKey: string) => {
+    const pinnedLeftCols = getReorderedColumns().filter((col: TableColumn) => 
+      pinnedColumns.includes(col.key)
+    );
+    
+    const idx = pinnedLeftCols.findIndex((col: TableColumn) => col.key === colKey);
+    if (idx === -1) return 0;
+    
+    let left = 0;
+    for (let i = 0; i < idx; i++) {
+      const key = pinnedLeftCols[i].key;
+      const width = colWidths[key] || 150;
+      left += width;
+    }
+    
+    return left;
+  };
+
+  // Función mejorada para calcular offset derecho
+  const getRightOffset = (colKey: string) => {
+    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
+      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
+    ).filter(Boolean) as TableColumn[];
+    
+    const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
+    if (idx === -1) return 0;
+    
+    let offset = 0;
+    for (let i = idx + 1; i < pinnedRightCols.length; i++) {
+      const key = pinnedRightCols[i].key;
+      offset += colWidths[key] || 150;
+    }
+    
+    return offset;
+  };
+
+  // Función dedicada para aplicar estilos sticky correctamente
+  const applyStickyStyles = () => {
+    const tableContainer = document.querySelector('.table-scroll-container');
+    if (!tableContainer) return;
+
+    // Aplicar estilos a headers sticky
+    const stickyHeaders = tableContainer.querySelectorAll('th[data-col-key]');
+    stickyHeaders.forEach((header: Element) => {
+      const colKey = header.getAttribute('data-col-key');
+      if (!colKey) return;
+
+      const isPinnedLeft = pinnedColumns.includes(colKey);
+      const isPinnedRight = pinnedColumnsRight.includes(colKey);
+
+      if (isPinnedLeft || isPinnedRight) {
+        const headerElement = header as HTMLElement;
+        headerElement.style.position = 'sticky';
+        headerElement.style.left = isPinnedLeft ? `${getLeftOffset(colKey)}px` : 'auto';
+        headerElement.style.right = isPinnedRight ? `${getRightOffset(colKey)}px` : 'auto';
+        headerElement.style.zIndex = isPinnedLeft ? `${getPinnedZIndex(colKey)}` : `${getPinnedRightZIndex(colKey)}`;
+        headerElement.style.background = '#f0f6ff';
+        headerElement.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+      } else {
+        const headerElement = header as HTMLElement;
+        headerElement.style.position = 'static';
+        headerElement.style.left = 'auto';
+        headerElement.style.right = 'auto';
+        headerElement.style.zIndex = '1';
+        headerElement.style.background = '#f8fafc';
+        headerElement.style.boxShadow = 'none';
+      }
+    });
+
+    // Aplicar estilos a celdas sticky
+    const stickyCells = tableContainer.querySelectorAll('td[data-col-key]');
+    stickyCells.forEach((cell: Element) => {
+      const colKey = cell.getAttribute('data-col-key');
+      if (!colKey) return;
+
+      const isPinnedLeft = pinnedColumns.includes(colKey);
+      const isPinnedRight = pinnedColumnsRight.includes(colKey);
+
+      if (isPinnedLeft || isPinnedRight) {
+        const cellElement = cell as HTMLElement;
+        cellElement.style.position = 'sticky';
+        cellElement.style.left = isPinnedLeft ? `${getLeftOffset(colKey)}px` : 'auto';
+        cellElement.style.right = isPinnedRight ? `${getRightOffset(colKey)}px` : 'auto';
+        cellElement.style.zIndex = isPinnedLeft ? `${getPinnedZIndex(colKey)}` : `${getPinnedRightZIndex(colKey)}`;
+        cellElement.style.background = '#f0f6ff';
+        cellElement.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+      } else {
+        const cellElement = cell as HTMLElement;
+        cellElement.style.position = 'static';
+        cellElement.style.left = 'auto';
+        cellElement.style.right = 'auto';
+        cellElement.style.zIndex = '1';
+        cellElement.style.background = '#fff';
+        cellElement.style.boxShadow = 'none';
+      }
+    });
+  };
+
+  // useEffect mejorado para aplicar estilos sticky después del renderizado
   useEffect(() => {
-    if (pinUpdateTrigger > 0) {
-      // Usar requestAnimationFrame para asegurar que se ejecute después del renderizado
+    // Aplicar estilos después de que el DOM esté completamente construido
+    const timeoutId = setTimeout(() => {
+      applyStickyStyles();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [pinnedColumns, pinnedColumnsRight, columnOrder, colWidths, pinUpdateTrigger, offsetUpdateTrigger]);
+
+  // Aplicar estilos también cuando cambie el scroll
+  useEffect(() => {
+    const container = document.querySelector('.table-scroll-container');
+    if (!container) return;
+
+    const handleScroll = () => {
+      // Re-aplicar estilos sticky después del scroll para asegurar que funcionen
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const tableContainer = document.querySelector('.table-scroll-container') as HTMLElement;
-          const tableElement = document.querySelector('table') as HTMLElement;
-          
-          if (tableContainer && tableElement) {
-            // Forzar scroll más significativo para activar sticky
-            const currentScroll = tableContainer.scrollLeft;
-            const maxScroll = tableContainer.scrollWidth - tableContainer.clientWidth;
-            
-            if (maxScroll > 0) {
-              // Hacer scroll significativo y regresar
-              tableContainer.scrollLeft = Math.min(currentScroll + 200, maxScroll);
-              setTimeout(() => {
-                tableContainer.scrollLeft = currentScroll;
-              }, 100);
-            } else {
-              // Si no hay scroll, forzar scroll mínimo
-              tableContainer.scrollLeft = currentScroll + 1;
-              tableContainer.scrollLeft = currentScroll;
-            }
-            
-            // Forzar reflow
-            tableElement.style.transform = 'translateZ(0)';
-            setTimeout(() => {
-              tableElement.style.transform = '';
-            }, 10);
-            
-            // Forzar aplicación de estilos sticky en las celdas
-            const stickyCells = tableElement.querySelectorAll('th[style*="position: sticky"], td[style*="position: sticky"]');
-            stickyCells.forEach((cell: Element) => {
-              const cellElement = cell as HTMLElement;
-              // Forzar recálculo de estilos
-              cellElement.style.position = 'static';
-              cellElement.offsetHeight; // Forzar reflow
-              cellElement.style.position = 'sticky';
-            });
-          }
-        });
+        applyStickyStyles();
       });
-    }
-  }, [pinUpdateTrigger]);
-  
-  // useEffect para forzar aplicación de offsets cuando cambien las columnas fijadas
-  useEffect(() => {
-    if (offsetUpdateTrigger > 0) {
-      setTimeout(() => {
-        const tableContainer = document.querySelector('.table-scroll-container') as HTMLElement;
-        if (tableContainer) {
-          // Aplicar offsets directamente a las celdas sticky
-          const stickyCells = tableContainer.querySelectorAll('th[data-col-key], td[data-col-key]');
-          stickyCells.forEach((cell: Element) => {
-            const cellElement = cell as HTMLElement;
-            const colKey = cellElement.getAttribute('data-col-key');
-            
-            if (colKey && pinnedColumns.includes(colKey)) {
-              const offset = getLeftOffset(colKey);
-              cellElement.style.left = `${offset}px`;
-              console.log(`Applied offset ${offset}px to column ${colKey} in useEffect`);
-            }
-          });
-        }
-      }, 50);
-    }
-  }, [offsetUpdateTrigger, pinnedColumns]);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [pinnedColumns, pinnedColumnsRight]);
 
   useEffect(() => {
     if (showSearch) {
@@ -1084,62 +1139,6 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     }
   };
 
-  // Función para calcular el offset left de una columna fijada a la izquierda
-  const getLeftOffset = (colKey: string) => {
-    // Con el reordenamiento, las columnas pinned left están al inicio del array
-    // Solo necesitamos calcular el offset basado en su posición en el grupo pinned left
-    const pinnedLeftCols = getReorderedColumns().filter((col: TableColumn) => 
-      pinnedColumns.includes(col.key)
-    );
-    
-    const idx = pinnedLeftCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return 0;
-    
-    // Calcular offset basado en la posición en el grupo pinned left
-    let left = 0;
-    for (let i = 0; i < idx; i++) {
-      const key = pinnedLeftCols[i].key;
-      const width = colWidths[key] || 150;
-      left += width;
-    }
-    
-    // Debug: mostrar el cálculo del offset
-    console.log(`getLeftOffset for ${colKey}:`, {
-      pinnedLeftCols: pinnedLeftCols.map(c => c.key),
-      idx,
-      left,
-      colWidths: colWidths[colKey] || 150
-    });
-    
-    return left;
-  };
-  // Calcula el offset right para columnas sticky a la derecha
-  function getRightOffset(colKey: string) {
-    // Las columnas pinned right se ordenan desde la derecha hacia la izquierda
-    // La primera en el array es la más a la derecha
-    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
-      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
-    ).filter(Boolean) as TableColumn[];
-    
-    const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return 0;
-    
-    // Calcular offset desde la derecha: sumar anchos de columnas a la derecha de esta
-    let offset = 0;
-    for (let i = idx + 1; i < pinnedRightCols.length; i++) {
-      const key = pinnedRightCols[i].key;
-      offset += colWidths[key] || 150;
-    }
-    
-    console.log(`getRightOffset for ${colKey}:`, {
-      pinnedRightCols: pinnedRightCols.map(c => c.key),
-      idx,
-      offset,
-      colWidths: colWidths[colKey] || 150
-    });
-    
-    return offset;
-  }
   // Calcula el z-index para columnas sticky a la derecha: la más a la derecha tiene el mayor z-index
   function getPinnedRightZIndex(colKey: string) {
     const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
@@ -1153,9 +1152,6 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     return 1000 + (pinnedRightCols.length - 1 - idx);
   }
 
-  // Helper para sticky position
-  const stickyPosition = 'sticky' as CSSProperties['position'];
-
   // Calcula el z-index para columnas sticky: la más a la izquierda tiene el mayor z-index
   function getPinnedZIndex(colKey: string) {
     // Con el reordenamiento, las columnas pinned left están al inicio del array
@@ -1164,10 +1160,6 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     );
     const idx = pinnedLeftCols.findIndex((col: TableColumn) => col.key === colKey);
     if (idx === -1) return 1; // No sticky
-    
-    // Debug: mostrar el orden de las columnas fijadas
-    console.log('Pinned left columns order:', pinnedLeftCols.map(c => c.key));
-    console.log(`Column ${colKey} has index ${idx}, z-index: ${1000 + idx}`);
     
     // La primera en el grupo pinned left tiene el mayor z-index
     return 1000 + idx; // 1000, 1001, 1002, ...
@@ -1610,7 +1602,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
         
         {/* ESTRUCTURA MIGRADA DESDE LA TABLA QUE FUNCIONA */}
         {/* IMPORTANTE: No poner z-index, position: relative ni transform en el contenedor de scroll ni en wrappers de la tabla para evitar stacking context que rompa el sticky. */}
-        <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb', position: 'relative' }}>
+        <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
           <table 
             className={`user-table${resizingCol ? ' resizing' : ''}`}
             key={`table-${pinUpdateTrigger}-${offsetUpdateTrigger}`}
@@ -1625,16 +1617,10 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                     <th key={col.key} 
                       data-col-key={col.key}
                       style={{
-                        position: isPinnedLeft || isPinnedRight ? 'sticky' : 'static',
-                        left: isPinnedLeft ? getLeftOffset(col.key) : undefined,
-                        right: isPinnedRight ? getRightOffset(col.key) : undefined,
-                        background: isPinnedLeft || isPinnedRight ? '#f0f6ff' : '#f8fafc',
-                        zIndex: isPinnedLeft ? getPinnedZIndex(col.key) : isPinnedRight ? getPinnedRightZIndex(col.key) : 1,
                         border: '1px solid #e5e7eb',
                         padding: '6px 12px',
                         textAlign: 'left',
                         fontWeight: 500,
-                        boxShadow: isPinnedLeft || isPinnedRight ? '2px 0 4px rgba(0,0,0,0.1)' : 'none',
                       }}
                     onMouseEnter={(e) => {
                       const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
@@ -1730,14 +1716,8 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                       <td key={col.key} 
                         data-col-key={col.key}
                         style={{
-                          position: isPinnedLeft || isPinnedRight ? 'sticky' : 'static',
-                          left: isPinnedLeft ? getLeftOffset(col.key) : undefined,
-                          right: isPinnedRight ? getRightOffset(col.key) : undefined,
-                          background: isPinnedLeft || isPinnedRight ? '#f0f6ff' : '#fff',
-                          zIndex: isPinnedLeft ? getPinnedZIndex(col.key) : isPinnedRight ? getPinnedRightZIndex(col.key) : 1,
                           border: '1px solid #e5e7eb',
                           padding: '6px 12px',
-                          boxShadow: isPinnedLeft || isPinnedRight ? '2px 0 4px rgba(0,0,0,0.1)' : 'none',
                         }}>
                         {row[col.key] || (col.key === 'name' ? row.name || 'Sin nombre' : '-')}
                       </td>

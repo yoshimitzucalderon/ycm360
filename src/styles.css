@@ -1206,3 +1206,87 @@ div.column-menu-item:hover, .column-menu-item:hover {
 .user-table.resizing td {
   transition: none;
 }
+
+/* ===== ESTILOS MEJORADOS PARA STICKY POSITIONING ===== */
+
+/* Asegurar que el contenedor de scroll no tenga stacking context que rompa sticky */
+.table-scroll-container {
+  position: static !important;
+  transform: none !important;
+  z-index: auto !important;
+}
+
+/* Estilos base para elementos sticky */
+.user-table th[style*="position: sticky"],
+.user-table td[style*="position: sticky"] {
+  position: sticky !important;
+  background: #f0f6ff !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+  z-index: 1000 !important;
+}
+
+/* Headers sticky con mayor z-index */
+.user-table th[style*="position: sticky"] {
+  background: #f8fafc !important;
+  z-index: 2000 !important;
+}
+
+/* Celdas sticky */
+.user-table td[style*="position: sticky"] {
+  background: #f0f6ff !important;
+  z-index: 1000 !important;
+}
+
+/* Asegurar que las columnas sticky tengan el ancho correcto */
+.user-table th[style*="position: sticky"],
+.user-table td[style*="position: sticky"] {
+  min-width: 150px;
+  max-width: none;
+}
+
+/* Estilos específicos para columnas pinned a la izquierda */
+.user-table th[style*="left"],
+.user-table td[style*="left"] {
+  left: var(--sticky-left, 0) !important;
+}
+
+/* Estilos específicos para columnas pinned a la derecha */
+.user-table th[style*="right"],
+.user-table td[style*="right"] {
+  right: var(--sticky-right, 0) !important;
+}
+
+/* Asegurar que la tabla tenga table-layout: fixed para mejor performance */
+.user-table {
+  table-layout: fixed !important;
+}
+
+/* Estilos para el contenedor de la tabla */
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
+  width: 100%;
+}
+
+/* Asegurar que no haya elementos padre con overflow: hidden que rompan sticky */
+.table-container,
+.table-scroll-container,
+.user-table {
+  overflow: visible !important;
+}
+
+/* Estilos para debugging - remover en producción */
+.user-table th[style*="position: sticky"]::before,
+.user-table td[style*="position: sticky"]::before {
+  content: "STICKY";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 0, 0, 0.1);
+  color: red;
+  font-size: 8px;
+  padding: 1px;
+  z-index: 9999;
+  pointer-events: none;
+}
