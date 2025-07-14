@@ -1282,3 +1282,78 @@ div.column-menu-item:hover, .column-menu-item:hover {
 .user-table {
   overflow: unset !important;
 }
+
+/* ===== STICKY COLUMNS MEJORADO ===== */
+
+/* Asegurar que el contenedor no interfiera con sticky */
+.table-scroll-container {
+  position: static !important;
+  transform: none !important;
+  overflow-x: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Tabla con layout fijo para mejor performance */
+.user-table {
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+/* Asegurar que las celdas sticky funcionen correctamente */
+.user-table th[data-col-key],
+.user-table td[data-col-key] {
+  /* Permitir que JS maneje el sticky positioning */
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estilos específicos para columnas sticky aplicados via JS */
+.user-table th[style*="position: sticky"],
+.user-table td[style*="position: sticky"] {
+  /* Asegurar que sticky funcione */
+  position: sticky !important;
+  /* Evitar overflow issues */
+  overflow: visible !important;
+}
+
+/* Headers tienen mayor z-index */
+.user-table th[style*="position: sticky"] {
+  z-index: 2000 !important;
+}
+
+.user-table td[style*="position: sticky"] {
+  z-index: 1000 !important;
+}
+
+/* Eliminar cualquier transformación que rompa sticky */
+.table-container,
+.table-container > *,
+.user-table-header {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Asegurar que no haya scroll issues */
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}

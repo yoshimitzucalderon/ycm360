@@ -478,13 +478,15 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     return reordered;
   };
 
-  // Función mejorada para calcular offset izquierdo
-  const getLeftOffset = (colKey: string) => {
-    // Obtén el orden actual de las columnas visibles y fijadas a la izquierda
-    const pinnedLeftCols = getReorderedColumns().filter((col: TableColumn) => pinnedColumns.includes(col.key));
+  // ===== STICKY COLUMNS: FUNCIONES MEJORADAS =====
+  // Reemplazo getLeftOffset
+  const getLeftOffset = (colKey: string): number => {
+    const reorderedColumns = getReorderedColumns();
+    const pinnedLeftCols = reorderedColumns.filter((col: TableColumn) => 
+      pinnedColumns.includes(col.key)
+    );
     const idx = pinnedLeftCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return undefined;
-    // Suma los anchos de todas las columnas sticky anteriores
+    if (idx === -1) return 0;
     let left = 0;
     for (let i = 0; i < idx; i++) {
       const key = pinnedLeftCols[i].key;
@@ -493,13 +495,14 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     return left;
   };
 
-  // Función mejorada para calcular offset derecho
-  const getRightOffset = (colKey: string) => {
-    // Obtén el orden actual de las columnas visibles y fijadas a la derecha
-    const pinnedRightCols = getReorderedColumns().filter((col: TableColumn) => pinnedColumnsRight.includes(col.key));
+  // Reemplazo getRightOffset
+  const getRightOffset = (colKey: string): number => {
+    const reorderedColumns = getReorderedColumns();
+    const pinnedRightCols = reorderedColumns.filter((col: TableColumn) => 
+      pinnedColumnsRight.includes(col.key)
+    );
     const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return undefined;
-    // Suma los anchos de todas las columnas sticky posteriores
+    if (idx === -1) return 0;
     let right = 0;
     for (let i = pinnedRightCols.length - 1; i > idx; i--) {
       const key = pinnedRightCols[i].key;
@@ -508,93 +511,124 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     return right;
   };
 
-  // Función dedicada para aplicar estilos sticky correctamente
+  // Reemplazo applyStickyStyles
   const applyStickyStyles = () => {
     const tableContainer = document.querySelector('.table-scroll-container');
     if (!tableContainer) return;
 
-    // Aplicar estilos a headers sticky
+    // Headers sticky
     const stickyHeaders = tableContainer.querySelectorAll('th[data-col-key]');
     stickyHeaders.forEach((header: Element) => {
       const colKey = header.getAttribute('data-col-key');
       if (!colKey) return;
-
+      const headerElement = header as HTMLElement;
       const isPinnedLeft = pinnedColumns.includes(colKey);
       const isPinnedRight = pinnedColumnsRight.includes(colKey);
-
-      if (isPinnedLeft || isPinnedRight) {
-        const headerElement = header as HTMLElement;
+      if (isPinnedLeft) {
+        const leftOffset = getLeftOffset(colKey);
         headerElement.style.position = 'sticky';
-        headerElement.style.left = isPinnedLeft ? `${getLeftOffset(colKey)}px` : 'auto';
-        headerElement.style.right = isPinnedRight ? `${getRightOffset(colKey)}px` : 'auto';
-        headerElement.style.zIndex = isPinnedLeft ? `${getPinnedZIndex(colKey)}` : `${getPinnedRightZIndex(colKey)}`;
-        headerElement.style.background = '#f0f6ff';
-        headerElement.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+        headerElement.style.left = `${leftOffset}px`;
+        headerElement.style.right = 'auto';
+        headerElement.style.zIndex = '2000';
+        headerElement.style.backgroundColor = '#f8fafc';
+        headerElement.style.boxShadow = '2px 0 4px rgba(0,0,0,0.15)';
+      } else if (isPinnedRight) {
+        const rightOffset = getRightOffset(colKey);
+        headerElement.style.position = 'sticky';
+        headerElement.style.right = `${rightOffset}px`;
+        headerElement.style.left = 'auto';
+        headerElement.style.zIndex = '2000';
+        headerElement.style.backgroundColor = '#f8fafc';
+        headerElement.style.boxShadow = '-2px 0 4px rgba(0,0,0,0.15)';
       } else {
-        const headerElement = header as HTMLElement;
         headerElement.style.position = 'static';
         headerElement.style.left = 'auto';
         headerElement.style.right = 'auto';
         headerElement.style.zIndex = '1';
-        headerElement.style.background = '#f8fafc';
+        headerElement.style.backgroundColor = '#f8fafc';
         headerElement.style.boxShadow = 'none';
       }
     });
 
-    // Aplicar estilos a celdas sticky
+    // Celdas sticky
     const stickyCells = tableContainer.querySelectorAll('td[data-col-key]');
     stickyCells.forEach((cell: Element) => {
       const colKey = cell.getAttribute('data-col-key');
       if (!colKey) return;
-
+      const cellElement = cell as HTMLElement;
       const isPinnedLeft = pinnedColumns.includes(colKey);
       const isPinnedRight = pinnedColumnsRight.includes(colKey);
-
-      if (isPinnedLeft || isPinnedRight) {
-        const cellElement = cell as HTMLElement;
+      if (isPinnedLeft) {
+        const leftOffset = getLeftOffset(colKey);
         cellElement.style.position = 'sticky';
-        cellElement.style.left = isPinnedLeft ? `${getLeftOffset(colKey)}px` : 'auto';
-        cellElement.style.right = isPinnedRight ? `${getRightOffset(colKey)}px` : 'auto';
-        cellElement.style.zIndex = isPinnedLeft ? `${getPinnedZIndex(colKey)}` : `${getPinnedRightZIndex(colKey)}`;
-        cellElement.style.background = '#f0f6ff';
+        cellElement.style.left = `${leftOffset}px`;
+        cellElement.style.right = 'auto';
+        cellElement.style.zIndex = '1000';
+        cellElement.style.backgroundColor = '#fafbff';
         cellElement.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+      } else if (isPinnedRight) {
+        const rightOffset = getRightOffset(colKey);
+        cellElement.style.position = 'sticky';
+        cellElement.style.right = `${rightOffset}px`;
+        cellElement.style.left = 'auto';
+        cellElement.style.zIndex = '1000';
+        cellElement.style.backgroundColor = '#fafbff';
+        cellElement.style.boxShadow = '-2px 0 4px rgba(0,0,0,0.1)';
       } else {
-        const cellElement = cell as HTMLElement;
         cellElement.style.position = 'static';
         cellElement.style.left = 'auto';
         cellElement.style.right = 'auto';
         cellElement.style.zIndex = '1';
-        cellElement.style.background = '#fff';
+        cellElement.style.backgroundColor = 'white';
         cellElement.style.boxShadow = 'none';
       }
     });
+    console.log('Sticky styles applied:', {
+      pinnedLeft: pinnedColumns,
+      pinnedRight: pinnedColumnsRight
+    });
   };
 
-  // useEffect mejorado para aplicar estilos sticky después del renderizado
+  // ===== useEffect sticky mejorados =====
   useEffect(() => {
-    // Aplicar estilos después de que el DOM esté completamente construido
-    const timeoutId = setTimeout(() => {
-      applyStickyStyles();
-    }, 0);
-
+    applyStickyStyles();
+    const timeoutId = setTimeout(applyStickyStyles, 10);
     return () => clearTimeout(timeoutId);
-  }, [pinnedColumns, pinnedColumnsRight, columnOrder, colWidths, pinUpdateTrigger, offsetUpdateTrigger]);
+  }, [pinnedColumns, pinnedColumnsRight, colWidths, data, visibleColumns]);
 
-  // Aplicar estilos también cuando cambie el scroll
   useEffect(() => {
     const container = document.querySelector('.table-scroll-container');
     if (!container) return;
-
     const handleScroll = () => {
-      // Re-aplicar estilos sticky después del scroll para asegurar que funcionen
       requestAnimationFrame(() => {
         applyStickyStyles();
       });
     };
-
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
   }, [pinnedColumns, pinnedColumnsRight]);
+
+  // ===== DEBUG STICKY =====
+  const debugStickyColumns = () => {
+    console.log('=== DEBUG STICKY COLUMNS ===');
+    console.log('Pinned Left:', pinnedColumns);
+    console.log('Pinned Right:', pinnedColumnsRight);
+    const container = document.querySelector('.table-scroll-container');
+    console.log('Container:', container);
+    const stickyElements = document.querySelectorAll('[style*="position: sticky"]');
+    console.log('Sticky elements:', stickyElements.length);
+    stickyElements.forEach((el, idx) => {
+      const colKey = el.getAttribute('data-col-key');
+      const styles = window.getComputedStyle(el);
+      console.log(`Sticky ${idx} (${colKey}):`, {
+        position: styles.position,
+        left: styles.left,
+        right: styles.right,
+        zIndex: styles.zIndex,
+        backgroundColor: styles.backgroundColor
+      });
+    });
+  };
 
   useEffect(() => {
     if (showSearch) {
@@ -1595,102 +1629,111 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
         
         {/* ESTRUCTURA MIGRADA DESDE LA TABLA QUE FUNCIONA */}
         {/* IMPORTANTE: No poner z-index, position: relative ni transform en el contenedor de scroll ni en wrappers de la tabla para evitar stacking context que rompa el sticky. */}
-        <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
+        <div 
+          className="table-scroll-container" 
+          style={{ 
+            overflowX: 'auto', 
+            width: '100%', 
+            maxWidth: '100%', 
+            margin: '32px 0', 
+            border: '1px solid #e5e7eb',
+            // REMOVER position: relative que interfiere con sticky
+          }}
+        >
           <table 
             className={`user-table${resizingCol ? ' resizing' : ''}`}
-            key={`table-${pinUpdateTrigger}-${offsetUpdateTrigger}`}
-            style={{ minWidth: '100%', width: 'max-content', maxWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}
+            style={{ 
+              minWidth: '100%', 
+              width: 'max-content', 
+              borderCollapse: 'separate',
+              borderSpacing: '0',
+              tableLayout: 'fixed'
+            }}
           >
             <thead>
               <tr>
-                {getReorderedColumns().map((col: TableColumn) => {
-                  const isPinnedLeft = pinnedColumns.includes(col.key);
-                  const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                  return (
-                    <th key={col.key} 
-                      data-col-key={col.key}
-                      style={{
-                        border: '1px solid #e5e7eb',
-                        padding: '6px 12px',
-                        textAlign: 'left',
-                        fontWeight: 500,
-                      }}
-                    onMouseEnter={(e) => {
-                      const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                      if (trigger) trigger.style.opacity = '1';
+                {getReorderedColumns().map((col: TableColumn) => (
+                  <th 
+                    key={col.key} 
+                    data-col-key={col.key}
+                    style={{
+                      border: '1px solid #e5e7eb',
+                      padding: '6px 12px',
+                      textAlign: 'left' as const,
+                      fontWeight: 500,
+                      minWidth: `${colWidths[col.key] || 150}px`,
+                      width: `${colWidths[col.key] || 150}px`,
+                      // NO aplicar sticky aquí - se hace via JS
                     }}
-                    onMouseLeave={(e) => {
-                      const trigger = e.currentTarget.querySelector('.header-menu-trigger') as HTMLElement;
-                      if (trigger) trigger.style.opacity = '0';
-                    }}
-                    >
-                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          {col.label}
-                          {(() => {
-                            const sortRule = sortRules.find(r => r.column === col.key);
-                            if (sortRule) {
-                              return sortRule.direction === 'asc' ? 
-                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
-                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
-                            }
-                            return null;
-                          })()}
-                        </span>
-                        <span
-                          className="header-menu-trigger"
-                          style={{
-                            position: 'absolute',
-                            right: 6,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            cursor: 'pointer',
-                            opacity: 0,
-                            transition: 'opacity 0.15s',
-                            zIndex: 3,
-                          }}
-                          onClick={e => handleOpenColumnMenu(e, col.key)}
-                        >
-                          <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                        </span>
-                        {/* Badge de filtros aplicados */}
-                        {filtersByColumn[col.key] > 0 && (
-                          <span style={{
-                            position: 'absolute',
-                            top: 6,
-                            right: 4,
-                            background: '#22c55e',
-                            color: '#fff',
-                            borderRadius: '50%',
-                            fontSize: 10,
-                            minWidth: 15,
-                            height: 15,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 600,
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                            zIndex: 2
-                          }}>{filtersByColumn[col.key]}</span>
-                        )}
-                        {/* Resizer para redimensionar columnas */}
-                        <div
-                          className={`col-resizer${resizingCol === col.key ? ' resizing' : ''}`}
-                          onMouseDown={(e) => handleMouseDown(e, col.key)}
-                          onMouseEnter={() => setHoveredResizer(col.key)}
-                          onMouseLeave={() => setHoveredResizer(null)}
-                        />
-                        {/* Indicador visual del resizer */}
-                        <div
-                          className={`col-resizer-indicator${resizingCol === col.key ? ' resizing' : ''}`}
-                          style={{
-                            opacity: (hoveredResizer === col.key || resizingCol === col.key) ? 1 : 0
-                          }}
-                        />
-                      </div>
-                    </th>
-                  );
-                })}
+                    // ... resto del código del th
+                  >
+                    {/* contenido del header */}
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {col.label}
+                        {(() => {
+                          const sortRule = sortRules.find(r => r.column === col.key);
+                          if (sortRule) {
+                            return sortRule.direction === 'asc' ? 
+                              <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 2 }} /> : 
+                              <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 2 }} />;
+                          }
+                          return null;
+                        })()}
+                      </span>
+                      <span
+                        className="header-menu-trigger"
+                        style={{
+                          position: 'absolute',
+                          right: 6,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          cursor: 'pointer',
+                          opacity: 0,
+                          transition: 'opacity 0.15s',
+                          zIndex: 3,
+                        }}
+                        onClick={e => handleOpenColumnMenu(e, col.key)}
+                      >
+                        <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                      </span>
+                      {/* Badge de filtros aplicados */}
+                      {filtersByColumn[col.key] > 0 && (
+                        <span style={{
+                          position: 'absolute',
+                          top: 6,
+                          right: 4,
+                          background: '#22c55e',
+                          color: '#fff',
+                          borderRadius: '50%',
+                          fontSize: 10,
+                          minWidth: 15,
+                          height: 15,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 600,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                          zIndex: 2
+                        }}>{filtersByColumn[col.key]}</span>
+                      )}
+                      {/* Resizer para redimensionar columnas */}
+                      <div
+                        className={`col-resizer${resizingCol === col.key ? ' resizing' : ''}`}
+                        onMouseDown={(e) => handleMouseDown(e, col.key)}
+                        onMouseEnter={() => setHoveredResizer(col.key)}
+                        onMouseLeave={() => setHoveredResizer(null)}
+                      />
+                      {/* Indicador visual del resizer */}
+                      <div
+                        className={`col-resizer-indicator${resizingCol === col.key ? ' resizing' : ''}`}
+                        style={{
+                          opacity: (hoveredResizer === col.key || resizingCol === col.key) ? 1 : 0
+                        }}
+                      />
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -1702,20 +1745,21 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  {getReorderedColumns().map((col: TableColumn) => {
-                    const isPinnedLeft = pinnedColumns.includes(col.key);
-                    const isPinnedRight = pinnedColumnsRight.includes(col.key);
-                    return (
-                      <td key={col.key} 
-                        data-col-key={col.key}
-                        style={{
-                          border: '1px solid #e5e7eb',
-                          padding: '6px 12px',
-                        }}>
-                        {row[col.key] || (col.key === 'name' ? row.name || 'Sin nombre' : '-')}
-                      </td>
-                    );
-                  })}
+                  {getReorderedColumns().map((col: TableColumn) => (
+                    <td 
+                      key={col.key} 
+                      data-col-key={col.key}
+                      style={{
+                        border: '1px solid #e5e7eb',
+                        padding: '6px 12px',
+                        minWidth: `${colWidths[col.key] || 150}px`,
+                        width: `${colWidths[col.key] || 150}px`,
+                        // NO aplicar sticky aquí - se hace via JS
+                      }}
+                    >
+                      {row[col.key] || (col.key === 'name' ? row.name || 'Sin nombre' : '-')}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
