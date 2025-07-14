@@ -1137,3 +1137,72 @@ div.column-menu-item:hover, .column-menu-item:hover {
 .user-table th.first-pinned-column, .user-table td.first-pinned-column {
   overflow: visible !important;
 }
+
+/* Estilos mejorados para resizer con columnas pinned */
+.user-table th .col-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 4;
+  transition: background-color 0.15s ease;
+}
+
+.user-table th:hover .col-resizer {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.user-table th .col-resizer.resizing {
+  background: #2563eb;
+}
+
+/* Indicador visual del resizer */
+.user-table th .col-resizer-indicator {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #d1d5db;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.user-table th:hover .col-resizer-indicator {
+  opacity: 1;
+}
+
+.user-table th .col-resizer.resizing + .col-resizer-indicator {
+  background: #2563eb;
+  opacity: 1;
+}
+
+/* Estilos específicos para columnas pinned durante resize */
+.user-table th[style*="position: sticky"] .col-resizer {
+  z-index: 1001; /* Mayor z-index para columnas pinned */
+}
+
+.user-table th[style*="position: sticky"] .col-resizer-indicator {
+  z-index: 1002;
+}
+
+/* Cursor específico para resizer en columnas pinned */
+.user-table th[style*="position: sticky"] .col-resizer:hover {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+/* Animación suave para el cambio de ancho */
+.user-table th,
+.user-table td {
+  transition: width 0.1s ease, min-width 0.1s ease;
+}
+
+/* Deshabilitar transición durante resize para mejor performance */
+.user-table.resizing th,
+.user-table.resizing td {
+  transition: none;
+}

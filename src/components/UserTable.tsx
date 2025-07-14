@@ -445,22 +445,37 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   
   // Función para reordenar columnas según el estado de pinning (lógica MUI DataGrid)
   const getReorderedColumns = () => {
-    const pinnedLeftCols = columnOrder.filter((col: TableColumn) => 
-      visibleColumns.includes(col.key) && pinnedColumns.includes(col.key)
-    );
+    // 1. Obtener columnas pinned left en orden de pinning (primera pinneada = más a la izquierda)
+    const pinnedLeftCols = pinnedColumns.map(pinnedKey => 
+      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
+    ).filter(Boolean) as TableColumn[];
     
-    const pinnedRightCols = columnOrder.filter((col: TableColumn) => 
-      visibleColumns.includes(col.key) && pinnedColumnsRight.includes(col.key)
-    );
+    // 2. Obtener columnas pinned right en orden de pinning INVERSO (primera pinneada = más a la derecha)
+    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
+      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
+    ).filter(Boolean) as TableColumn[];
     
+    // 3. Obtener columnas normales (no pinneadas)
     const normalCols = columnOrder.filter((col: TableColumn) => 
       visibleColumns.includes(col.key) && 
       !pinnedColumns.includes(col.key) && 
       !pinnedColumnsRight.includes(col.key)
     );
     
-    // Reordenar según la lógica de MUI: pinned left + normal + pinned right
-    return [...pinnedLeftCols, ...normalCols, ...pinnedRightCols];
+    // 4. Reordenar según la lógica de MUI: pinned left + normal + pinned right
+    const reordered = [...pinnedLeftCols, ...normalCols, ...pinnedRightCols];
+    
+    // Debug: mostrar el ordenamiento
+    console.log('Column reordering:', {
+      pinnedLeftOrder: pinnedColumns,
+      pinnedLeftCols: pinnedLeftCols.map((c: TableColumn) => c.key),
+      normalCols: normalCols.map((c: TableColumn) => c.key),
+      pinnedRightOrder: pinnedColumnsRight,
+      pinnedRightCols: pinnedRightCols.map((c: TableColumn) => c.key),
+      finalOrder: reordered.map((c: TableColumn) => c.key)
+    });
+    
+    return reordered;
   };
 
   // useEffect para forzar aplicación de estilos sticky después del renderizado
@@ -626,8 +641,13 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   // Función para fijar columna a la derecha
   const pinColumnRight = (colKey: string) => {
     setPinnedColumnsRight(prev => {
-      const filtered = prev.filter(key => key !== colKey);
-      return [...filtered, colKey];
+      // Si ya está fijada, la quitamos
+      if (prev.includes(colKey)) {
+        return prev.filter(key => key !== colKey);
+      }
+      // Si no está fijada, la añadimos al INICIO del array (unshift)
+      // Esto hace que la primera pinneada sea la más a la derecha (orden inverso)
+      return [colKey, ...prev];
     });
     
     // Forzar re-renderizado inmediato
@@ -709,23 +729,138 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   const [resizingCol, setResizingCol] = useState<string | null>(null);
   const [hoveredResizer, setHoveredResizer] = useState<string | null>(null);
 
-  // Modifica handleMouseDown para setResizingCol
+  // Sistema de redimensionamiento mejorado basado en MUI
   const handleMouseDown = (e: React.MouseEvent, colKey: string) => {
     e.preventDefault();
     setResizingCol(colKey);
     const startX = e.clientX;
     const startWidth = colWidths[colKey] || 150;
+    
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newWidth = Math.max(60, startWidth + moveEvent.clientX - startX);
-      setColWidths((prev) => ({ ...prev, [colKey]: newWidth }));
+      
+      // Validar el redimensionamiento según el tipo de columna
+      const validation = validateResize(colKey, newWidth);
+      if (!validation.valid) {
+        console.warn('Resize validation failed:', validation.reason);
+        return;
+      }
+      
+      // Aplicar el redimensionamiento con recálculo de layout
+      handleColumnResize(colKey, newWidth, startWidth);
     };
+    
     const onMouseUp = () => {
       setResizingCol(null);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
+      
+      // Forzar actualización de offsets después del redimensionamiento
+      setTimeout(() => {
+        setOffsetUpdateTrigger(prev => prev + 1);
+        forceStickyUpdate();
+      }, 10);
     };
+    
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Validación de redimensionamiento
+  const validateResize = (colKey: string, newWidth: number): { valid: boolean; reason?: string } => {
+    // 1. Ancho mínimo
+    if (newWidth < 60) {
+      return { valid: false, reason: 'Below minimum width' };
+    }
+    
+    // 2. Verificar que no se desborde el contenedor
+    const container = document.querySelector('.table-scroll-container') as HTMLElement;
+    if (container) {
+      const containerWidth = container.clientWidth;
+      const currentTotalWidth = Object.values(colWidths).reduce((sum, width) => sum + width, 0);
+      const deltaWidth = newWidth - (colWidths[colKey] || 150);
+      const newTotalWidth = currentTotalWidth + deltaWidth;
+      
+      // Para columnas pinned, verificar que quede espacio para normales
+      const isLeftPinned = pinnedColumns.includes(colKey);
+      const isRightPinned = pinnedColumnsRight.includes(colKey);
+      
+      if (isLeftPinned || isRightPinned) {
+        const pinnedWidth = isLeftPinned ? 
+          pinnedColumns.reduce((sum, key) => sum + (colWidths[key] || 150), 0) :
+          pinnedColumnsRight.reduce((sum, key) => sum + (colWidths[key] || 150), 0);
+        
+        if (pinnedWidth + deltaWidth > containerWidth * 0.8) {
+          return { valid: false, reason: 'Pinned columns would take too much space' };
+        }
+      }
+    }
+    
+    return { valid: true };
+  };
+
+  // Manejo de redimensionamiento con recálculo de layout
+  const handleColumnResize = (colKey: string, newWidth: number, oldWidth: number) => {
+    const deltaWidth = newWidth - oldWidth;
+    
+    // 1. Actualizar el ancho de la columna
+    setColWidths(prev => ({ ...prev, [colKey]: newWidth }));
+    
+    // 2. Recalcular layout según el tipo de columna
+    const isLeftPinned = pinnedColumns.includes(colKey);
+    const isRightPinned = pinnedColumnsRight.includes(colKey);
+    
+    if (isLeftPinned) {
+      handleLeftPinnedResize(colKey, deltaWidth);
+    } else if (isRightPinned) {
+      handleRightPinnedResize(colKey, deltaWidth);
+    } else {
+      handleNormalColumnResize(colKey, deltaWidth);
+    }
+    
+    // 3. Ajustar scroll si es necesario
+    adjustScrollAfterResize(colKey, deltaWidth);
+  };
+
+  // Redimensionamiento de columnas left pinned
+  const handleLeftPinnedResize = (colKey: string, deltaWidth: number) => {
+    console.log(`Left pinned resize: ${colKey} by ${deltaWidth}px`);
+    
+    // Las columnas left pinned posteriores se desplazan automáticamente
+    // porque getLeftOffset() las recalcula basándose en colWidths
+    // Solo necesitamos forzar la actualización
+    setPinUpdateTrigger(prev => prev + 1);
+  };
+
+  // Redimensionamiento de columnas right pinned
+  const handleRightPinnedResize = (colKey: string, deltaWidth: number) => {
+    console.log(`Right pinned resize: ${colKey} by ${deltaWidth}px`);
+    
+    // Las columnas right pinned mantienen su posición right
+    // pero el área de scroll se reduce
+    setPinUpdateTrigger(prev => prev + 1);
+  };
+
+  // Redimensionamiento de columnas normales
+  const handleNormalColumnResize = (colKey: string, deltaWidth: number) => {
+    console.log(`Normal column resize: ${colKey} by ${deltaWidth}px`);
+    
+    // Las columnas normales solo afectan el ancho total
+    // No necesitan recálculo de posiciones
+  };
+
+  // Ajustar scroll después del redimensionamiento
+  const adjustScrollAfterResize = (colKey: string, deltaWidth: number) => {
+    const container = document.querySelector('.table-scroll-container') as HTMLElement;
+    if (!container) return;
+    
+    const currentScrollLeft = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    
+    // Si el scroll actual excede el nuevo máximo, ajustarlo
+    if (currentScrollLeft > maxScrollLeft) {
+      container.scrollLeft = Math.max(0, maxScrollLeft);
+    }
   };
 
   // Drag and drop handlers
@@ -980,32 +1115,42 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   };
   // Calcula el offset right para columnas sticky a la derecha
   function getRightOffset(colKey: string) {
-    // Con el reordenamiento, las columnas pinned right están al final del array
-    // Solo necesitamos calcular el offset basado en su posición en el grupo pinned right
-    const pinnedRightCols = getReorderedColumns().filter((col: TableColumn) => 
-      pinnedColumnsRight.includes(col.key)
-    );
+    // Las columnas pinned right se ordenan desde la derecha hacia la izquierda
+    // La primera en el array es la más a la derecha
+    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
+      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
+    ).filter(Boolean) as TableColumn[];
     
     const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
     if (idx === -1) return 0;
     
-    // Calcular offset basado en la posición en el grupo pinned right
+    // Calcular offset desde la derecha: sumar anchos de columnas a la derecha de esta
     let offset = 0;
-    for (let i = 0; i < idx; i++) {
+    for (let i = idx + 1; i < pinnedRightCols.length; i++) {
       const key = pinnedRightCols[i].key;
       offset += colWidths[key] || 150;
     }
+    
+    console.log(`getRightOffset for ${colKey}:`, {
+      pinnedRightCols: pinnedRightCols.map(c => c.key),
+      idx,
+      offset,
+      colWidths: colWidths[colKey] || 150
+    });
     
     return offset;
   }
   // Calcula el z-index para columnas sticky a la derecha: la más a la derecha tiene el mayor z-index
   function getPinnedRightZIndex(colKey: string) {
-    const pinnedRightCols = getReorderedColumns().filter((col: TableColumn) => 
-      pinnedColumnsRight.includes(col.key)
-    );
+    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
+      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
+    ).filter(Boolean) as TableColumn[];
+    
     const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
     if (idx === -1) return 1;
-    return 1000 + idx; // La primera en el grupo tiene el mayor z-index
+    
+    // La primera en el array (más a la derecha) tiene el mayor z-index
+    return 1000 + (pinnedRightCols.length - 1 - idx);
   }
 
   // Helper para sticky position
@@ -1048,6 +1193,40 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     pinnedColumns.forEach(unpinColumn);
     handleClosePinPanel();
   };
+
+  // Estado para scrollLeft
+  const [scrollLeft, setScrollLeft] = useState(0);
+  useEffect(() => {
+    const container = document.querySelector('.table-scroll-container');
+    if (!container) return;
+    const onScroll = () => setScrollLeft(container.scrollLeft);
+    container.addEventListener('scroll', onScroll);
+    return () => { container.removeEventListener('scroll', onScroll); };
+  }, []);
+
+  // Medir anchos reales de columnas tras cada render
+  useEffect(() => {
+    const table = document.querySelector('.user-table');
+    if (!table) return;
+    const ths = table.querySelectorAll('th[data-col-key]');
+    const newColWidths: { [key: string]: number } = {};
+    ths.forEach((th: Element) => {
+      const key = th.getAttribute('data-col-key');
+      if (key) {
+        newColWidths[key] = (th as HTMLElement).getBoundingClientRect().width;
+      }
+    });
+    setColWidths(newColWidths);
+  }, [columnOrder, pinnedColumns, pinnedColumnsRight, visibleColumns, pinUpdateTrigger, offsetUpdateTrigger, search, page]);
+
+  // Inicializa colWidths con un valor fijo para cada columna al montar
+  useEffect(() => {
+    const initialColWidths: { [key: string]: number } = {};
+    columnOrder.forEach((col: TableColumn) => {
+      initialColWidths[col.key] = colWidths[col.key] || 150;
+    });
+    setColWidths(initialColWidths);
+  }, [columnOrder, colWidths]);
 
   return (
     <>
@@ -1433,6 +1612,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
         {/* IMPORTANTE: No poner z-index, position: relative ni transform en el contenedor de scroll ni en wrappers de la tabla para evitar stacking context que rompa el sticky. */}
         <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb', position: 'relative' }}>
           <table 
+            className={`user-table${resizingCol ? ' resizing' : ''}`}
             key={`table-${pinUpdateTrigger}-${offsetUpdateTrigger}`}
             style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}
           >
@@ -1514,6 +1694,20 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                             zIndex: 2
                           }}>{filtersByColumn[col.key]}</span>
                         )}
+                        {/* Resizer para redimensionar columnas */}
+                        <div
+                          className={`col-resizer${resizingCol === col.key ? ' resizing' : ''}`}
+                          onMouseDown={(e) => handleMouseDown(e, col.key)}
+                          onMouseEnter={() => setHoveredResizer(col.key)}
+                          onMouseLeave={() => setHoveredResizer(null)}
+                        />
+                        {/* Indicador visual del resizer */}
+                        <div
+                          className={`col-resizer-indicator${resizingCol === col.key ? ' resizing' : ''}`}
+                          style={{
+                            opacity: (hoveredResizer === col.key || resizingCol === col.key) ? 1 : 0
+                          }}
+                        />
                       </div>
                     </th>
                   );
