@@ -1602,11 +1602,11 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
         
         {/* ESTRUCTURA MIGRADA DESDE LA TABLA QUE FUNCIONA */}
         {/* IMPORTANTE: No poner z-index, position: relative ni transform en el contenedor de scroll ni en wrappers de la tabla para evitar stacking context que rompa el sticky. */}
-        <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
+        <div className="table-scroll-container" style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', margin: '32px 0', border: '1px solid #e5e7eb' }}>
           <table 
             className={`user-table${resizingCol ? ' resizing' : ''}`}
             key={`table-${pinUpdateTrigger}-${offsetUpdateTrigger}`}
-            style={{ minWidth: 1800, width: 'max-content', borderCollapse: 'collapse' }}
+            style={{ minWidth: '100%', width: 'max-content', maxWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}
           >
             <thead>
               <tr>

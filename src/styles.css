@@ -1264,16 +1264,23 @@ div.column-menu-item:hover, .column-menu-item:hover {
 /* Estilos para el contenedor de la tabla */
 .table-scroll-container {
   overflow-x: auto;
-  overflow-y: visible;
-  position: relative;
   width: 100%;
+  max-width: 100%;
+  margin: 32px 0;
+  border: 1px solid #e5e7eb;
 }
 
-/* Asegurar que no haya elementos padre con overflow: hidden que rompan sticky */
-.table-container,
+/* Ajuste para que el scroll horizontal esté justo debajo de la tabla y no se desborde */
+.table-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Elimina cualquier overflow: visible !important conflictivo */
 .table-scroll-container,
+.table-container,
 .user-table {
-  overflow: visible !important;
+  overflow: unset !important;
 }
 
 /* Estilos para debugging - remover en producción */
