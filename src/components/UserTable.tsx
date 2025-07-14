@@ -480,39 +480,32 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
 
   // Función mejorada para calcular offset izquierdo
   const getLeftOffset = (colKey: string) => {
-    const pinnedLeftCols = getReorderedColumns().filter((col: TableColumn) => 
-      pinnedColumns.includes(col.key)
-    );
-    
+    // Obtén el orden actual de las columnas visibles y fijadas a la izquierda
+    const pinnedLeftCols = getReorderedColumns().filter((col: TableColumn) => pinnedColumns.includes(col.key));
     const idx = pinnedLeftCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return 0;
-    
+    if (idx === -1) return undefined;
+    // Suma los anchos de todas las columnas sticky anteriores
     let left = 0;
     for (let i = 0; i < idx; i++) {
       const key = pinnedLeftCols[i].key;
-      const width = colWidths[key] || 150;
-      left += width;
+      left += colWidths[key] || 150;
     }
-    
     return left;
   };
 
   // Función mejorada para calcular offset derecho
   const getRightOffset = (colKey: string) => {
-    const pinnedRightCols = pinnedColumnsRight.map(pinnedKey => 
-      columnOrder.find((col: TableColumn) => col.key === pinnedKey)
-    ).filter(Boolean) as TableColumn[];
-    
+    // Obtén el orden actual de las columnas visibles y fijadas a la derecha
+    const pinnedRightCols = getReorderedColumns().filter((col: TableColumn) => pinnedColumnsRight.includes(col.key));
     const idx = pinnedRightCols.findIndex((col: TableColumn) => col.key === colKey);
-    if (idx === -1) return 0;
-    
-    let offset = 0;
-    for (let i = idx + 1; i < pinnedRightCols.length; i++) {
+    if (idx === -1) return undefined;
+    // Suma los anchos de todas las columnas sticky posteriores
+    let right = 0;
+    for (let i = pinnedRightCols.length - 1; i > idx; i--) {
       const key = pinnedRightCols[i].key;
-      offset += colWidths[key] || 150;
+      right += colWidths[key] || 150;
     }
-    
-    return offset;
+    return right;
   };
 
   // Función dedicada para aplicar estilos sticky correctamente
