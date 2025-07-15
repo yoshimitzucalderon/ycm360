@@ -260,10 +260,12 @@ function StickyProveedorTable() {
           display: "flex",
           flexDirection: "column",
           width: "100%",
-          maxWidth: 1200,
+          maxWidth: "none",
           border: "1px solid #e5e7eb",
           borderRadius: 8,
           background: "#fff",
+          margin: 0,
+          padding: 0,
         }}
       >
         <div
@@ -275,6 +277,9 @@ function StickyProveedorTable() {
             maxHeight: maxTableHeight,
             transition: "max-height 0.2s",
             width: "100%",
+            maxWidth: "none",
+            margin: 0,
+            padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
           }}
         >
