@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Pin, PinOff, AlertTriangle, GripVertical } from 'lucide-react';
+import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical } from 'lucide-react';
 import { supabase } from "../supabaseClient";
 
 interface Column {
@@ -142,6 +142,34 @@ function StickyProveedorTable() {
   const headerHeight = 48; // px (aprox)
   const maxVisibleRows = 10;
   const maxTableHeight = rowsPerPage > maxVisibleRows ? headerHeight + rowHeight * maxVisibleRows : undefined;
+
+  // Estado para menú contextual de columna
+  const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
+  const [columnMenuKey, setColumnMenuKey] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
+    setColumnMenuAnchor(event.currentTarget as HTMLElement);
+    setColumnMenuKey(colKey);
+  };
+  const handleCloseColumnMenu = () => {
+    setColumnMenuAnchor(null);
+    setColumnMenuKey(null);
+  };
+  // Cierre por click fuera
+  useEffect(() => {
+    if (!columnMenuAnchor) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current && !menuRef.current.contains(event.target as Node) &&
+        columnMenuAnchor && !columnMenuAnchor.contains(event.target as Node)
+      ) {
+        handleCloseColumnMenu();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [columnMenuAnchor]);
 
   useEffect(() => {
     setLoading(true);
@@ -288,75 +316,94 @@ function StickyProveedorTable() {
               <tr>
                 {tableLayout.orderedColumns.map((col: ProveedorColumn) => {
                   const position = tableLayout.positions[col.key as string];
+                  // @ts-ignore
                   let style = {
                     minWidth: col.width,
                     width: col.width,
-                    position: 'relative',
+                    position: "sticky",
+                    // @ts-ignore
+                    top: 0,
+                    background: col.isPinnedLeft ? "#f8fafc" : col.isPinnedRight ? "#faf5ff" : "#fff",
+                    zIndex: col.isPinnedLeft || col.isPinnedRight ? 300 : 200,
+                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: "2px 0 4px -1px rgba(0,0,0,0.1)", borderRight: "2px solid #3b82f6" } : {}),
+                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: "-2px 0 4px -1px rgba(0,0,0,0.1)", borderLeft: "2px solid #8b5cf6" } : {}),
                   };
-                  let pinIcon = null;
-                  if (col.isPinnedLeft && position?.left !== undefined) {
-                    // @ts-ignore
-                    style = {
-                      position: "sticky",
-                      // @ts-ignore
-                      left: position.left,
-                      // @ts-ignore
-                      top: 0,
-                      background: "#f8fafc",
-                      zIndex: 300,
-                      minWidth: col.width,
-                      width: col.width,
-                      boxShadow: "2px 0 4px -1px rgba(0,0,0,0.1)",
-                      borderRight: "2px solid #3b82f6"
-                    };
-                    pinIcon = (
-                      <PinOff size={14} style={{ color: "#2563eb", cursor: "pointer" }} onClick={() => pinLeft(col.key)} />
-                    );
-                  } else if (col.isPinnedRight && position?.right !== undefined) {
-                    // @ts-ignore
-                    style = {
-                      position: "sticky",
-                      // @ts-ignore
-                      right: position.right,
-                      // @ts-ignore
-                      top: 0,
-                      background: "#faf5ff",
-                      zIndex: 300,
-                      minWidth: col.width,
-                      width: col.width,
-                      boxShadow: "-2px 0 4px -1px rgba(0,0,0,0.1)",
-                      borderLeft: "2px solid #8b5cf6"
-                    };
-                    pinIcon = (
-                      <PinOff size={14} style={{ color: "#7c3aed", cursor: "pointer" }} onClick={() => pinRight(col.key)} />
-                    );
-                  } else {
-                    // @ts-ignore
-                    style = {
-                      ...style,
-                      position: "sticky",
-                      // @ts-ignore
-                      top: 0,
-                      background: "#fff",
-                      zIndex: 200,
-                    };
-                    const canLeft = canPinLeft(col.key);
-                    const canRight = canPinRight(col.key);
-                    pinIcon = (
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <Pin size={12} style={{ color: canLeft ? "#3b82f6" : "#d1d5db", cursor: canLeft ? "pointer" : "not-allowed", marginRight: 4 }} onClick={() => canLeft && pinLeft(col.key)} />
-                        <Pin size={12} style={{ color: canRight ? "#7c3aed" : "#d1d5db", cursor: canRight ? "pointer" : "not-allowed", transform: 'scaleX(-1)' }} onClick={() => canRight && pinRight(col.key)} />
-                      </div>
-                    );
-                  }
-                  // @ts-ignore
                   return (
-                     // @ts-ignore
+                    // @ts-ignore
                     <th key={col.key} style={style}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{col.label}</span>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
-                          {pinIcon}
+                          <button
+                            ref={columnMenuKey === col.key ? buttonRef : undefined}
+                            style={{ background: "none", border: "none", padding: 2, cursor: "pointer", borderRadius: 4, display: "flex", alignItems: "center" }}
+                            onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
+                            title="Opciones de columna"
+                          >
+                            <MoreVertical size={18} style={{ color: "#2563eb" }} />
+                          </button>
+                          {/* Menú contextual de columna, solo para la columna activa */}
+                          {columnMenuAnchor && columnMenuKey === col.key && (
+                            <div
+                              ref={menuRef}
+                              style={{
+                                position: 'absolute',
+                                top: 32,
+                                right: 0,
+                                minWidth: 170,
+                                background: '#fff',
+                                border: '1.5px solid #e5e7eb',
+                                borderRadius: 8,
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                zIndex: 10000,
+                                fontSize: 14,
+                                padding: 4,
+                              }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              {/* Opciones de pin */}
+                              {!columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && !columns.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Pin size={16} /> Fijar a la izquierda
+                                </div>
+                              )}
+                              {columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <PinOff size={16} /> Desfijar izquierda
+                                </div>
+                              )}
+                              {!columns.find(c => c.key === columnMenuKey)?.isPinnedRight && !columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                </div>
+                              )}
+                              {columns.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <PinOff size={16} /> Desfijar derecha
+                                </div>
+                              )}
+                            </div>
+                          )}
                           <button style={{ padding: 4, cursor: "col-resize", borderRadius: 4, border: "none", backgroundColor: "transparent" }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
                             <GripVertical size={12} style={{ color: "#6b7280" }} />
                           </button>
@@ -368,9 +415,7 @@ function StickyProveedorTable() {
                 })}
               </tr>
             </thead>
-            <tbody
-              style={{ minHeight: maxTableHeight ? maxTableHeight - 48 : undefined }}
-            >
+            <tbody style={{ minHeight: maxTableHeight ? maxTableHeight - 48 : undefined }}>
               {loading && (
                 <tr><td colSpan={columns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
               )}
