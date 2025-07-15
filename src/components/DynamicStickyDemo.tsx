@@ -122,11 +122,26 @@ function StickyProveedorTable() {
     }))
   );
 
+  // --- PAGINACIÓN ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const rowsPerPageOptions = [10, 25, 50, 100, 1000];
+  const totalRows = data.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   // Layout container
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [isResizing, setIsResizing] = useState<string | null>(null);
   const [resizeStart, setResizeStart] = useState<{ x: number; width: number } | null>(null);
+
+  // --- SCROLL VERTICAL SI HAY MÁS DE 10 FILAS ---
+  // Altura estimada de fila (ajustar si tu fila es más alta/baja)
+  const rowHeight = 44; // px
+  const headerHeight = 48; // px (aprox)
+  const maxVisibleRows = 10;
+  const maxTableHeight = rowsPerPage > maxVisibleRows ? headerHeight + rowHeight * maxVisibleRows : undefined;
 
   useEffect(() => {
     setLoading(true);
@@ -240,113 +255,196 @@ function StickyProveedorTable() {
   return (
     <div style={{ margin: "32px 0 32px 0" }}>
       <h3 style={{ fontWeight: 500, color: "#111827", marginBottom: 8 }}>Proveedores (Supabase)</h3>
-      <div ref={containerRef} style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "auto", width: "100%", maxWidth: 1200 }}>
-        <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900 }}>
-          <thead>
-            <tr>
-              {tableLayout.orderedColumns.map((col: ProveedorColumn) => {
-                const position = tableLayout.positions[col.key as string];
-                let style = {
-                  minWidth: col.width,
-                  width: col.width,
-                  position: 'relative',
-                };
-                let pinIcon = null;
-                if (col.isPinnedLeft && position?.left !== undefined) {
-                  // @ts-ignore
-                  style = {
-                    position: "sticky",
-                    // @ts-ignore
-                    left: position.left,
-                    background: "#f8fafc",
-                    zIndex: position.zIndex,
-                    minWidth: col.width,
-                    width: col.width,
-                    boxShadow: "2px 0 4px -1px rgba(0,0,0,0.1)",
-                    borderRight: "2px solid #3b82f6"
-                  };
-                  pinIcon = (
-                    <PinOff size={14} style={{ color: "#2563eb", cursor: "pointer" }} onClick={() => pinLeft(col.key)} />
-                  );
-                } else if (col.isPinnedRight && position?.right !== undefined) {
-                  // @ts-ignore
-                  style = {
-                    position: "sticky",
-                    // @ts-ignore
-                    right: position.right,
-                    background: "#faf5ff",
-                    zIndex: position.zIndex,
-                    minWidth: col.width,
-                    width: col.width,
-                    boxShadow: "-2px 0 4px -1px rgba(0,0,0,0.1)",
-                    borderLeft: "2px solid #8b5cf6"
-                  };
-                  pinIcon = (
-                    <PinOff size={14} style={{ color: "#7c3aed", cursor: "pointer" }} onClick={() => pinRight(col.key)} />
-                  );
-                } else {
-                  const canLeft = canPinLeft(col.key);
-                  const canRight = canPinRight(col.key);
-                  pinIcon = (
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <Pin size={12} style={{ color: canLeft ? "#3b82f6" : "#d1d5db", cursor: canLeft ? "pointer" : "not-allowed", marginRight: 4 }} onClick={() => canLeft && pinLeft(col.key)} />
-                      <Pin size={12} style={{ color: canRight ? "#7c3aed" : "#d1d5db", cursor: canRight ? "pointer" : "not-allowed", transform: 'scaleX(-1)' }} onClick={() => canRight && pinRight(col.key)} />
-                    </div>
-                  );
-                }
-                // @ts-ignore
-                return (
-                   // @ts-ignore
-                  <th key={col.key} style={style}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{col.label}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
-                        {pinIcon}
-                        <button style={{ padding: 4, cursor: "col-resize", borderRadius: 4, border: "none", backgroundColor: "transparent" }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
-                          <GripVertical size={12} style={{ color: "#6b7280" }} />
-                        </button>
-                      </div>
-                    </div>
-                    <div style={{ position: "absolute", top: 0, right: 0, width: 8, height: "100%", cursor: "col-resize", backgroundColor: "transparent", zIndex: 1000 }} onMouseDown={(e) => handleResizeStart(col.key, e)} />
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (
-              <tr><td colSpan={columns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
-            )}
-            {error && (
-              <tr><td colSpan={columns.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
-            )}
-            {!loading && !error && data.map((row, i) => (
-              <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          maxWidth: 1200,
+          border: "1px solid #e5e7eb",
+          borderRadius: 8,
+          background: "#fff",
+        }}
+      >
+        <div
+          ref={containerRef}
+          style={{
+            flex: "1 1 auto",
+            overflowX: "auto",
+            overflowY: rowsPerPage > maxVisibleRows ? "auto" : "visible",
+            maxHeight: maxTableHeight,
+            transition: "max-height 0.2s",
+            width: "100%",
+            height: maxTableHeight ? maxTableHeight : undefined,
+          }}
+        >
+          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, height: "100%" }}>
+            <thead>
+              <tr>
                 {tableLayout.orderedColumns.map((col: ProveedorColumn) => {
                   const position = tableLayout.positions[col.key as string];
-                  let style: React.CSSProperties = {
+                  let style = {
                     minWidth: col.width,
                     width: col.width,
-                    position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
-                    background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
-                    zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
-                    boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
-                    borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
-                    borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
+                    position: 'relative',
                   };
+                  let pinIcon = null;
+                  if (col.isPinnedLeft && position?.left !== undefined) {
+                    // @ts-ignore
+                    style = {
+                      position: "sticky",
+                      // @ts-ignore
+                      left: position.left,
+                      // @ts-ignore
+                      top: 0,
+                      background: "#f8fafc",
+                      zIndex: 300,
+                      minWidth: col.width,
+                      width: col.width,
+                      boxShadow: "2px 0 4px -1px rgba(0,0,0,0.1)",
+                      borderRight: "2px solid #3b82f6"
+                    };
+                    pinIcon = (
+                      <PinOff size={14} style={{ color: "#2563eb", cursor: "pointer" }} onClick={() => pinLeft(col.key)} />
+                    );
+                  } else if (col.isPinnedRight && position?.right !== undefined) {
+                    // @ts-ignore
+                    style = {
+                      position: "sticky",
+                      // @ts-ignore
+                      right: position.right,
+                      // @ts-ignore
+                      top: 0,
+                      background: "#faf5ff",
+                      zIndex: 300,
+                      minWidth: col.width,
+                      width: col.width,
+                      boxShadow: "-2px 0 4px -1px rgba(0,0,0,0.1)",
+                      borderLeft: "2px solid #8b5cf6"
+                    };
+                    pinIcon = (
+                      <PinOff size={14} style={{ color: "#7c3aed", cursor: "pointer" }} onClick={() => pinRight(col.key)} />
+                    );
+                  } else {
+                    // @ts-ignore
+                    style = {
+                      ...style,
+                      position: "sticky",
+                      // @ts-ignore
+                      top: 0,
+                      background: "#fff",
+                      zIndex: 200,
+                    };
+                    const canLeft = canPinLeft(col.key);
+                    const canRight = canPinRight(col.key);
+                    pinIcon = (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <Pin size={12} style={{ color: canLeft ? "#3b82f6" : "#d1d5db", cursor: canLeft ? "pointer" : "not-allowed", marginRight: 4 }} onClick={() => canLeft && pinLeft(col.key)} />
+                        <Pin size={12} style={{ color: canRight ? "#7c3aed" : "#d1d5db", cursor: canRight ? "pointer" : "not-allowed", transform: 'scaleX(-1)' }} onClick={() => canRight && pinRight(col.key)} />
+                      </div>
+                    );
+                  }
                   // @ts-ignore
                   return (
-                    <td key={col.key} style={style}>
-                      <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row[col.key]}</div>
-                    </td>
+                     // @ts-ignore
+                    <th key={col.key} style={style}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{col.label}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
+                          {pinIcon}
+                          <button style={{ padding: 4, cursor: "col-resize", borderRadius: 4, border: "none", backgroundColor: "transparent" }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
+                            <GripVertical size={12} style={{ color: "#6b7280" }} />
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ position: "absolute", top: 0, right: 0, width: 8, height: "100%", cursor: "col-resize", backgroundColor: "transparent", zIndex: 1000 }} onMouseDown={(e) => handleResizeStart(col.key, e)} />
+                    </th>
                   );
                 })}
               </tr>
+            </thead>
+            <tbody
+              style={{ minHeight: maxTableHeight ? maxTableHeight - 48 : undefined }}
+            >
+              {loading && (
+                <tr><td colSpan={columns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
+              )}
+              {error && (
+                <tr><td colSpan={columns.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
+              )}
+              {!loading && !error && paginatedData.map((row, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                  {tableLayout.orderedColumns.map((col: ProveedorColumn) => {
+                    const position = tableLayout.positions[col.key as string];
+                    let style: React.CSSProperties = {
+                      minWidth: col.width,
+                      width: col.width,
+                      position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                      ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
+                      ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
+                      background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
+                      zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
+                      boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
+                      borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
+                      borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
+                    };
+                    // @ts-ignore
+                    return (
+                      <td key={col.key} style={style}>
+                        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row[col.key]}</div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {/* PAGINACIÓN */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 0 0", fontSize: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span>Filas por página:</span>
+          <select
+            value={rowsPerPage}
+            onChange={e => {
+              setRowsPerPage(Number(e.target.value));
+              setPage(0);
+            }}
+            style={{ border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 8px", background: "#fff", fontSize: 14 }}
+          >
+            {rowsPerPageOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
             ))}
-          </tbody>
-        </table>
+          </select>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span>{totalRows === 0 ? 0 : page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, totalRows)} de {totalRows}</span>
+          <button
+            onClick={() => setPage(0)}
+            disabled={page === 0}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            title="Primera página"
+          >{'|<'}</button>
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            title="Página anterior"
+          >{'<'}</button>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            title="Página siguiente"
+          >{'>'}</button>
+          <button
+            onClick={() => setPage(totalPages - 1)}
+            disabled={page >= totalPages - 1}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            title="Última página"
+          >{'>|'}</button>
+        </div>
       </div>
       <div style={{ fontSize: 12, color: "#6b7280", backgroundColor: "#f9fafb", padding: 12, borderRadius: 4, marginTop: 16 }}>
         <div style={{ fontWeight: 500, color: "#374151", marginBottom: 8 }}>Funcionalidades:</div>
