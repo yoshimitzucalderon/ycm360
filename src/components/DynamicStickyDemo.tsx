@@ -1251,13 +1251,6 @@ function StickyProveedorTable() {
           >{'>|'}</button>
         </div>
       </div>
-      <div style={{ fontSize: 12, color: "#6b7280", backgroundColor: "#f9fafb", padding: 12, borderRadius: 4, marginTop: 16 }}>
-        <div style={{ fontWeight: 500, color: "#374151", marginBottom: 8 }}>Funcionalidades:</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
-          📏 <strong>Redimensionar</strong>: Usa el botón <GripVertical size={12} style={{ color: "#6b7280", margin: "0 4px" }} /> o arrastra el borde derecho de cada columna (100px - 300px)
-        </div>
-        <div style={{ marginBottom: 4 }}>📌 <strong>Fijar columnas</strong>: Usa los iconos de pin para fijar a izquierda/derecha</div>
-      </div>
     </div>
   );
 }
