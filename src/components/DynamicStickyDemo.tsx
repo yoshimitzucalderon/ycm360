@@ -1549,7 +1549,6 @@ function StickyProveedorTable() {
         justifyContent: "space-between", 
         padding: "12px 16px", 
         fontSize: 14,
-        borderTop: "1px solid #e5e7eb",
         borderLeft: "1px solid #e5e7eb",
         borderRight: "1px solid #e5e7eb",
         borderBottom: "1px solid #e5e7eb",
