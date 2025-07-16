@@ -1164,7 +1164,7 @@ function StickyProveedorTable() {
             position: "relative", // <-- agregado para sticky
           }}
         >
-          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900 }}>
+          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '14px' }}>
             <thead>
               <tr>
                 {tableLayout.orderedColumns.map((col) => {
