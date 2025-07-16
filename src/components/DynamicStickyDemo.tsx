@@ -380,7 +380,7 @@ function StickyProveedorTable() {
   // Resetear página cuando cambian filtros o búsqueda
   useEffect(() => {
     setPage(0);
-  }, [search, sortRules]);
+  }, [search, filters, sortRules]);
 
   // Observar tamaño del contenedor
   useEffect(() => {
@@ -650,15 +650,19 @@ function StickyProveedorTable() {
     return { orderedColumns, leftPinned, rightPinned, normal, positions, leftTotalWidth, rightTotalWidth };
   }, [visibleColumnsData, containerWidth]);
 
-  const getExportColumns = () => tableLayout.orderedColumns.filter(col => visibleColumns.includes(col.key));
+  // Para exportar columnas en el orden visual real (mismo orden que se muestra en pantalla)
+  const getExportColumns = () => {
+    // Usar el mismo orden que se muestra en la tabla: tableLayout.orderedColumns
+    return tableLayout.orderedColumns;
+  };
 
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    // Columnas visibles y en el orden real de la tabla
+    // Usar el mismo orden de columnas que se muestra en pantalla
     const exportCols = getExportColumns();
     const tableData = filteredAndSortedData.map((row: any) =>
       exportCols.map(col => row[col.key] || '')
     );
+    const doc = new jsPDF();
     autoTable(doc, {
       head: [exportCols.map(col => col.label)],
       body: tableData,
@@ -668,7 +672,7 @@ function StickyProveedorTable() {
   };
 
   const handleDownloadXLSX = () => {
-    // Columnas visibles y en el orden real de la tabla
+    // Usar el mismo orden de columnas que se muestra en pantalla
     const exportCols = getExportColumns();
     const exportData = filteredAndSortedData.map((row: any) => {
       const obj: any = {};
@@ -687,7 +691,7 @@ function StickyProveedorTable() {
   };
 
   const handleDownloadCSV = () => {
-    // Columnas visibles y en el orden real de la tabla
+    // Usar el mismo orden de columnas que se muestra en pantalla
     const exportCols = getExportColumns();
     const headers = exportCols.map(col => col.label).join(',');
     const csvData = filteredAndSortedData.map((row: any) =>
@@ -700,6 +704,7 @@ function StickyProveedorTable() {
   };
 
   const clearSort = () => setSortRules([]);
+  
   // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
   const filtersByColumn: { [key: string]: number } = {};
   filters.forEach(f => {
@@ -1167,12 +1172,21 @@ function StickyProveedorTable() {
                   const style: React.CSSProperties = {
                     minWidth: col.width,
                     width: col.width,
-                    position: 'sticky', // SIEMPRE sticky
-                    top: 0,             // SIEMPRE top 0
+                    position: 'sticky',
+                    top: 0, // Todos los headers son sticky verticalmente
                     background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : '#fff',
-                    zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : 200,
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', borderRight: '2px solid #3b82f6' } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', borderLeft: '2px solid #8b5cf6' } : {}),
+                    zIndex: col.isPinnedLeft || col.isPinnedRight ? (position?.zIndex || 300) : 200,
+                    // Solo aplicar left/right para columnas pinned
+                    ...(col.isPinnedLeft && position?.left !== undefined ? { 
+                      left: position.left, 
+                      boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', 
+                      borderRight: '2px solid #3b82f6' 
+                    } : {}),
+                    ...(col.isPinnedRight && position?.right !== undefined ? { 
+                      right: position.right, 
+                      boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', 
+                      borderLeft: '2px solid #8b5cf6' 
+                    } : {}),
                   };
                   return (
                     <th key={col.key} style={style}>
@@ -1306,6 +1320,7 @@ function StickyProveedorTable() {
                     const style: React.CSSProperties = {
                       minWidth: col.width,
                       width: col.width,
+                      // Solo las celdas pinned son sticky horizontalmente
                       position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
@@ -1327,8 +1342,59 @@ function StickyProveedorTable() {
           </table>
         </div>
       </div>
+      {/* PAGINACIÓN */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 0 0", fontSize: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span>Filas por página:</span>
+          <select
+            value={rowsPerPage}
+            onChange={e => {
+              setRowsPerPage(Number(e.target.value));
+              setPage(0);
+            }}
+            style={{ border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 8px", background: "#fff", fontSize: 14 }}
+          >
+            {rowsPerPageOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span>{totalRows === 0 ? 0 : page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, totalRows)} de {totalRows}</span>
+          <button
+            onClick={() => setPage(0)}
+            disabled={page === 0}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            title="Primera página"
+          >{'|<'}</button>
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            title="Página anterior"
+          >{'<'}</button>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            title="Página siguiente"
+          >{'>'}</button>
+          <button
+            onClick={() => setPage(totalPages - 1)}
+            disabled={page >= totalPages - 1}
+            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            title="Última página"
+          >{'>|'}</button>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default StickyProveedorTable;
+export default function DynamicStickyDemo() {
+  return (
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <StickyProveedorTable />
+    </div>
+  );
+}
