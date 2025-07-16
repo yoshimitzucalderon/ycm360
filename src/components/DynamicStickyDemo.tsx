@@ -1208,8 +1208,9 @@ function StickyProveedorTable() {
           flexDirection: "column",
           width: "100%",
           maxWidth: "none",
-          border: "1px solid #e5e7eb",
-          borderTop: "none",
+          borderLeft: "1px solid #e5e7eb",
+          borderRight: "1px solid #e5e7eb",
+          borderBottom: "1px solid #e5e7eb",
           background: "#fff",
           margin: 0,
           padding: 0,
@@ -1248,9 +1249,7 @@ function StickyProveedorTable() {
                     // Bordes base para todos los headers
                     borderTop: '1px solid #e5e7eb',
                     borderBottom: '1px solid #e5e7eb',
-                    // Borde izquierdo solo si no es la primera columna
-                    ...(index > 0 ? { borderLeft: '1px solid #e5e7eb' } : {}),
-                    // Borde derecho solo si no es la última columna
+                    // Solo borde derecho para separar columnas (evita empalmes)
                     ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : {}),
                     // Estilos específicos para columnas fijadas (mantienen prioridad)
                     ...(col.isPinnedLeft && position?.left !== undefined ? { 
@@ -1498,12 +1497,10 @@ function StickyProveedorTable() {
                       width: col.width,
                       // Solo las celdas pinned son sticky horizontalmente
                       position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                      // Bordes base para todas las celdas
-                      borderBottom: '1px solid #e5e7eb',
-                      // Borde izquierdo solo si no es la primera columna
-                      ...(tableLayout.orderedColumns.indexOf(col) > 0 ? { borderLeft: '1px solid #e5e7eb' } : {}),
-                      // Borde derecho solo si no es la última columna
-                      ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                                          // Bordes base para todas las celdas
+                    borderBottom: '1px solid #e5e7eb',
+                    // Solo borde derecho para separar columnas (evita empalmes)
+                    ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
                       background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
