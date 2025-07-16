@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical, Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, RotateCcw, EyeOff } from 'lucide-react';
+import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical, Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, RotateCcw, EyeOff, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 import { supabase } from "../supabaseClient";
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -1528,27 +1528,123 @@ function StickyProveedorTable() {
           <button
             onClick={() => setPage(0)}
             disabled={page === 0}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            style={{ 
+              border: "1px solid #e5e7eb", 
+              background: "#fff", 
+              borderRadius: "50%", 
+              width: 28, 
+              height: 28, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              cursor: page === 0 ? "not-allowed" : "pointer", 
+              opacity: page === 0 ? 0.5 : 1,
+              transition: "all 0.15s ease"
+            }}
             title="Primera página"
-          >{'|<'}</button>
+            onMouseEnter={e => {
+              if (page !== 0) {
+                e.currentTarget.style.background = "#f0fdf4";
+                e.currentTarget.style.borderColor = "#22c55e";
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#fff";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+            }}
+          >
+            <ChevronsLeft size={16} style={{ color: page === 0 ? "#9ca3af" : "#6b7280" }} />
+          </button>
           <button
             onClick={() => setPage(p => Math.max(0, p - 1))}
             disabled={page === 0}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
+            style={{ 
+              border: "1px solid #e5e7eb", 
+              background: "#fff", 
+              borderRadius: "50%", 
+              width: 28, 
+              height: 28, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              cursor: page === 0 ? "not-allowed" : "pointer", 
+              opacity: page === 0 ? 0.5 : 1,
+              transition: "all 0.15s ease"
+            }}
             title="Página anterior"
-          >{'<'}</button>
+            onMouseEnter={e => {
+              if (page !== 0) {
+                e.currentTarget.style.background = "#f0fdf4";
+                e.currentTarget.style.borderColor = "#22c55e";
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#fff";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+            }}
+          >
+            <ChevronLeft size={16} style={{ color: page === 0 ? "#9ca3af" : "#6b7280" }} />
+          </button>
           <button
             onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            style={{ 
+              border: "1px solid #e5e7eb", 
+              background: "#fff", 
+              borderRadius: "50%", 
+              width: 28, 
+              height: 28, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", 
+              opacity: page >= totalPages - 1 ? 0.5 : 1,
+              transition: "all 0.15s ease"
+            }}
             title="Página siguiente"
-          >{'>'}</button>
+            onMouseEnter={e => {
+              if (page < totalPages - 1) {
+                e.currentTarget.style.background = "#f0fdf4";
+                e.currentTarget.style.borderColor = "#22c55e";
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#fff";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+            }}
+          >
+            <ChevronRight size={16} style={{ color: page >= totalPages - 1 ? "#9ca3af" : "#6b7280" }} />
+          </button>
           <button
             onClick={() => setPage(totalPages - 1)}
             disabled={page >= totalPages - 1}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
+            style={{ 
+              border: "1px solid #e5e7eb", 
+              background: "#fff", 
+              borderRadius: "50%", 
+              width: 28, 
+              height: 28, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", 
+              opacity: page >= totalPages - 1 ? 0.5 : 1,
+              transition: "all 0.15s ease"
+            }}
             title="Última página"
-          >{'>|'}</button>
+            onMouseEnter={e => {
+              if (page < totalPages - 1) {
+                e.currentTarget.style.background = "#f0fdf4";
+                e.currentTarget.style.borderColor = "#22c55e";
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#fff";
+              e.currentTarget.style.borderColor = "#e5e7eb";
+            }}
+          >
+            <ChevronsRight size={16} style={{ color: page >= totalPages - 1 ? "#9ca3af" : "#6b7280" }} />
+          </button>
         </div>
       </div>
     </div>
