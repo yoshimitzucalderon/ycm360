@@ -890,31 +890,64 @@ function StickyProveedorTable() {
                   );
                 })}
                 <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '10px 0' }} />
-                <button
-                  onClick={() => {
-                    [...pinnedColumns, ...pinnedColumnsRight].forEach(unpinColumn);  // ← NUEVA LÍNEA
-                    handleClosePinPanel();
-                  }}
-                  style={{
-                    color: '#22c55e',
-                    fontWeight: 500,
-                    fontSize: 14,
-                    textTransform: 'none',
-                    background: 'none',
-                    border: 'none',
-                    boxShadow: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    cursor: 'pointer',
-                    padding: 4,
-                    borderRadius: 6,
-                    transition: 'color 0.15s',
-                  }}
-                >
-                  <PinOff size={18} style={{ marginRight: 4 }} />
-                  Desfijar todas
-                </button>
+                {pinSide === 'left' && (
+                  <button
+                    onClick={() => {
+                      [...pinnedColumns, ...pinnedColumnsRight].forEach(unpinColumn);
+                      handleClosePinPanel();
+                    }}
+                    style={{
+                      color: '#888', // gris por defecto
+                      fontWeight: 500,
+                      fontSize: 14,
+                      textTransform: 'none',
+                      background: 'none',
+                      border: 'none',
+                      boxShadow: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      cursor: 'pointer',
+                      padding: 4,
+                      borderRadius: 6,
+                      transition: 'color 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#888'; }}
+                  >
+                    <PinOff size={18} style={{ marginRight: 4, color: 'inherit' }} />
+                    Desfijar todas
+                  </button>
+                )}
+                {pinSide === 'right' && (
+                  <button
+                    onClick={() => {
+                      [...pinnedColumns, ...pinnedColumnsRight].forEach(unpinColumn);
+                      handleClosePinPanel();
+                    }}
+                    style={{
+                      color: '#888', // gris por defecto
+                      fontWeight: 500,
+                      fontSize: 14,
+                      textTransform: 'none',
+                      background: 'none',
+                      border: 'none',
+                      boxShadow: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      cursor: 'pointer',
+                      padding: 4,
+                      borderRadius: 6,
+                      transition: 'color 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#888'; }}
+                  >
+                    <PinOff size={18} style={{ marginRight: 4, color: 'inherit' }} />
+                    Desfijar todas
+                  </button>
+                )}
               </div>
             </Popover>
             <button 
