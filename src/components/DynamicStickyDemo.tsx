@@ -1,6 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical } from 'lucide-react';
+import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical, Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
 import { supabase } from "../supabaseClient";
+import Popover from '@mui/material/Popover';
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import GridOnIcon from '@mui/icons-material/GridOn';
+import TableFilter from "./TableFilter";
+import TableSort from "./TableSort";
+import TablePagination from "./TablePagination";
 
 interface Column {
   key: string;
@@ -77,6 +95,24 @@ interface TableLayout {
   rightTotalWidth: number;
 }
 
+// Tipos para las funcionalidades de la barra de acciones
+interface TableColumn {
+  key: string;
+  label: string;
+}
+
+interface TableFilter {
+  column: string;
+  operator: string;
+  value: string;
+  logicalOperator?: 'AND' | 'OR';
+}
+
+interface SortRule {
+  column: string;
+  direction: 'asc' | 'desc';
+}
+
 const mapProveedor = (row: any) => ({
   name: row.proveedor,
   company: row.proveedor_nombre_comercial,
@@ -105,6 +141,165 @@ const mapProveedor = (row: any) => ({
   deletedAt: row.deleted_at,
 });
 
+// Componente ColumnManager para administrar columnas
+const ColumnManager = ({ 
+  columns, 
+  visibleColumns, 
+  onToggleColumn, 
+  onShowAll, 
+  onHideAll, 
+  onReset 
+}: {
+  columns: TableColumn[];
+  visibleColumns: string[];
+  onToggleColumn: (key: string) => void;
+  onShowAll: () => void;
+  onHideAll: () => void;
+  onReset: () => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [search, setSearch] = useState("");
+  const [popoverPosition, setPopoverPosition] = useState<'down' | 'up'>('down');
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 350 && spaceAbove > spaceBelow) {
+      setPopoverPosition('up');
+    } else {
+      setPopoverPosition('down');
+    }
+    setAnchorEl(event.currentTarget);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
+  const allChecked = visibleColumns.length === columns.length;
+
+  return (
+    <>
+      <button
+        className="action-button"
+        title="Administrar columnas"
+        onClick={handleOpen}
+        aria-label="Administrar columnas"
+      >
+        <Columns3 className="action-icon" />
+      </button>
+      {open && anchorEl && (
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={popoverPosition === 'up' ? { vertical: 'top', horizontal: 'left' } : { vertical: 'bottom', horizontal: 'left' }}
+          transformOrigin={popoverPosition === 'up' ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'top', horizontal: 'left' }}
+          PaperProps={{
+            style: {
+              minWidth: 220,
+              borderRadius: 10,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+              border: '1.5px solid #e5e7eb',
+              padding: 12,
+              maxHeight: 340,
+              overflowY: 'auto',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#d1d5db #f8fafc',
+            },
+          }}
+        >
+          <div style={{ minWidth: 220 }}>
+            <TextField
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              size="small"
+              fullWidth
+              variant="outlined"
+              sx={{ mb: 1, background: '#fff', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 15, paddingLeft: 1 } }}
+              InputProps={{
+                startAdornment: <Search style={{ color: '#bdbdbd', width: 18, height: 18, marginRight: 6 }} />,
+                endAdornment: search && (
+                  <XIcon style={{ cursor: 'pointer', color: '#bdbdbd', width: 18, height: 18 }} onClick={() => setSearch('')} />
+                ),
+              }}
+            />
+            <div style={{ marginBottom: 8, fontWeight: 500, fontSize: 15 }}>Administrar columnas</div>
+            <FormGroup>
+              {columns.filter(col =>
+                col.label.toLowerCase().includes(search.toLowerCase())
+              ).map(col => (
+                <FormControlLabel
+                  key={col.key}
+                  control={
+                    <Checkbox
+                      checked={visibleColumns.includes(col.key)}
+                      onChange={() => onToggleColumn(col.key)}
+                      sx={{ 
+                        color: '#22c55e',
+                        '&.Mui-checked': {
+                          color: '#22c55e',
+                        },
+                      }}
+                    />
+                  }
+                  label={col.label}
+                  sx={{ fontSize: 14, ml: 0 }}
+                />
+              ))}
+            </FormGroup>
+            <div style={{ borderTop: '1.5px solid #f1f5f9', marginTop: 10, marginBottom: 0 }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, gap: 8 }}>
+              <Button
+                onClick={allChecked ? onHideAll : onShowAll}
+                sx={{
+                  color: '#22c55e',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: '#bbf7d0',
+                    color: '#166534',
+                  },
+                }}
+              >
+                {allChecked ? 'Ocultar todas' : 'Mostrar todas'}
+              </Button>
+              <Button
+                onClick={onReset}
+                sx={{
+                  color: '#888',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  textTransform: 'none',
+                  background: 'none',
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0,
+                  transition: 'color 0.15s',
+                  '&:hover': {
+                    background: 'none',
+                    color: '#ef4444',
+                  },
+                }}
+              >
+                <RotateCcw size={18} style={{ marginRight: 4, transition: 'color 0.15s' }} />
+                Resetear
+              </Button>
+            </div>
+          </div>
+        </Popover>
+      )}
+    </>
+  );
+};
+
 function StickyProveedorTable() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -126,9 +321,6 @@ function StickyProveedorTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const rowsPerPageOptions = [10, 25, 50, 100, 1000];
-  const totalRows = data.length;
-  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-  const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   // Layout container
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,6 +340,22 @@ function StickyProveedorTable() {
   const [columnMenuKey, setColumnMenuKey] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // --- ESTADOS PARA LA BARRA DE ACCIONES ---
+  const [search, setSearch] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchContainerRef] = useState(useRef<HTMLDivElement>(null));
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(proveedorColumns.map(col => col.key));
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
+  const [pinPanelAnchorEl, setPinPanelAnchorEl] = useState<null | HTMLElement>(null);
+  const [pinSide, setPinSide] = useState<'left' | 'right'>('left');
+  const [filters, setFilters] = useState<TableFilter[]>([]);
+  const [sortRules, setSortRules] = useState<SortRule[]>([]);
+  const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
+  const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
@@ -183,6 +391,19 @@ function StickyProveedorTable() {
       });
   }, []);
 
+  // Sincronizar estados de pinning con columnas
+  useEffect(() => {
+    const leftPinned = columns.filter(col => col.isPinnedLeft).map(col => col.key);
+    const rightPinned = columns.filter(col => col.isPinnedRight).map(col => col.key);
+    setPinnedColumns(leftPinned);
+    setPinnedColumnsRight(rightPinned);
+  }, [columns]);
+
+  // Resetear página cuando cambian filtros o búsqueda
+  useEffect(() => {
+    setPage(0);
+  }, [search, filters, sortRules]);
+
   // Observar tamaño del contenedor
   useEffect(() => {
     if (!containerRef.current) return;
@@ -194,51 +415,34 @@ function StickyProveedorTable() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Layout de columnas (igual que abajo)
-  const tableLayout: TableLayout = useMemo(() => {
-    const leftPinned = columns.filter((c) => c.isPinnedLeft);
-    const rightPinned = columns.filter((c) => c.isPinnedRight);
-    const normal = columns.filter((c) => !c.isPinnedLeft && !c.isPinnedRight);
-    const orderedColumns = [...leftPinned, ...normal, ...rightPinned];
-    const positions: Record<string, { left?: number; right?: number; zIndex: number }> = {};
-    let currentLeft = 0;
-    leftPinned.forEach((col, i) => {
-      positions[col.key] = { left: currentLeft, zIndex: 100 + leftPinned.length - i };
-      currentLeft += col.width;
-    });
-    let currentRight = 0;
-    [...rightPinned].reverse().forEach((col, i) => {
-      const origIdx = rightPinned.length - 1 - i;
-      positions[col.key] = { right: currentRight, zIndex: 100 + rightPinned.length - origIdx };
-      currentRight += col.width;
-    });
-    const leftTotalWidth = leftPinned.reduce((sum, col) => sum + col.width, 0);
-    const rightTotalWidth = rightPinned.reduce((sum, col) => sum + col.width, 0);
-    return { orderedColumns, leftPinned, rightPinned, normal, positions, leftTotalWidth, rightTotalWidth };
-  }, [columns, containerWidth]);
-
   // Pinning
   const canPinLeft = (colKey: string): boolean => {
-    const col = columns.find((c) => c.key === colKey);
+    const col = visibleColumnsData.find((c) => c.key === colKey);
     if (!col || col.isPinnedLeft) return true;
-    const testCols = columns.map((c) => c.key === colKey ? { ...c, isPinnedLeft: true, isPinnedRight: false } : c);
+    const testCols = visibleColumnsData.map((c) => c.key === colKey ? { ...c, isPinnedLeft: true, isPinnedRight: false } : c);
     const testLeft = testCols.filter((c) => c.isPinnedLeft).reduce((sum, c) => sum + c.width, 0);
     const testRight = tableLayout.rightTotalWidth;
     return testLeft + testRight + 100 <= containerWidth;
   };
   const canPinRight = (colKey: string): boolean => {
-    const col = columns.find((c) => c.key === colKey);
+    const col = visibleColumnsData.find((c) => c.key === colKey);
     if (!col || col.isPinnedRight) return true;
-    const testCols = columns.map((c) => c.key === colKey ? { ...c, isPinnedRight: true, isPinnedLeft: false } : c);
+    const testCols = visibleColumnsData.map((c) => c.key === colKey ? { ...c, isPinnedRight: true, isPinnedLeft: false } : c);
     const testRight = testCols.filter((c) => c.isPinnedRight).reduce((sum, c) => sum + c.width, 0);
     const testLeft = tableLayout.leftTotalWidth;
     return testLeft + testRight + 100 <= containerWidth;
   };
   const pinLeft = (key: string) => {
     setColumns((cols) => cols.map((c) => c.key === key ? { ...c, isPinnedLeft: !c.isPinnedLeft, isPinnedRight: false } : c));
+    // Sincronizar con estados de la barra de acciones
+    setPinnedColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+    setPinnedColumnsRight(prev => prev.filter(k => k !== key));
   };
   const pinRight = (key: string) => {
     setColumns((cols) => cols.map((c) => c.key === key ? { ...c, isPinnedRight: !c.isPinnedRight, isPinnedLeft: false } : c));
+    // Sincronizar con estados de la barra de acciones
+    setPinnedColumnsRight(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+    setPinnedColumns(prev => prev.filter(k => k !== key));
   };
   const clearAllPins = () => {
     setColumns((cols) => cols.map((c) => ({ ...c, isPinnedLeft: false, isPinnedRight: false })));
@@ -248,7 +452,7 @@ function StickyProveedorTable() {
   const handleResizeStart = (colKey: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const col = columns.find((c) => c.key === colKey);
+    const col = visibleColumnsData.find((c) => c.key === colKey);
     if (!col) return;
     setIsResizing(colKey);
     setResizeStart({ x: e.clientX, width: col.width });
@@ -279,10 +483,563 @@ function StickyProveedorTable() {
     }
   }, [isResizing, handleResizeMove, handleResizeEnd]);
 
+  // --- FUNCIONES PARA LA BARRA DE ACCIONES ---
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev: string[]) => 
+      prev.includes(key) ? prev.filter((k: string) => k !== key) : [...prev, key]
+    );
+  };
+
+  const showAllColumns = () => setVisibleColumns(proveedorColumns.map(c => c.key));
+  const hideAllColumns = () => setVisibleColumns([]);
+  const resetColumns = () => setVisibleColumns(proveedorColumns.map(c => c.key));
+
+  const pinColumnLeft = (colKey: string) => {
+    setPinnedColumns((prev: string[]) => [...prev, colKey]);
+    setPinnedColumnsRight((prev: string[]) => prev.filter((k: string) => k !== colKey));
+    // Sincronizar con columnas
+    setColumns((cols) => cols.map((c) => c.key === colKey ? { ...c, isPinnedLeft: true, isPinnedRight: false } : c));
+  };
+
+  const pinColumnRight = (colKey: string) => {
+    setPinnedColumnsRight((prev: string[]) => [...prev, colKey]);
+    setPinnedColumns((prev: string[]) => prev.filter((k: string) => k !== colKey));
+    // Sincronizar con columnas
+    setColumns((cols) => cols.map((c) => c.key === colKey ? { ...c, isPinnedRight: true, isPinnedLeft: false } : c));
+  };
+
+  const unpinColumn = (colKey: string) => {
+    setPinnedColumns((prev: string[]) => prev.filter((k: string) => k !== colKey));
+    setPinnedColumnsRight((prev: string[]) => prev.filter((k: string) => k !== colKey));
+    // Sincronizar con columnas
+    setColumns((cols) => cols.map((c) => c.key === colKey ? { ...c, isPinnedLeft: false, isPinnedRight: false } : c));
+  };
+
+  const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
+  const handleCloseFilter = () => setFilterAnchorEl(null);
+
+  const handleOpenSort = (event: React.MouseEvent<HTMLElement>) => setSortAnchorEl(event.currentTarget);
+  const handleCloseSort = () => setSortAnchorEl(null);
+
+  const handleOpenDownload = (event: React.MouseEvent<HTMLElement>) => setDownloadAnchorEl(event.currentTarget);
+  const handleCloseDownload = () => setDownloadAnchorEl(null);
+
+  const handleOpenPinPanel = (event: React.MouseEvent<HTMLElement>) => setPinPanelAnchorEl(event.currentTarget);
+  const handleClosePinPanel = () => setPinPanelAnchorEl(null);
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const tableData = data.map(row => 
+      proveedorColumns.map(col => row[col.key] || '')
+    );
+    autoTable(doc, {
+      head: [proveedorColumns.map(col => col.label)],
+      body: tableData,
+    });
+    doc.save('proveedores.pdf');
+    handleCloseDownload();
+  };
+
+  const handleDownloadXLSX = () => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(dataBlob, 'proveedores.xlsx');
+    handleCloseDownload();
+  };
+
+  const handleDownloadCSV = () => {
+    const headers = proveedorColumns.map(col => col.label).join(',');
+    const csvData = data.map(row => 
+      proveedorColumns.map(col => `"${row[col.key] || ''}"`).join(',')
+    ).join('\n');
+    const csvContent = `${headers}\n${csvData}`;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'proveedores.csv');
+    handleCloseDownload();
+  };
+
+  const clearSort = () => setSortRules([]);
+  const totalFilters = filters.length;
+
+  // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...data];
+
+    // Aplicar búsqueda
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      result = result.filter(row => {
+        return proveedorColumns.some(col => {
+          const value = row[col.key];
+          return value && value.toString().toLowerCase().includes(searchLower);
+        });
+      });
+    }
+
+    // Aplicar filtros
+    if (filters.length > 0) {
+      result = result.filter(row => {
+        return filters.every(filter => {
+          const value = row[filter.column];
+          if (!value) return false;
+          
+          switch (filter.operator) {
+            case '=':
+              return value.toString() === filter.value;
+            case '!=':
+              return value.toString() !== filter.value;
+            case 'contains':
+              return value.toString().toLowerCase().includes(filter.value.toLowerCase());
+            case 'starts_with':
+              return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
+            case 'ends_with':
+              return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
+            default:
+              return true;
+          }
+        });
+      });
+    }
+
+    // Aplicar ordenamiento
+    if (sortRules.length > 0) {
+      result.sort((a, b) => {
+        for (const rule of sortRules) {
+          const aValue = a[rule.column];
+          const bValue = b[rule.column];
+          
+          if (aValue === bValue) continue;
+          
+          const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+          return rule.direction === 'asc' ? comparison : -comparison;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, search, filters, sortRules]);
+
+  // Actualizar datos paginados con los datos filtrados
+  const paginatedData = filteredAndSortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const totalRows = filteredAndSortedData.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+
+  // Filtrar columnas visibles
+  const visibleColumnsData = useMemo(() => {
+    return columns.filter(col => visibleColumns.includes(col.key));
+  }, [columns, visibleColumns]);
+
+  // Actualizar layout con columnas visibles
+  const tableLayout: TableLayout = useMemo(() => {
+    const leftPinned = visibleColumnsData.filter((c) => c.isPinnedLeft);
+    const rightPinned = visibleColumnsData.filter((c) => c.isPinnedRight);
+    const normal = visibleColumnsData.filter((c) => !c.isPinnedLeft && !c.isPinnedRight);
+    const orderedColumns = [...leftPinned, ...normal, ...rightPinned];
+    const positions: Record<string, { left?: number; right?: number; zIndex: number }> = {};
+    let currentLeft = 0;
+    leftPinned.forEach((col, i) => {
+      positions[col.key] = { left: currentLeft, zIndex: 100 + leftPinned.length - i };
+      currentLeft += col.width;
+    });
+    let currentRight = 0;
+    [...rightPinned].reverse().forEach((col, i) => {
+      const origIdx = rightPinned.length - 1 - i;
+      positions[col.key] = { right: currentRight, zIndex: 100 + rightPinned.length - origIdx };
+      currentRight += col.width;
+    });
+    const leftTotalWidth = leftPinned.reduce((sum, col) => sum + col.width, 0);
+    const rightTotalWidth = rightPinned.reduce((sum, col) => sum + col.width, 0);
+    return { orderedColumns, leftPinned, rightPinned, normal, positions, leftTotalWidth, rightTotalWidth };
+  }, [visibleColumnsData, containerWidth]);
+
   // Render
   return (
     <div style={{ margin: "32px 0 32px 0" }}>
       <h3 style={{ fontWeight: 500, color: "#111827", marginBottom: 8 }}>Proveedores (Supabase)</h3>
+      
+      {/* BARRA DE ACCIONES */}
+      <div className="table-container">
+        <div className="user-table-header table-controls">
+          <div className="controls-left">
+            {searchVisible ? (
+              <div
+                className={`search-animate${showSearch ? ' expanded' : ''}`}
+                ref={searchContainerRef}
+              >
+                <Search className="search-icon-inside" />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Buscar..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  autoFocus={showSearch}
+                />
+                {search && (
+                  <button
+                    type="button"
+                    className="search-clear-btn"
+                    onClick={() => setSearch("")}
+                    tabIndex={-1}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <XIcon className="search-clear-icon" />
+                  </button>
+                )}
+              </div>
+            ) : null}
+            {!searchVisible && (
+              <button
+                className={`action-button`}
+                onClick={() => setShowSearch(s => !s)}
+                title="Buscar"
+                aria-label="Buscar"
+                style={{ zIndex: 2 }}
+              >
+                <Search className="action-icon" />
+              </button>
+            )}
+            {/* Botón Seleccionar Columnas */}
+            <ColumnManager
+              columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
+              visibleColumns={visibleColumns}
+              onToggleColumn={toggleColumn}
+              onShowAll={showAllColumns}
+              onHideAll={hideAllColumns}
+              onReset={resetColumns}
+            />
+            <button
+              className={`action-button${filterAnchorEl ? ' active' : ''}`}
+              onClick={handleOpenFilter}
+              title="Filtrar"
+              style={{ position: 'relative' }}
+            >
+              <Filter className="action-icon" />
+              {totalFilters > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#22c55e',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 10,
+                  minWidth: 15,
+                  height: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{totalFilters}</span>
+              )}
+            </button>
+            {filterAnchorEl && (
+              <TableFilter
+                columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
+                visibleColumns={visibleColumns}
+                filters={filters}
+                setFilters={setFilters}
+                anchorRef={{ current: filterAnchorEl }}
+                onClose={handleCloseFilter}
+              />
+            )}
+            {/* En la barra de acciones (arriba a la derecha): */}
+            <button
+              className={`action-button${Boolean(sortAnchorEl) ? ' active' : ''}`}
+              onClick={handleOpenSort}
+              title="Ordenar"
+              style={{ position: 'relative' }}
+            >
+              <ArrowUpDown className="action-icon" />
+              {sortRules.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#2563eb',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 11,
+                  minWidth: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{sortRules.length}</span>
+              )}
+            </button>
+            {/* Popover de Ordenamiento */}
+            <Popover
+              open={Boolean(sortAnchorEl)}
+              anchorEl={sortAnchorEl}
+              onClose={() => setSortAnchorEl(null)}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              PaperProps={{ style: { minWidth: 260, borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1.5px solid #e5e7eb', padding: 16, maxWidth: 1000, maxHeight: 320, overflowY: 'auto' } }}
+            >
+              <TableSort
+                columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
+                visibleColumns={visibleColumns}
+                sortRules={sortRules}
+                setSortRules={setSortRules}
+                onApply={() => setSortAnchorEl(null)}
+                onClear={clearSort}
+              />
+            </Popover>
+            {/* El botón de las flechas para ordenar va en cada columna, no aquí */}
+            <button className="btn-minimal" title="Agregar proveedor">
+              <Plus className="btn-icon" />
+            </button>
+            {/* Botón de pin en la barra de acciones: */}
+            <button
+              className="action-button"
+              title="Columnas fijadas"
+              style={{ position: 'relative', marginLeft: 4 }}
+              onClick={handleOpenPinPanel}
+            >
+              <Pin className="action-icon" style={{ color: '#22c55e', width: 20, height: 20 }} />
+              {(pinnedColumns.length + pinnedColumnsRight.length) > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  background: '#22c55e',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  fontSize: 11,
+                  minWidth: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  zIndex: 2
+                }}>{pinnedColumns.length + pinnedColumnsRight.length}</span>
+              )}
+            </button>
+            <Popover
+              open={Boolean(pinPanelAnchorEl)}
+              anchorEl={pinPanelAnchorEl}
+              onClose={handleClosePinPanel}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+              PaperProps={{
+                style: {
+                  minWidth: 240,
+                  borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1.5px solid #e5e7eb',
+                  padding: 12,
+                  maxHeight: 340,
+                  overflowY: 'auto',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#d1d5db #f8fafc',
+                },
+              }}
+            >
+              <div style={{ minWidth: 220 }}>
+                {/* Toggle minimalista */}
+                <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
+                  <button
+                    onClick={() => setPinSide('left')}
+                    style={{
+                      flex: 1,
+                      background: pinSide === 'left' ? '#f0fdf4' : 'transparent',
+                      border: 'none',
+                      borderBottom: pinSide === 'left' ? '2px solid #22c55e' : '2px solid transparent',
+                      color: pinSide === 'left' ? '#22c55e' : '#888',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      padding: '6px 0',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >Fijar a la izquierda</button>
+                  <button
+                    onClick={() => setPinSide('right')}
+                    style={{
+                      flex: 1,
+                      background: pinSide === 'right' ? '#f0fdf4' : 'transparent',
+                      border: 'none',
+                      borderBottom: pinSide === 'right' ? '2px solid #22c55e' : '2px solid transparent',
+                      color: pinSide === 'right' ? '#22c55e' : '#888',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      padding: '6px 0',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >Fijar a la derecha</button>
+                </div>
+                <div style={{ fontWeight: 500, fontSize: 15, marginBottom: 8 }}>
+                  {pinSide === 'left' ? 'Columnas fijadas a la izquierda' : 'Columnas fijadas a la derecha'}
+                </div>
+                {proveedorColumns.filter((col) => visibleColumns.includes(col.key)).map((col) => {
+                  const isPinnedLeft = pinnedColumns.includes(col.key);
+                  const isPinnedRight = pinnedColumnsRight.includes(col.key);
+                  return (
+                    <div key={col.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, opacity: pinSide === 'left' && isPinnedRight ? 0.4 : pinSide === 'right' && isPinnedLeft ? 0.4 : 1 }}>
+                      <Checkbox
+                        checked={pinSide === 'left' ? isPinnedLeft : isPinnedRight}
+                        disabled={pinSide === 'left' ? isPinnedRight : isPinnedLeft}
+                        onChange={() => {
+                          if (pinSide === 'left') {
+                            if (isPinnedLeft) {
+                              unpinColumn(col.key);
+                            } else {
+                              pinColumnLeft(col.key);
+                              if (isPinnedRight) setPinnedColumnsRight(prev => prev.filter(k => k !== col.key));
+                            }
+                          } else {
+                            if (isPinnedRight) {
+                              unpinColumn(col.key);
+                            } else {
+                              pinColumnRight(col.key);
+                              if (isPinnedLeft) setPinnedColumns(prev => prev.filter(k => k !== col.key));
+                            }
+                          }
+                        }}
+                        sx={{ color: '#22c55e', '&.Mui-checked': { color: '#22c55e' } }}
+                      />
+                      <span style={{ fontSize: 14 }}>{col.label}</span>
+                    </div>
+                  );
+                })}
+                <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '10px 0' }} />
+                <button
+                  onClick={() => {
+                    pinnedColumns.forEach(unpinColumn);
+                    setPinnedColumnsRight([]);
+                    handleClosePinPanel();
+                  }}
+                  style={{
+                    color: '#22c55e',
+                    fontWeight: 500,
+                    fontSize: 14,
+                    textTransform: 'none',
+                    background: 'none',
+                    border: 'none',
+                    boxShadow: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer',
+                    padding: 4,
+                    borderRadius: 6,
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  <PinOff size={18} style={{ marginRight: 4 }} />
+                  Desfijar todas
+                </button>
+              </div>
+            </Popover>
+            <button 
+              className={`btn-minimal${Boolean(downloadAnchorEl) ? ' active' : ''}`} 
+              title="Descargar"
+              onClick={handleOpenDownload}
+            >
+              <Download className="btn-icon" />
+            </button>
+            {/* Menu de Descarga */}
+            <Menu
+              anchorEl={downloadAnchorEl}
+              open={Boolean(downloadAnchorEl)}
+              onClose={handleCloseDownload}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              PaperProps={{
+                style: {
+                  minWidth: 140,
+                  borderRadius: 8,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1px solid #e5e7eb',
+                  padding: 4
+                }
+              }}
+            >
+              <button
+                onClick={handleDownloadPDF}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#e11d48', display: 'flex', alignItems: 'center' }}><PictureAsPdfIcon fontSize="inherit" /></span>
+                Descargar PDF
+              </button>
+              <button
+                onClick={handleDownloadXLSX}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#22c55e', display: 'flex', alignItems: 'center' }}><TableChartIcon fontSize="inherit" /></span>
+                Descargar XLSX
+              </button>
+              <button
+                onClick={handleDownloadCSV}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  color: '#374151',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textAlign: 'left'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: 18, color: '#2563eb', display: 'flex', alignItems: 'center' }}><GridOnIcon fontSize="inherit" /></span>
+                Descargar CSV
+              </button>
+            </Menu>
+          </div>
+        </div>
+      </div>
       <div
         style={{
           display: "flex",
@@ -362,7 +1119,7 @@ function StickyProveedorTable() {
                               onClick={e => e.stopPropagation()}
                             >
                               {/* Opciones de pin */}
-                              {!columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && !columns.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
                                 <div
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
                                   onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
@@ -372,7 +1129,7 @@ function StickyProveedorTable() {
                                   <Pin size={16} /> Fijar a la izquierda
                                 </div>
                               )}
-                              {columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
                                 <div
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
                                   onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
@@ -382,7 +1139,7 @@ function StickyProveedorTable() {
                                   <PinOff size={16} /> Desfijar izquierda
                                 </div>
                               )}
-                              {!columns.find(c => c.key === columnMenuKey)?.isPinnedRight && !columns.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
                                 <div
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
                                   onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
@@ -392,7 +1149,7 @@ function StickyProveedorTable() {
                                   <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
                                 </div>
                               )}
-                              {columns.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
                                 <div
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
                                   onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
@@ -417,10 +1174,10 @@ function StickyProveedorTable() {
             </thead>
             <tbody style={{ minHeight: maxTableHeight ? maxTableHeight - 48 : undefined }}>
               {loading && (
-                <tr><td colSpan={columns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
+                <tr><td colSpan={visibleColumnsData.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
               )}
               {error && (
-                <tr><td colSpan={columns.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
+                <tr><td colSpan={visibleColumnsData.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
               )}
               {!loading && !error && paginatedData.map((row, i) => (
                 <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
