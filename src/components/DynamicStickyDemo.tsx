@@ -329,9 +329,6 @@ function StickyProveedorTable() {
   const filterOpen = Boolean(filterAnchorEl);
   // Estados de búsqueda y columnas visibles
   const [search, setSearch] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchVisible, setSearchVisible] = useState(false);
-  const [searchContainerRef] = useState(useRef<HTMLDivElement>(null));
   const [visibleColumns, setVisibleColumns] = useState<string[]>(proveedorColumns.map(col => col.key));
 
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
@@ -736,44 +733,6 @@ function StickyProveedorTable() {
       <div className="table-container">
         <div className="user-table-header table-controls">
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, width: '100%' }}>
-            {searchVisible ? (
-              <div
-                className={`search-animate${showSearch ? ' expanded' : ''}`}
-                ref={searchContainerRef}
-              >
-                <Search className="search-icon-inside" />
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Buscar..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  autoFocus={showSearch}
-                />
-                {search && (
-                  <button
-                    type="button"
-                    className="search-clear-btn"
-                    onClick={() => setSearch("")}
-                    tabIndex={-1}
-                    aria-label="Limpiar búsqueda"
-                  >
-                    <XIcon className="search-clear-icon" />
-                  </button>
-                )}
-              </div>
-            ) : null}
-            {!searchVisible && (
-              <button
-                className={`action-button`}
-                onClick={() => setShowSearch(s => !s)}
-                title="Buscar"
-                aria-label="Buscar"
-                style={{ zIndex: 2 }}
-              >
-                <Search className="action-icon" />
-              </button>
-            )}
             {/* Botón Seleccionar Columnas */}
             <ColumnManager
               columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
