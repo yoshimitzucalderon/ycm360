@@ -410,7 +410,7 @@ body {
 .table-container {
   padding: 0;
   background: #fff;
-  min-height: 100vh;
+  min-height: 0;
 }
 .user-table {
   border-collapse: collapse;
