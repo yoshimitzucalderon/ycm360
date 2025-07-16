@@ -897,7 +897,7 @@ function StickyProveedorTable() {
                       handleClosePinPanel();
                     }}
                     style={{
-                      color: '#888', // gris por defecto
+                      color: '#888',
                       fontWeight: 500,
                       fontSize: 14,
                       textTransform: 'none',
@@ -906,6 +906,8 @@ function StickyProveedorTable() {
                       boxShadow: 'none',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'flex-end', // <-- Mueve el contenido al extremo derecho
+                      width: '100%',              // <-- Ocupa todo el ancho del panel
                       gap: 4,
                       cursor: 'pointer',
                       padding: 4,
@@ -926,7 +928,7 @@ function StickyProveedorTable() {
                       handleClosePinPanel();
                     }}
                     style={{
-                      color: '#888', // gris por defecto
+                      color: '#888',
                       fontWeight: 500,
                       fontSize: 14,
                       textTransform: 'none',
@@ -935,6 +937,8 @@ function StickyProveedorTable() {
                       boxShadow: 'none',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'flex-end', // <-- Mueve el contenido al extremo derecho
+                      width: '100%',              // <-- Ocupa todo el ancho del panel
                       gap: 4,
                       cursor: 'pointer',
                       padding: 4,
