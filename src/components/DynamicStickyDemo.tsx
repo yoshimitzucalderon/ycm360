@@ -892,8 +892,7 @@ function StickyProveedorTable() {
                 <div style={{ borderTop: '1.5px solid #f1f5f9', margin: '10px 0' }} />
                 <button
                   onClick={() => {
-                    pinnedColumns.forEach(unpinColumn);
-                    setPinnedColumnsRight([]);
+                    [...pinnedColumns, ...pinnedColumnsRight].forEach(unpinColumn);  // ← NUEVA LÍNEA
                     handleClosePinPanel();
                   }}
                   style={{
