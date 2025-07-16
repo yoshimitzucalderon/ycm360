@@ -1243,11 +1243,23 @@ function StickyProveedorTable() {
                           >
                             <button
                               ref={columnMenuKey === col.key ? buttonRef : undefined}
-                              style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                padding: 4, 
+                                cursor: 'pointer', 
+                                borderRadius: 4, 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                opacity: 0.6,
+                                transition: 'opacity 0.15s'
+                              }}
                               onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
                               title='Opciones de columna'
+                              onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
                             >
-                              <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                              <MoreVertical size={16} style={{ color: '#6b7280' }} />
                             </button>
                           </span>
                           {/* Menú contextual de columna, solo para la columna activa */}
@@ -1362,12 +1374,28 @@ function StickyProveedorTable() {
                               </div>
                             </div>
                           )}
-                          <button style={{ padding: 4, cursor: 'col-resize', borderRadius: 4, border: 'none', backgroundColor: 'transparent' }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
-                            <GripVertical size={12} style={{ color: '#6b7280' }} />
-                          </button>
                         </div>
                       </div>
-                      <div style={{ position: 'absolute', top: 0, right: 0, width: 8, height: '100%', cursor: 'col-resize', backgroundColor: 'transparent', zIndex: 1000 }} onMouseDown={(e) => handleResizeStart(col.key, e)} />
+                      <div 
+                        style={{ 
+                          position: 'absolute', 
+                          top: 0, 
+                          right: 0, 
+                          width: 8, 
+                          height: '100%', 
+                          cursor: 'col-resize', 
+                          backgroundColor: 'transparent', 
+                          zIndex: 1000,
+                          transition: 'background-color 0.15s ease'
+                        }} 
+                        onMouseDown={(e) => handleResizeStart(col.key, e)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.08)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      />
                     </th>
                   );
                 })}
