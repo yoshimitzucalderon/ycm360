@@ -1230,15 +1230,26 @@ function StickyProveedorTable() {
                             return null;
                           })()}
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8 }}>
-                          <button
-                            ref={columnMenuKey === col.key ? buttonRef : undefined}
-                            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', borderRadius: 4, display: 'flex', alignItems: 'center' }}
-                            onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
-                            title='Opciones de columna'
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, position: 'relative' }}>
+                          <span
+                            className="header-menu-trigger"
+                            style={{
+                              position: 'relative',
+                              opacity: 0,
+                              transition: 'opacity 0.15s',
+                              zIndex: 3,
+                              display: 'inline-flex',
+                            }}
                           >
-                            <MoreVertical size={18} style={{ color: '#2563eb' }} />
-                          </button>
+                            <button
+                              ref={columnMenuKey === col.key ? buttonRef : undefined}
+                              style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                              onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
+                              title='Opciones de columna'
+                            >
+                              <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                            </button>
+                          </span>
                           {/* Menú contextual de columna, solo para la columna activa */}
                           {columnMenuAnchor && columnMenuKey === col.key && (
                             <div

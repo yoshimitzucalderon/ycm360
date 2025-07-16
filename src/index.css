@@ -94,3 +94,8 @@ td.first-pinned-column {
   max-width: 48px !important;
   width: 48px !important;
 }
+
+/* Show 3-dot menu only on header hover for DynamicStickyDemo */
+.user-table th:hover .header-menu-trigger {
+  opacity: 1 !important;
+}
