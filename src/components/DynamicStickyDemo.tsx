@@ -1247,10 +1247,26 @@ function StickyProveedorTable() {
                     background: '#f3f4f6', // Light gray background for all headers
                     color: '#000000', // Black text for better contrast
                     zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', borderRight: '2px solid #3b82f6' } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', borderLeft: '2px solid #8b5cf6' } : {}),
-                    // Add soft gray border on the right side, except for the last column and pinned columns
-                    ...(!isLastColumn && !col.isPinnedLeft && !col.isPinnedRight ? { borderRight: '1px solid rgba(156, 163, 175, 0.5)' } : {}),
+                    // Bordes base para todos los headers
+                    borderTop: '1px solid #e5e7eb',
+                    borderBottom: '1px solid #e5e7eb',
+                    // Borde izquierdo solo si no es la primera columna
+                    ...(index > 0 ? { borderLeft: '1px solid #e5e7eb' } : {}),
+                    // Borde derecho solo si no es la última columna
+                    ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : {}),
+                    // Estilos específicos para columnas fijadas (mantienen prioridad)
+                    ...(col.isPinnedLeft && position?.left !== undefined ? { 
+                      left: position.left, 
+                      boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', 
+                      borderRight: '2px solid #3b82f6',
+                      borderLeft: index > 0 ? '1px solid #e5e7eb' : 'none'
+                    } : {}),
+                    ...(col.isPinnedRight && position?.right !== undefined ? { 
+                      right: position.right, 
+                      boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', 
+                      borderLeft: '2px solid #8b5cf6',
+                      borderRight: !isLastColumn ? '1px solid #e5e7eb' : 'none'
+                    } : {}),
                     paddingLeft: '2px', // Add 2px gap from left border
                   };
                   return (
@@ -1484,13 +1500,26 @@ function StickyProveedorTable() {
                       width: col.width,
                       // Solo las celdas pinned son sticky horizontalmente
                       position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                      // Bordes base para todas las celdas
+                      borderBottom: '1px solid #e5e7eb',
+                      // Borde izquierdo solo si no es la primera columna
+                      ...(tableLayout.orderedColumns.indexOf(col) > 0 ? { borderLeft: '1px solid #e5e7eb' } : {}),
+                      // Borde derecho solo si no es la última columna
+                      ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
                       background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
                       zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
                       boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
-                      borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
-                      borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
+                      // Estilos específicos para columnas fijadas (mantienen prioridad)
+                      ...(col.isPinnedLeft ? { 
+                        borderRight: '2px solid #3b82f6',
+                        borderLeft: tableLayout.orderedColumns.indexOf(col) > 0 ? '1px solid #e5e7eb' : 'none'
+                      } : {}),
+                      ...(col.isPinnedRight ? { 
+                        borderLeft: '2px solid #8b5cf6',
+                        borderRight: tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? '1px solid #e5e7eb' : 'none'
+                      } : {}),
                     };
                     const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
                     return (
@@ -1523,9 +1552,12 @@ function StickyProveedorTable() {
         padding: "12px 16px", 
         fontSize: 14,
         borderTop: "1px solid #e5e7eb",
+        borderLeft: "1px solid #e5e7eb",
+        borderRight: "1px solid #e5e7eb",
+        borderBottom: "1px solid #e5e7eb",
         background: "#f9fafb",
-        borderBottomLeftRadius: 8,
-        borderBottomRightRadius: 8
+        borderBottomLeftRadius: 4,
+        borderBottomRightRadius: 4
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span>Filas por página:</span>
