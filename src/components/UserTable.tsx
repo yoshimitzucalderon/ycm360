@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useTableData, TableColumn, TableFilter as TableFilterType } from "../hooks/useTableData";
+import { useStickyColumns } from "../hooks/useStickyColumns";
 import TableFilter from "./TableFilter";
 import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
@@ -407,6 +408,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   // Estado para el menú de orden
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const orderButtonRef = useRef<HTMLButtonElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   const [orderPanelPosition, setOrderPanelPosition] = useState<{ top: number | null; left: number | null }>({ top: null, left: null });
   const [selectMenuOpen, setSelectMenuOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState<{ [id: string]: boolean }>({});
@@ -717,7 +719,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     setOffsetUpdateTrigger(prev => prev + 1);
     
     // Forzar aplicación inmediata de estilos sticky
-    setTimeout(forceStickyUpdate, 0);
+    setTimeout(() => applyStickyStylesHook(), 0);
   };
 
   // Función para fijar columna a la derecha
@@ -737,7 +739,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     setOffsetUpdateTrigger(prev => prev + 1);
     
     // Forzar aplicación inmediata de estilos sticky
-    setTimeout(forceStickyUpdate, 0);
+    setTimeout(() => applyStickyStylesHook(), 0);
   };
   
   // Función para desfijar columna
@@ -750,7 +752,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     setOffsetUpdateTrigger(prev => prev + 1);
     
     // Forzar aplicación inmediata de estilos sticky
-    setTimeout(forceStickyUpdate, 0);
+    setTimeout(() => applyStickyStylesHook(), 0);
   };
 
   // Cerrar menú al hacer clic fuera
@@ -840,7 +842,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
       // Forzar actualización de offsets después del redimensionamiento
       setTimeout(() => {
         setOffsetUpdateTrigger(prev => prev + 1);
-        forceStickyUpdate();
+        applyStickyStylesHook();
       }, 10);
     };
     
@@ -1133,38 +1135,7 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
   const dummyRef = useRef<HTMLElement>(null);
   
   // Función para forzar aplicación inmediata de estilos sticky
-  const forceStickyUpdate = () => {
-    const tableContainer = document.querySelector('.table-scroll-container') as HTMLElement;
-    if (tableContainer) {
-      // Forzar aplicación directa de estilos sticky y offsets
-      const stickyCells = tableContainer.querySelectorAll('th[style*="position: sticky"], td[style*="position: sticky"]');
-      stickyCells.forEach((cell: Element) => {
-        const cellElement = cell as HTMLElement;
-        const colKey = cellElement.getAttribute('data-col-key');
-        
-        if (colKey) {
-          // Recalcular y aplicar offset inmediatamente
-          const isPinnedLeft = pinnedColumns.includes(colKey);
-          if (isPinnedLeft) {
-            const offset = getLeftOffset(colKey);
-            cellElement.style.left = `${offset}px`;
-            console.log(`Applied offset ${offset}px to column ${colKey}`);
-          }
-        }
-        
-        // Forzar recálculo de estilos
-        cellElement.style.position = 'static';
-        cellElement.offsetHeight; // Forzar reflow
-        cellElement.style.position = 'sticky';
-      });
-      
-      // Forzar reflow del contenedor
-      tableContainer.style.transform = 'translateZ(0)';
-      setTimeout(() => {
-        tableContainer.style.transform = '';
-      }, 10);
-    }
-  };
+
 
   // Calcula el z-index para columnas sticky a la derecha: la más a la derecha tiene el mayor z-index
   function getPinnedRightZIndex(colKey: string) {
@@ -1246,6 +1217,31 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
     });
     setColWidths(initialColWidths);
   }, [columnOrder, colWidths]);
+
+  // ===== HOOK useStickyColumns =====
+  const { applyStickyStyles: applyStickyStylesHook, diagnoseSticky } = useStickyColumns({
+    leftPinnedColumns: pinnedColumns,
+    rightPinnedColumns: pinnedColumnsRight,
+    colWidths,
+    containerRef: tableContainerRef,
+    columnOrder,
+    enabled: true
+  });
+
+  // Función para forzar aplicación inmediata de estilos sticky
+  const forceStickyUpdate = () => {
+    // Usar el hook para aplicar estilos sticky
+    applyStickyStylesHook();
+    
+    // Forzar reflow del contenedor
+    const tableContainer = document.querySelector('.table-scroll-container') as HTMLElement;
+    if (tableContainer) {
+      tableContainer.style.transform = 'translateZ(0)';
+      setTimeout(() => {
+        tableContainer.style.transform = '';
+      }, 10);
+    }
+  };
 
   return (
     <>

@@ -18,7 +18,7 @@ export function useStickyColumns({
   enabled = true
 }: UseStickyColumnsProps) {
   
-  // Calcula offsets para columnas sticky basándose en el orden visual real
+  // Calcula offsets para columnas sticky siguiendo el comportamiento de MUI DataGrid
   const getStickyStyles = useCallback((colKey: string) => {
     if (!enabled) return {};
     
@@ -30,51 +30,48 @@ export function useStickyColumns({
     let offset = 0;
     
     if (isLeft) {
-      // Para columnas left: calcular offset basándose en el orden visual real
-      const visualOrder = columnOrder.map(col => col.key);
-      const currentColIndex = visualOrder.indexOf(colKey);
+      // Para columnas left: mantener el orden que se definen en la configuración
+      // Calcular offset basándose en el orden de leftPinnedColumns
+      const currentIndex = leftPinnedColumns.indexOf(colKey);
       
-      // Sumar anchos de todas las columnas pinned que están visualmente a la izquierda
-      for (const pinnedCol of leftPinnedColumns) {
-        const pinnedColIndex = visualOrder.indexOf(pinnedCol);
-        if (pinnedColIndex < currentColIndex) {
-          offset += colWidths[pinnedCol] || 150;
-        }
+      // Sumar anchos de todas las columnas pinned que están antes en el array
+      for (let i = 0; i < currentIndex; i++) {
+        const pinnedCol = leftPinnedColumns[i];
+        offset += colWidths[pinnedCol] || 150;
       }
       
       return {
         position: 'sticky' as const,
         left: offset,
-        zIndex: 2000 + (leftPinnedColumns.length - leftPinnedColumns.indexOf(colKey)),
+        zIndex: 2000 + (leftPinnedColumns.length - currentIndex),
         background: '#f8fafc',
         boxShadow: '2px 0 4px rgba(0,0,0,0.15)'
       };
     }
     
     if (isRight) {
-      // Para columnas right: calcular offset desde la derecha
-      const visualOrder = columnOrder.map(col => col.key);
-      const currentColIndex = visualOrder.indexOf(colKey);
+      // Para columnas right: mantener el orden INVERSO al que se definen (como MUI DataGrid)
+      // Calcular offset basándose en el orden inverso de rightPinnedColumns
+      const currentIndex = rightPinnedColumns.indexOf(colKey);
+      const reverseIndex = rightPinnedColumns.length - 1 - currentIndex;
       
-      // Sumar anchos de todas las columnas pinned right que están visualmente a la derecha
-      for (const pinnedCol of rightPinnedColumns) {
-        const pinnedColIndex = visualOrder.indexOf(pinnedCol);
-        if (pinnedColIndex > currentColIndex) {
-          offset += colWidths[pinnedCol] || 150;
-        }
+      // Sumar anchos de todas las columnas pinned right que están después en el array (orden inverso)
+      for (let i = rightPinnedColumns.length - 1; i > currentIndex; i--) {
+        const pinnedCol = rightPinnedColumns[i];
+        offset += colWidths[pinnedCol] || 150;
       }
       
       return {
         position: 'sticky' as const,
         right: offset,
-        zIndex: 2000 + (rightPinnedColumns.length - rightPinnedColumns.indexOf(colKey)),
+        zIndex: 2000 + (rightPinnedColumns.length - reverseIndex),
         background: '#f8fafc',
         boxShadow: '-2px 0 4px rgba(0,0,0,0.15)'
       };
     }
     
     return {};
-  }, [leftPinnedColumns, rightPinnedColumns, colWidths, enabled, columnOrder]);
+  }, [leftPinnedColumns, rightPinnedColumns, colWidths, enabled]);
 
   // Aplica estilos sticky a th y td después de cada render
   const applyStickyStyles = useCallback(() => {
