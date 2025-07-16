@@ -779,7 +779,14 @@ function StickyProveedorTable() {
     <div style={{ margin: "32px 0 32px 0" }}>
       {/* BARRA DE ACCIONES */}
       <div className="table-container">
-        <div className="user-table-header table-controls">
+        <div className="user-table-header table-controls" style={{ 
+          border: "1px solid #e5e7eb", 
+          borderBottom: "none",
+          borderTopLeftRadius: 8, 
+          borderTopRightRadius: 8,
+          background: "#f9fafb",
+          padding: "12px 16px"
+        }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, width: '100%' }}>
             {searchVisible ? (
               <div
@@ -1202,7 +1209,9 @@ function StickyProveedorTable() {
           width: "100%",
           maxWidth: "none",
           border: "1px solid #e5e7eb",
-          borderRadius: 8,
+          borderTop: "none",
+          borderBottomLeftRadius: 8,
+          borderBottomRightRadius: 8,
           background: "#fff",
           margin: 0,
           padding: 0,
@@ -1507,7 +1516,17 @@ function StickyProveedorTable() {
         </div>
       </div>
       {/* PAGINACIÓN */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 0 0", fontSize: 14 }}>
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "space-between", 
+        padding: "12px 16px", 
+        fontSize: 14,
+        borderTop: "1px solid #e5e7eb",
+        background: "#f9fafb",
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span>Filas por página:</span>
           <select
