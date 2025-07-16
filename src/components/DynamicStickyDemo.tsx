@@ -321,16 +321,13 @@ function StickyProveedorTable() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchContainerRef] = useState(useRef<HTMLDivElement>(null));
   const [visibleColumns, setVisibleColumns] = useState<string[]>(proveedorColumns.map(col => col.key));
-  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
   const [pinPanelAnchorEl, setPinPanelAnchorEl] = useState<null | HTMLElement>(null);
   const [pinSide, setPinSide] = useState<'left' | 'right'>('left');
-  const [filters, setFilters] = useState<TableFilter[]>([]);
   const [sortRules, setSortRules] = useState<SortRule[]>([]);
   const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
   const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
-  const [filterLogic, setFilterLogic] = useState<'AND' | 'OR'>('AND');
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
@@ -377,7 +374,7 @@ function StickyProveedorTable() {
   // Resetear página cuando cambian filtros o búsqueda
   useEffect(() => {
     setPage(0);
-  }, [search, filters, sortRules]);
+  }, [search, sortRules]);
 
   // Observar tamaño del contenedor
   useEffect(() => {
@@ -490,9 +487,6 @@ function StickyProveedorTable() {
     setColumns((cols) => cols.map((c) => c.key === colKey ? { ...c, isPinnedLeft: false, isPinnedRight: false } : c));
   };
 
-  const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
-  const handleCloseFilter = () => setFilterAnchorEl(null);
-
   const handleOpenSort = (event: React.MouseEvent<HTMLElement>) => setSortAnchorEl(event.currentTarget);
   const handleCloseSort = () => setSortAnchorEl(null);
 
@@ -501,6 +495,10 @@ function StickyProveedorTable() {
 
   const handleOpenPinPanel = (event: React.MouseEvent<HTMLElement>) => setPinPanelAnchorEl(event.currentTarget);
   const handleClosePinPanel = () => setPinPanelAnchorEl(null);
+
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
+  const handleCloseFilter = () => setFilterAnchorEl(null);
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -537,105 +535,129 @@ function StickyProveedorTable() {
   };
 
   const clearSort = () => setSortRules([]);
-  const totalFilters = filters.filter(
-    f => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
-  ).length;
+  const [filters, setFilters] = useState<TableFilter[]>([]);
+  const [filterLogic, setFilterLogic] = useState<'AND' | 'OR'>('AND');
+  // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
+  const filtersByColumn: { [key: string]: number } = {};
+  filters.forEach(f => {
+    if (f.column && f.value && f.value.trim() !== "") {
+      filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
+    }
+  });
+  const totalFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "").length;
 
   // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
-  // ... existing code ...
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...data];
 
-const filteredAndSortedData = useMemo(() => {
-  let result = [...data];
-
-  // Aplicar búsqueda
-  if (search.trim()) {
-    const searchLower = search.toLowerCase();
-    result = result.filter(row => {
-      return proveedorColumns.some(col => {
-        const value = row[col.key];
-        return value && value.toString().toLowerCase().includes(searchLower);
-      });
-    });
-  }
-
-  // Filtrado estilo Supabase (igual que UserTable)
-  if (filters.length > 0) {
-    const validFilters = filters.filter(
-      (f: TableFilter) => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
-    );
-
-    if (validFilters.length > 0) {
+    // Aplicar búsqueda
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
       result = result.filter(row => {
-        const filterFn = (filter: TableFilter) => {
-          const value = row[filter.column];
-          if (value === undefined || value === null) return false;
-          switch (filter.operator) {
-            case '=': case 'eq':
-              return value.toString() === filter.value;
-            case '!=': case '<>': case 'neq':
-              return value.toString() !== filter.value;
-            case 'like':
-              if (filter.value.startsWith('%') && filter.value.endsWith('%')) {
-                return value.toString().toLowerCase().includes(filter.value.replace(/%/g, '').toLowerCase());
-              }
-              if (filter.value.startsWith('%')) {
-                return value.toString().toLowerCase().endsWith(filter.value.replace(/%/g, '').toLowerCase());
-              }
-              if (filter.value.endsWith('%')) {
-                return value.toString().toLowerCase().startsWith(filter.value.replace(/%/g, '').toLowerCase());
-              }
-              return value.toString().toLowerCase() === filter.value.toLowerCase();
-            case 'ilike':
-              return value.toString().toLowerCase().includes(filter.value.toLowerCase());
-            case '>': case 'gt':
-              return value > filter.value;
-            case '<': case 'lt':
-              return value < filter.value;
-            case '>=': case 'gte':
-              return value >= filter.value;
-            case '<=': case 'lte':
-              return value <= filter.value;
-            case 'in':
-              return filter.value
-                .split(',')
-                .map((v: string) => v.trim())
-                .includes(value.toString());
-            case 'is':
-              if (filter.value === 'null') return value === null || value === '';
-              if (filter.value === 'not null') return value !== null && value !== '';
-              if (filter.value === 'true') return value === true || value === 'true';
-              if (filter.value === 'false') return value === false || value === 'false';
-              return false;
-            default:
-              return true;
-          }
-        };
-
-        if (filterLogic === 'AND') {
-          return validFilters.every(filterFn);
-        } else {
-          return validFilters.some(filterFn);
-        }
+        return proveedorColumns.some(col => {
+          const value = row[col.key];
+          return value && value.toString().toLowerCase().includes(searchLower);
+        });
       });
     }
-  }
 
-  // Aplicar ordenamiento
-  if (sortRules.length > 0) {
-    result.sort((a, b) => {
-      for (const rule of sortRules) {
-        const aValue = a[rule.column];
-        const bValue = b[rule.column];
-        if (aValue === bValue) continue;
-        const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        return rule.direction === 'asc' ? comparison : -comparison;
+    // Filtrado estilo Supabase (igual que UserTable)
+    if (filters.length > 0) {
+      const validFilters = filters.filter(
+        (f: TableFilter) => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
+      );
+
+      if (validFilters.length > 0) {
+        result = result.filter(row => {
+          // Lógica secuencial AND/OR igual que useTableData
+          let res = true;
+          for (let i = 0; i < validFilters.length; i++) {
+            const filter = validFilters[i];
+            const value = row[filter.column];
+            let currentResult = false;
+            if (value !== undefined && value !== null) {
+              switch (filter.operator) {
+                case '=': case 'eq':
+                  currentResult = value.toString() === filter.value;
+                  break;
+                case '!=': case '<>': case 'neq':
+                  currentResult = value.toString() !== filter.value;
+                  break;
+                case 'like':
+                  if (filter.value.startsWith('%') && filter.value.endsWith('%')) {
+                    currentResult = value.toString().toLowerCase().includes(filter.value.replace(/%/g, '').toLowerCase());
+                  } else if (filter.value.startsWith('%')) {
+                    currentResult = value.toString().toLowerCase().endsWith(filter.value.replace(/%/g, '').toLowerCase());
+                  } else if (filter.value.endsWith('%')) {
+                    currentResult = value.toString().toLowerCase().startsWith(filter.value.replace(/%/g, '').toLowerCase());
+                  } else {
+                    currentResult = value.toString().toLowerCase() === filter.value.toLowerCase();
+                  }
+                  break;
+                case 'ilike':
+                  currentResult = value.toString().toLowerCase().includes(filter.value.toLowerCase());
+                  break;
+                case '>': case 'gt':
+                  currentResult = value > filter.value;
+                  break;
+                case '<': case 'lt':
+                  currentResult = value < filter.value;
+                  break;
+                case '>=': case 'gte':
+                  currentResult = value >= filter.value;
+                  break;
+                case '<=': case 'lte':
+                  currentResult = value <= filter.value;
+                  break;
+                case 'in':
+                  currentResult = filter.value
+                    .split(',')
+                    .map((v: string) => v.trim())
+                    .includes(value.toString());
+                  break;
+                case 'is':
+                  if (filter.value === 'null') currentResult = value === null || value === '';
+                  else if (filter.value === 'not null') currentResult = value !== null && value !== '';
+                  else if (filter.value === 'true') currentResult = value === true || value === 'true';
+                  else if (filter.value === 'false') currentResult = value === false || value === 'false';
+                  else currentResult = false;
+                  break;
+                default:
+                  currentResult = true;
+              }
+            }
+            if (i === 0) {
+              res = currentResult;
+            } else {
+              const logic = filter.logicalOperator || 'AND';
+              if (logic === 'AND') {
+                res = res && currentResult;
+              } else if (logic === 'OR') {
+                res = res || currentResult;
+              }
+            }
+          }
+          return res;
+        });
       }
-      return 0;
-    });
-  }
+    }
 
-  return result;
-}, [data, search, filters, sortRules, filterLogic]);
+    // Aplicar ordenamiento
+    if (sortRules.length > 0) {
+      result.sort((a, b) => {
+        for (const rule of sortRules) {
+          const aValue = a[rule.column];
+          const bValue = b[rule.column];
+          if (aValue === bValue) continue;
+          const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+          return rule.direction === 'asc' ? comparison : -comparison;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, search, filters, sortRules, filterLogic]);
   // Actualizar datos paginados con los datos filtrados
   const paginatedData = filteredAndSortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const totalRows = filteredAndSortedData.length;
@@ -723,6 +745,7 @@ const filteredAndSortedData = useMemo(() => {
               onHideAll={hideAllColumns}
               onReset={resetColumns}
             />
+            {/* En la barra de acciones: */}
             <button
               className={`action-button${filterAnchorEl ? ' active' : ''}`}
               onClick={handleOpenFilter}
@@ -1137,8 +1160,28 @@ const filteredAndSortedData = useMemo(() => {
                   return (
                     // @ts-ignore
                     <th key={col.key} style={style}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{col.label}</span>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", position: 'relative' }}>
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          {/* Badge de filtros activos por columna */}
+                          {filtersByColumn[col.key] > 0 && (
+                            <span style={{
+                              marginLeft: 6,
+                              background: '#22c55e',
+                              color: '#fff',
+                              borderRadius: '50%',
+                              fontSize: 10,
+                              minWidth: 15,
+                              height: 15,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 600,
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                              zIndex: 2
+                            }}>{filtersByColumn[col.key]}</span>
+                          )}
+                        </span>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
                           <button
                             ref={columnMenuKey === col.key ? buttonRef : undefined}
