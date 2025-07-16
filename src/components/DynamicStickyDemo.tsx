@@ -1172,21 +1172,12 @@ function StickyProveedorTable() {
                   const style: React.CSSProperties = {
                     minWidth: col.width,
                     width: col.width,
-                    position: 'sticky',
-                    top: 0, // Todos los headers son sticky verticalmente
+                    position: 'sticky', // SIEMPRE sticky
+                    top: 0,             // SIEMPRE top 0
                     background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : '#fff',
-                    zIndex: col.isPinnedLeft || col.isPinnedRight ? (position?.zIndex || 300) : 200,
-                    // Solo aplicar left/right para columnas pinned
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { 
-                      left: position.left, 
-                      boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', 
-                      borderRight: '2px solid #3b82f6' 
-                    } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { 
-                      right: position.right, 
-                      boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', 
-                      borderLeft: '2px solid #8b5cf6' 
-                    } : {}),
+                    zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
+                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', borderRight: '2px solid #3b82f6' } : {}),
+                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', borderLeft: '2px solid #8b5cf6' } : {}),
                   };
                   return (
                     <th key={col.key} style={style}>
