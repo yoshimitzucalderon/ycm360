@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical, Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
+import { Pin, PinOff, AlertTriangle, GripVertical, MoreVertical, Filter, ArrowUpDown, Plus, Check, Search, X as XIcon, Download, Columns3, ArrowUp, ArrowDown, RotateCcw, EyeOff } from 'lucide-react';
 import { supabase } from "../supabaseClient";
 import Popover from '@mui/material/Popover';
 import Checkbox from '@mui/material/Checkbox';
@@ -714,6 +714,21 @@ function StickyProveedorTable() {
   });
   const totalFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "").length;
 
+  // Add this helper inside StickyProveedorTable, near other handlers
+  const handleSortOption = (colKey: string, direction: 'asc' | 'desc') => {
+    // Check if already sorted by this column
+    const existingRuleIndex = sortRules.findIndex(rule => rule.column === colKey);
+    if (existingRuleIndex >= 0) {
+      // Update direction
+      const newSortRules = [...sortRules];
+      newSortRules[existingRuleIndex] = { column: colKey, direction };
+      setSortRules(newSortRules);
+    } else {
+      // Add new rule
+      setSortRules([...sortRules, { column: colKey, direction }]);
+    }
+  };
+
   // Render
   return (
     <div style={{ margin: "32px 0 32px 0" }}>
@@ -1243,7 +1258,46 @@ function StickyProveedorTable() {
                               }}
                               onClick={e => e.stopPropagation()}
                             >
-                              {/* Opciones de pin */}
+                              {/* Ordenar ascendente */}
+                              <div
+                                className="column-menu-item"
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 8,
+                                  padding: '7px 12px',
+                                  cursor: 'pointer',
+                                  borderRadius: 5,
+                                  color: '#555',
+                                  fontWeight: 400
+                                }}
+                                onClick={() => { handleSortOption(columnMenuKey, 'asc'); handleCloseColumnMenu(); }}
+                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              >
+                                <ArrowUp size={16} /> Ordenar ascendente
+                              </div>
+                              {/* Ordenar descendente */}
+                              <div
+                                className="column-menu-item"
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 8,
+                                  padding: '7px 12px',
+                                  cursor: 'pointer',
+                                  borderRadius: 5,
+                                  color: '#555',
+                                  fontWeight: 400
+                                }}
+                                onClick={() => { handleSortOption(columnMenuKey, 'desc'); handleCloseColumnMenu(); }}
+                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              >
+                                <ArrowDown size={16} /> Ordenar descendente
+                              </div>
+                              <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                              {/* Pin/unpin options (existing) */}
                               {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
                                 <div
                                   style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
@@ -1284,6 +1338,17 @@ function StickyProveedorTable() {
                                   <PinOff size={16} /> Desfijar derecha
                                 </div>
                               )}
+                              <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                              {/* Ocultar columna */}
+                              <div
+                                className="column-menu-item column-menu-hide"
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                onClick={() => { toggleColumn(columnMenuKey); handleCloseColumnMenu(); }}
+                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                              >
+                                <EyeOff size={16} /> Ocultar columna
+                              </div>
                             </div>
                           )}
                           <button style={{ padding: 4, cursor: 'col-resize', borderRadius: 4, border: 'none', backgroundColor: 'transparent' }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
