@@ -18,8 +18,6 @@ const App = () => {
         <UserTable />
         {/* Ejemplo sticky dinámico minimalista */}
         <DynamicStickyDemo />
-        {/* Ejemplo aislado de sticky columns */}
-        <StickyMultiColumnDemo />
       </div>
       <RightPanel />
     </div>
