@@ -31,6 +31,8 @@ type Props = {
   visibleColumns: string[];
   filters: TableFilterType[];
   setFilters: (filters: TableFilterType[]) => void;
+  filterLogic: 'AND' | 'OR'; // <-- agregado
+  setFilterLogic: (logic: 'AND' | 'OR') => void; // <-- agregado
   anchorRef: React.RefObject<HTMLElement>;
   onClose: () => void;
 };
@@ -92,7 +94,16 @@ const menuProps = {
   },
 };
 
-const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters, setFilters, anchorRef, onClose }) => {
+const TableFilterPopover: React.FC<Props> = ({
+  columns,
+  visibleColumns,
+  filters,
+  setFilters,
+  filterLogic,        // <-- agregado
+  setFilterLogic,     // <-- agregado
+  anchorRef,
+  onClose
+}) => {
   const [newFilter, setNewFilter] = useState<TableFilterType>({ column: "", operator: "=", value: "" });
   const popoverRef = useRef<HTMLDivElement>(null);
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
@@ -191,29 +202,8 @@ const TableFilterPopover: React.FC<Props> = ({ columns, visibleColumns, filters,
   };
 
   const removeFilter = (idx: number) => {
-    if (filters.length === 1) {
-      // Si solo queda uno, lo resetea en vez de eliminar
-      setFilters([
-        {
-          column: '',
-          operator: '=',
-          value: '',
-          logicalOperator: undefined,
-        },
-      ]);
-    } else if (filters.length === 2) {
-      // Si quedan dos y eliminas uno, el otro se resetea
-      setFilters([
-        {
-          column: '',
-          operator: '=',
-          value: '',
-          logicalOperator: undefined,
-        },
-      ]);
-    } else {
-      setFilters(filters.filter((_, i) => i !== idx));
-    }
+    // Elimina el filtro seleccionado, permitiendo que el array quede vacío
+    setFilters(filters.filter((_, i) => i !== idx));
   };
 
   const setLogicalOperator = (idx: number, op: string) => {

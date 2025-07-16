@@ -1332,6 +1332,8 @@ const UserTable: React.FC<UserTableProps> = ({ isFirstColumnPinned = false }) =>
                 visibleColumns={visibleColumns}
                 filters={filters}
                 setFilters={setFilters}
+                filterLogic="AND" // valor por defecto
+                setFilterLogic={() => {}} // función vacía
                 anchorRef={{ current: filterAnchorEl }}
                 onClose={handleCloseFilter}
               />

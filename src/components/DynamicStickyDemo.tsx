@@ -16,7 +16,7 @@ import { saveAs } from 'file-saver';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import GridOnIcon from '@mui/icons-material/GridOn';
-import TableFilter from "./TableFilter";
+import TableFilterPopover from "./TableFilter";
 import TableSort from "./TableSort";
 import TablePagination from "./TablePagination";
 
@@ -330,6 +330,7 @@ function StickyProveedorTable() {
   const [sortRules, setSortRules] = useState<SortRule[]>([]);
   const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
   const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
+  const [filterLogic, setFilterLogic] = useState<'AND' | 'OR'>('AND');
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
@@ -553,28 +554,48 @@ function StickyProveedorTable() {
       });
     }
 
-    // Aplicar filtros
+    // Aplicar filtros con lógica AND/OR
     if (filters.length > 0) {
       result = result.filter(row => {
-        return filters.every(filter => {
-          const value = row[filter.column];
-          if (!value) return false;
-          
-          switch (filter.operator) {
-            case '=':
-              return value.toString() === filter.value;
-            case '!=':
-              return value.toString() !== filter.value;
-            case 'contains':
-              return value.toString().toLowerCase().includes(filter.value.toLowerCase());
-            case 'starts_with':
-              return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
-            case 'ends_with':
-              return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
-            default:
-              return true;
-          }
-        });
+        if (filterLogic === 'AND') {
+          return filters.every(filter => {
+            const value = row[filter.column];
+            if (!value) return false;
+            switch (filter.operator) {
+              case '=':
+                return value.toString() === filter.value;
+              case '!=':
+                return value.toString() !== filter.value;
+              case 'contains':
+                return value.toString().toLowerCase().includes(filter.value.toLowerCase());
+              case 'starts_with':
+                return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
+              case 'ends_with':
+                return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
+              default:
+                return true;
+            }
+          });
+        } else { // OR
+          return filters.some(filter => {
+            const value = row[filter.column];
+            if (!value) return false;
+            switch (filter.operator) {
+              case '=':
+                return value.toString() === filter.value;
+              case '!=':
+                return value.toString() !== filter.value;
+              case 'contains':
+                return value.toString().toLowerCase().includes(filter.value.toLowerCase());
+              case 'starts_with':
+                return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
+              case 'ends_with':
+                return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
+              default:
+                return true;
+            }
+          });
+        }
       });
     }
 
@@ -595,7 +616,7 @@ function StickyProveedorTable() {
     }
 
     return result;
-  }, [data, search, filters, sortRules]);
+  }, [data, search, filters, sortRules, filterLogic]);
 
   // Actualizar datos paginados con los datos filtrados
   const paginatedData = filteredAndSortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -712,11 +733,13 @@ function StickyProveedorTable() {
               )}
             </button>
             {filterAnchorEl && (
-              <TableFilter
+              <TableFilterPopover
                 columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
                 visibleColumns={visibleColumns}
                 filters={filters}
                 setFilters={setFilters}
+                filterLogic={filterLogic}
+                setFilterLogic={setFilterLogic}
                 anchorRef={{ current: filterAnchorEl }}
                 onClose={handleCloseFilter}
               />
