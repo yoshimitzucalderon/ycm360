@@ -735,7 +735,7 @@ function StickyProveedorTable() {
       {/* BARRA DE ACCIONES */}
       <div className="table-container">
         <div className="user-table-header table-controls">
-          <div className="controls-left">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, width: '100%' }}>
             {searchVisible ? (
               <div
                 className={`search-animate${showSearch ? ' expanded' : ''}`}
