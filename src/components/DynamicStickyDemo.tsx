@@ -333,10 +333,18 @@ function StickyProveedorTable() {
   const [searchVisible, setSearchVisible] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(proveedorColumns.map(col => col.key));
+  
+  // Estado para celda seleccionada
+  const [selectedCell, setSelectedCell] = useState<{ rowIndex: number; colKey: string } | null>(null);
 
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
+  };
+  
+  // Manejador para seleccionar celda
+  const handleCellClick = (rowIndex: number, colKey: string) => {
+    setSelectedCell({ rowIndex, colKey });
   };
   const handleCloseColumnMenu = () => {
     setColumnMenuAnchor(null);
@@ -1455,8 +1463,19 @@ function StickyProveedorTable() {
                       borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
                       borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
                     };
+                    const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
                     return (
-                      <td key={col.key} style={{ ...style, paddingLeft: '2px' }}>
+                      <td 
+                        key={col.key} 
+                        style={{ 
+                          ...style, 
+                          paddingLeft: '2px',
+                          cursor: 'pointer',
+                          outline: isSelected ? '2px solid #2563eb' : 'none',
+                          outlineOffset: '-2px'
+                        }}
+                        onClick={() => handleCellClick(i, col.key)}
+                      >
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[col.key]}</div>
                       </td>
                     );
