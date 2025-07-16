@@ -336,6 +336,9 @@ function StickyProveedorTable() {
   
   // Estado para celda seleccionada
   const [selectedCell, setSelectedCell] = useState<{ rowIndex: number; colKey: string } | null>(null);
+  
+  // Estado para hover de fila
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
@@ -345,6 +348,15 @@ function StickyProveedorTable() {
   // Manejador para seleccionar celda
   const handleCellClick = (rowIndex: number, colKey: string) => {
     setSelectedCell({ rowIndex, colKey });
+  };
+  
+  // Manejadores para hover de fila
+  const handleRowMouseEnter = (rowIndex: number) => {
+    setHoveredRow(rowIndex);
+  };
+  
+  const handleRowMouseLeave = () => {
+    setHoveredRow(null);
   };
   const handleCloseColumnMenu = () => {
     setColumnMenuAnchor(null);
@@ -1447,7 +1459,15 @@ function StickyProveedorTable() {
                 <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', color: '#dc2626', padding: 24 }}>{error}</td></tr>
               )}
               {!loading && !error && paginatedData.map((row, i) => (
-                <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
+                <tr 
+                  key={i} 
+                  style={{ 
+                    background: hoveredRow === i ? '#dbeafe' : (i % 2 === 0 ? '#fff' : '#f9fafb'),
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseEnter={() => handleRowMouseEnter(i)}
+                  onMouseLeave={handleRowMouseLeave}
+                >
                   {tableLayout.orderedColumns.map(col => {
                     const position = tableLayout.positions[col.key];
                     const style: React.CSSProperties = {
