@@ -315,19 +315,25 @@ function StickyProveedorTable() {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // --- ESTADOS PARA LA BARRA DE ACCIONES ---
+  // Estados para orden, filtros, pinning y anclas
+  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
+  const [pinPanelAnchorEl, setPinPanelAnchorEl] = useState<null | HTMLElement>(null);
+  const [pinSide, setPinSide] = useState<'left' | 'right'>('left');
+  const [filters, setFilters] = useState<TableFilter[]>([]);
+  const [sortRules, setSortRules] = useState<SortRule[]>([]);
+  const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
+  const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
+  const [filterLogic, setFilterLogic] = useState<'AND' | 'OR'>('AND');
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const filterOpen = Boolean(filterAnchorEl);
+  // Estados de búsqueda y columnas visibles
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchContainerRef] = useState(useRef<HTMLDivElement>(null));
   const [visibleColumns, setVisibleColumns] = useState<string[]>(proveedorColumns.map(col => col.key));
-  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
-  const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
-  const [pinPanelAnchorEl, setPinPanelAnchorEl] = useState<null | HTMLElement>(null);
-  const [pinSide, setPinSide] = useState<'left' | 'right'>('left');
-  const [sortRules, setSortRules] = useState<SortRule[]>([]);
-  const [pinnedColumns, setPinnedColumns] = useState<string[]>([]);
-  const [pinnedColumnsRight, setPinnedColumnsRight] = useState<string[]>([]);
+
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
@@ -496,170 +502,8 @@ function StickyProveedorTable() {
   const handleOpenPinPanel = (event: React.MouseEvent<HTMLElement>) => setPinPanelAnchorEl(event.currentTarget);
   const handleClosePinPanel = () => setPinPanelAnchorEl(null);
 
-  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
   const handleOpenFilter = (event: React.MouseEvent<HTMLElement>) => setFilterAnchorEl(event.currentTarget);
   const handleCloseFilter = () => setFilterAnchorEl(null);
-
-  // --- LÓGICA DE FILTRADO (sin sort) ---
-  const [filters, setFilters] = useState<TableFilter[]>([]);
-  const [filterLogic, setFilterLogic] = useState<'AND' | 'OR'>('AND');
-  const filteredData = useMemo(() => {
-    let result = [...data];
-
-    // Aplicar búsqueda
-    if (search.trim()) {
-      const searchLower = search.toLowerCase();
-      result = result.filter(row => {
-        return proveedorColumns.some(col => {
-          const value = row[col.key];
-          return value && value.toString().toLowerCase().includes(searchLower);
-        });
-      });
-    }
-
-    // Filtrado estilo Supabase (igual que UserTable)
-    if (filters.length > 0) {
-      const validFilters = filters.filter(
-        (f: TableFilter) => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
-      );
-
-      if (validFilters.length > 0) {
-        result = result.filter(row => {
-          // Lógica secuencial AND/OR igual que useTableData
-          let res = true;
-          for (let i = 0; i < validFilters.length; i++) {
-            const filter = validFilters[i];
-            const value = row[filter.column];
-            let currentResult = false;
-            if (value !== undefined && value !== null) {
-              switch (filter.operator) {
-                case '=': case 'eq':
-                  currentResult = value.toString() === filter.value;
-                  break;
-                case '!=': case '<>': case 'neq':
-                  currentResult = value.toString() !== filter.value;
-                  break;
-                case 'like':
-                  if (filter.value.startsWith('%') && filter.value.endsWith('%')) {
-                    currentResult = value.toString().toLowerCase().includes(filter.value.replace(/%/g, '').toLowerCase());
-                  } else if (filter.value.startsWith('%')) {
-                    currentResult = value.toString().toLowerCase().endsWith(filter.value.replace(/%/g, '').toLowerCase());
-                  } else if (filter.value.endsWith('%')) {
-                    currentResult = value.toString().toLowerCase().startsWith(filter.value.replace(/%/g, '').toLowerCase());
-                  } else {
-                    currentResult = value.toString().toLowerCase() === filter.value.toLowerCase();
-                  }
-                  break;
-                case 'ilike':
-                  currentResult = value.toString().toLowerCase().includes(filter.value.toLowerCase());
-                  break;
-                case '>': case 'gt':
-                  currentResult = value > filter.value;
-                  break;
-                case '<': case 'lt':
-                  currentResult = value < filter.value;
-                  break;
-                case '>=': case 'gte':
-                  currentResult = value >= filter.value;
-                  break;
-                case '<=': case 'lte':
-                  currentResult = value <= filter.value;
-                  break;
-                case 'in':
-                  currentResult = filter.value
-                    .split(',')
-                    .map((v: string) => v.trim())
-                    .includes(value.toString());
-                  break;
-                case 'is':
-                  if (filter.value === 'null') currentResult = value === null || value === '';
-                  else if (filter.value === 'not null') currentResult = value !== null && value !== '';
-                  else if (filter.value === 'true') currentResult = value === true || value === 'true';
-                  else if (filter.value === 'false') currentResult = value === false || value === 'false';
-                  else currentResult = false;
-                  break;
-                default:
-                  currentResult = true;
-              }
-            }
-            if (i === 0) {
-              res = currentResult;
-            } else {
-              const logic = filter.logicalOperator || 'AND';
-              if (logic === 'AND') {
-                res = res && currentResult;
-              } else if (logic === 'OR') {
-                res = res || currentResult;
-              }
-            }
-          }
-          return res;
-        });
-      }
-    }
-
-    return result;
-  }, [data, search, filters, filterLogic]);
-
-  // Para exportar columnas en el orden visual real:
-  const getExportColumns = () => tableLayout.orderedColumns.filter(col => visibleColumns.includes(col.key));
-
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    // Columnas visibles y en el orden real de la tabla
-    const exportCols = getExportColumns();
-    const tableData = filteredData.map((row: any) =>
-      exportCols.map(col => row[col.key] || '')
-    );
-    autoTable(doc, {
-      head: [exportCols.map(col => col.label)],
-      body: tableData,
-    });
-    doc.save('proveedores.pdf');
-    handleCloseDownload();
-  };
-
-  const handleDownloadXLSX = () => {
-    // Columnas visibles y en el orden real de la tabla
-    const exportCols = getExportColumns();
-    const exportData = filteredData.map((row: any) => {
-      const obj: any = {};
-      exportCols.forEach(col => {
-        obj[col.label] = row[col.key] || '';
-      });
-      return obj;
-    });
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(dataBlob, 'proveedores.xlsx');
-    handleCloseDownload();
-  };
-
-  const handleDownloadCSV = () => {
-    // Columnas visibles y en el orden real de la tabla
-    const exportCols = getExportColumns();
-    const headers = exportCols.map(col => col.label).join(',');
-    const csvData = filteredData.map((row: any) =>
-      exportCols.map(col => `"${row[col.key] || ''}"`).join(',')
-    ).join('\n');
-    const csvContent = `${headers}\n${csvData}`;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'proveedores.csv');
-    handleCloseDownload();
-  };
-
-  const clearSort = () => setSortRules([]);
-  // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
-  const filtersByColumn: { [key: string]: number } = {};
-  filters.forEach(f => {
-    if (f.column && f.value && f.value.trim() !== "") {
-      filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
-    }
-  });
-  const totalFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "").length;
 
   // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
   const filteredAndSortedData = useMemo(() => {
@@ -806,6 +650,65 @@ function StickyProveedorTable() {
     return { orderedColumns, leftPinned, rightPinned, normal, positions, leftTotalWidth, rightTotalWidth };
   }, [visibleColumnsData, containerWidth]);
 
+  const getExportColumns = () => tableLayout.orderedColumns.filter(col => visibleColumns.includes(col.key));
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    // Columnas visibles y en el orden real de la tabla
+    const exportCols = getExportColumns();
+    const tableData = filteredAndSortedData.map((row: any) =>
+      exportCols.map(col => row[col.key] || '')
+    );
+    autoTable(doc, {
+      head: [exportCols.map(col => col.label)],
+      body: tableData,
+    });
+    doc.save('proveedores.pdf');
+    handleCloseDownload();
+  };
+
+  const handleDownloadXLSX = () => {
+    // Columnas visibles y en el orden real de la tabla
+    const exportCols = getExportColumns();
+    const exportData = filteredAndSortedData.map((row: any) => {
+      const obj: any = {};
+      exportCols.forEach(col => {
+        obj[col.label] = row[col.key] || '';
+      });
+      return obj;
+    });
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const dataBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(dataBlob, 'proveedores.xlsx');
+    handleCloseDownload();
+  };
+
+  const handleDownloadCSV = () => {
+    // Columnas visibles y en el orden real de la tabla
+    const exportCols = getExportColumns();
+    const headers = exportCols.map(col => col.label).join(',');
+    const csvData = filteredAndSortedData.map((row: any) =>
+      exportCols.map(col => `"${row[col.key] || ''}"`).join(',')
+    ).join('\n');
+    const csvContent = `${headers}\n${csvData}`;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'proveedores.csv');
+    handleCloseDownload();
+  };
+
+  const clearSort = () => setSortRules([]);
+  // Calcular filtros activos por columna y total (solo los que tienen columna y valor no vacío)
+  const filtersByColumn: { [key: string]: number } = {};
+  filters.forEach(f => {
+    if (f.column && f.value && f.value.trim() !== "") {
+      filtersByColumn[f.column] = (filtersByColumn[f.column] || 0) + 1;
+    }
+  });
+  const totalFilters = filters.filter(f => f.column && f.value && f.value.trim() !== "").length;
+
   // Render
   return (
     <div style={{ margin: "32px 0 32px 0" }}>
@@ -862,7 +765,7 @@ function StickyProveedorTable() {
             />
             {/* En la barra de acciones: */}
             <button
-              className={`action-button${filterAnchorEl ? ' active' : ''}`}
+              className={`action-button${filterOpen ? ' active' : ''}`}
               onClick={handleOpenFilter}
               title="Filtrar"
               style={{ position: 'relative' }}
@@ -888,7 +791,7 @@ function StickyProveedorTable() {
                 }}>{totalFilters}</span>
               )}
             </button>
-            {filterAnchorEl && (
+            {filterOpen && (
               <TableFilterPopover
                 columns={proveedorColumns.map(col => ({ key: col.key, label: col.label }))}
                 visibleColumns={visibleColumns}
@@ -1258,169 +1161,23 @@ function StickyProveedorTable() {
           <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, height: "100%" }}>
             <thead>
               <tr>
-                {getExportColumns().map((col: ProveedorColumn) => {
-                  const position = tableLayout.positions[col.key as string];
-                  // @ts-ignore
-                  let style = {
-                    minWidth: col.width,
-                    width: col.width,
-                    position: "sticky",
-                    // @ts-ignore
-                    top: 0,
-                    background: col.isPinnedLeft ? "#f8fafc" : col.isPinnedRight ? "#faf5ff" : "#fff",
-                    zIndex: col.isPinnedLeft || col.isPinnedRight ? 300 : 200,
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: "2px 0 4px -1px rgba(0,0,0,0.1)", borderRight: "2px solid #3b82f6" } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: "-2px 0 4px -1px rgba(0,0,0,0.1)", borderLeft: "2px solid #8b5cf6" } : {}),
-                  };
-                  return (
-                    // @ts-ignore
-                    <th key={col.key} style={style}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", position: 'relative' }}>
-                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                          {col.label}
-                          {/* Badge de filtros activos por columna */}
-                          {filtersByColumn[col.key] > 0 && (
-                            <span style={{
-                              marginLeft: 6,
-                              background: '#22c55e',
-                              color: '#fff',
-                              borderRadius: '50%',
-                              fontSize: 10,
-                              minWidth: 15,
-                              height: 15,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                              zIndex: 2
-                            }}>{filtersByColumn[col.key]}</span>
-                          )}
-                          {/* Flechas de ordenamiento */}
-                          {(() => {
-                            const sortRule = sortRules.find(r => r.column === col.key);
-                            if (sortRule) {
-                              return sortRule.direction === 'asc' ? (
-                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
-                              ) : (
-                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
-                              );
-                            }
-                            return null;
-                          })()}
-                        </span>
-                        <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
-                          <button
-                            ref={columnMenuKey === col.key ? buttonRef : undefined}
-                            style={{ background: "none", border: "none", padding: 2, cursor: "pointer", borderRadius: 4, display: "flex", alignItems: "center" }}
-                            onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
-                            title="Opciones de columna"
-                          >
-                            <MoreVertical size={18} style={{ color: "#2563eb" }} />
-                          </button>
-                          {/* Menú contextual de columna, solo para la columna activa */}
-                          {columnMenuAnchor && columnMenuKey === col.key && (
-                            <div
-                              ref={menuRef}
-                              style={{
-                                position: 'absolute',
-                                top: 32,
-                                right: 0,
-                                minWidth: 170,
-                                background: '#fff',
-                                border: '1.5px solid #e5e7eb',
-                                borderRadius: 8,
-                                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                zIndex: 10000,
-                                fontSize: 14,
-                                padding: 4,
-                              }}
-                              onClick={e => e.stopPropagation()}
-                            >
-                              {/* Opciones de pin */}
-                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <Pin size={16} /> Fijar a la izquierda
-                                </div>
-                              )}
-                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <PinOff size={16} /> Desfijar izquierda
-                                </div>
-                              )}
-                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                                </div>
-                              )}
-                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <PinOff size={16} /> Desfijar derecha
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <button style={{ padding: 4, cursor: "col-resize", borderRadius: 4, border: "none", backgroundColor: "transparent" }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
-                            <GripVertical size={12} style={{ color: "#6b7280" }} />
-                          </button>
-                        </div>
-                      </div>
-                      <div style={{ position: "absolute", top: 0, right: 0, width: 8, height: "100%", cursor: "col-resize", backgroundColor: "transparent", zIndex: 1000 }} onMouseDown={(e) => handleResizeStart(col.key, e)} />
-                    </th>
-                  );
-                })}
+                {tableLayout.orderedColumns.map(col => (
+                  <th key={col.key}>{col.label}</th>
+                ))}
               </tr>
             </thead>
-            <tbody style={{ minHeight: maxTableHeight ? maxTableHeight - 48 : undefined }}>
+            <tbody>
               {loading && (
-                <tr><td colSpan={getExportColumns().length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
+                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
               )}
               {error && (
-                <tr><td colSpan={getExportColumns().length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
+                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
               )}
               {!loading && !error && paginatedData.map((row, i) => (
                 <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                  {getExportColumns().map((col: ProveedorColumn) => {
-                    const position = tableLayout.positions[col.key as string];
-                    let style: React.CSSProperties = {
-                      minWidth: col.width,
-                      width: col.width,
-                      position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                      ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
-                      ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
-                      background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
-                      zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
-                      boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
-                      borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
-                      borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
-                    };
-                    // @ts-ignore
-                    return (
-                      <td key={col.key} style={style}>
-                        <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row[col.key]}</div>
-                      </td>
-                    );
-                  })}
+                  {tableLayout.orderedColumns.map(col => (
+                    <td key={col.key}>{row[col.key]}</td>
+                  ))}
                 </tr>
               ))}
             </tbody>
