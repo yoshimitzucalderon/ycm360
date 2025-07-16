@@ -418,12 +418,7 @@ const TableFilterPopover: React.FC<Props> = ({
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 0 }}>
         <button
           onClick={() => setFilters([
-            {
-              column: '',
-              operator: '=',
-              value: '',
-              logicalOperator: undefined,
-            },
+            { column: '', operator: '=', value: '', logicalOperator: undefined }
           ])}
           style={{
             background: 'none',

@@ -537,87 +537,105 @@ function StickyProveedorTable() {
   };
 
   const clearSort = () => setSortRules([]);
-  const totalFilters = filters.length;
+  const totalFilters = filters.filter(
+    f => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
+  ).length;
 
   // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...data];
+  // ... existing code ...
 
-    // Aplicar búsqueda
-    if (search.trim()) {
-      const searchLower = search.toLowerCase();
-      result = result.filter(row => {
-        return proveedorColumns.some(col => {
-          const value = row[col.key];
-          return value && value.toString().toLowerCase().includes(searchLower);
-        });
+const filteredAndSortedData = useMemo(() => {
+  let result = [...data];
+
+  // Aplicar búsqueda
+  if (search.trim()) {
+    const searchLower = search.toLowerCase();
+    result = result.filter(row => {
+      return proveedorColumns.some(col => {
+        const value = row[col.key];
+        return value && value.toString().toLowerCase().includes(searchLower);
       });
-    }
+    });
+  }
 
-    // Aplicar filtros con lógica AND/OR
-    if (filters.length > 0) {
+  // Filtrado estilo Supabase (igual que UserTable)
+  if (filters.length > 0) {
+    const validFilters = filters.filter(
+      (f: TableFilter) => f.column && f.operator && f.value !== undefined && f.value !== null && f.value !== ''
+    );
+
+    if (validFilters.length > 0) {
       result = result.filter(row => {
+        const filterFn = (filter: TableFilter) => {
+          const value = row[filter.column];
+          if (value === undefined || value === null) return false;
+          switch (filter.operator) {
+            case '=': case 'eq':
+              return value.toString() === filter.value;
+            case '!=': case '<>': case 'neq':
+              return value.toString() !== filter.value;
+            case 'like':
+              if (filter.value.startsWith('%') && filter.value.endsWith('%')) {
+                return value.toString().toLowerCase().includes(filter.value.replace(/%/g, '').toLowerCase());
+              }
+              if (filter.value.startsWith('%')) {
+                return value.toString().toLowerCase().endsWith(filter.value.replace(/%/g, '').toLowerCase());
+              }
+              if (filter.value.endsWith('%')) {
+                return value.toString().toLowerCase().startsWith(filter.value.replace(/%/g, '').toLowerCase());
+              }
+              return value.toString().toLowerCase() === filter.value.toLowerCase();
+            case 'ilike':
+              return value.toString().toLowerCase().includes(filter.value.toLowerCase());
+            case '>': case 'gt':
+              return value > filter.value;
+            case '<': case 'lt':
+              return value < filter.value;
+            case '>=': case 'gte':
+              return value >= filter.value;
+            case '<=': case 'lte':
+              return value <= filter.value;
+            case 'in':
+              return filter.value
+                .split(',')
+                .map((v: string) => v.trim())
+                .includes(value.toString());
+            case 'is':
+              if (filter.value === 'null') return value === null || value === '';
+              if (filter.value === 'not null') return value !== null && value !== '';
+              if (filter.value === 'true') return value === true || value === 'true';
+              if (filter.value === 'false') return value === false || value === 'false';
+              return false;
+            default:
+              return true;
+          }
+        };
+
         if (filterLogic === 'AND') {
-          return filters.every(filter => {
-            const value = row[filter.column];
-            if (!value) return false;
-            switch (filter.operator) {
-              case '=':
-                return value.toString() === filter.value;
-              case '!=':
-                return value.toString() !== filter.value;
-              case 'contains':
-                return value.toString().toLowerCase().includes(filter.value.toLowerCase());
-              case 'starts_with':
-                return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
-              case 'ends_with':
-                return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
-              default:
-                return true;
-            }
-          });
-        } else { // OR
-          return filters.some(filter => {
-            const value = row[filter.column];
-            if (!value) return false;
-            switch (filter.operator) {
-              case '=':
-                return value.toString() === filter.value;
-              case '!=':
-                return value.toString() !== filter.value;
-              case 'contains':
-                return value.toString().toLowerCase().includes(filter.value.toLowerCase());
-              case 'starts_with':
-                return value.toString().toLowerCase().startsWith(filter.value.toLowerCase());
-              case 'ends_with':
-                return value.toString().toLowerCase().endsWith(filter.value.toLowerCase());
-              default:
-                return true;
-            }
-          });
+          return validFilters.every(filterFn);
+        } else {
+          return validFilters.some(filterFn);
         }
       });
     }
+  }
 
-    // Aplicar ordenamiento
-    if (sortRules.length > 0) {
-      result.sort((a, b) => {
-        for (const rule of sortRules) {
-          const aValue = a[rule.column];
-          const bValue = b[rule.column];
-          
-          if (aValue === bValue) continue;
-          
-          const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-          return rule.direction === 'asc' ? comparison : -comparison;
-        }
-        return 0;
-      });
-    }
+  // Aplicar ordenamiento
+  if (sortRules.length > 0) {
+    result.sort((a, b) => {
+      for (const rule of sortRules) {
+        const aValue = a[rule.column];
+        const bValue = b[rule.column];
+        if (aValue === bValue) continue;
+        const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        return rule.direction === 'asc' ? comparison : -comparison;
+      }
+      return 0;
+    });
+  }
 
-    return result;
-  }, [data, search, filters, sortRules, filterLogic]);
-
+  return result;
+}, [data, search, filters, sortRules, filterLogic]);
   // Actualizar datos paginados con los datos filtrados
   const paginatedData = filteredAndSortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const totalRows = filteredAndSortedData.length;
