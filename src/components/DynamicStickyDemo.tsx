@@ -1207,17 +1207,22 @@ function StickyProveedorTable() {
           <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '14px' }}>
             <thead>
               <tr>
-                {tableLayout.orderedColumns.map((col) => {
+                {tableLayout.orderedColumns.map((col, index) => {
                   const position = tableLayout.positions[col.key];
+                  const isLastColumn = index === tableLayout.orderedColumns.length - 1;
                   const style: React.CSSProperties = {
                     minWidth: col.width,
                     width: col.width,
                     position: 'sticky', // SIEMPRE sticky
                     top: 0,             // SIEMPRE top 0
-                    background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : '#fff',
+                    background: '#f3f4f6', // Light gray background for all headers
+                    color: '#000000', // Black text for better contrast
                     zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
                     ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', borderRight: '2px solid #3b82f6' } : {}),
                     ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', borderLeft: '2px solid #8b5cf6' } : {}),
+                    // Add soft gray border on the right side, except for the last column and pinned columns
+                    ...(!isLastColumn && !col.isPinnedLeft && !col.isPinnedRight ? { borderRight: '1px solid rgba(156, 163, 175, 0.5)' } : {}),
+                    paddingLeft: '2px', // Add 2px gap from left border
                   };
                   return (
                     <th key={col.key} style={style}>
@@ -1451,7 +1456,7 @@ function StickyProveedorTable() {
                       borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
                     };
                     return (
-                      <td key={col.key} style={style}>
+                      <td key={col.key} style={{ ...style, paddingLeft: '2px' }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[col.key]}</div>
                       </td>
                     );
