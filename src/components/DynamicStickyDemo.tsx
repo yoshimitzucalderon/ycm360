@@ -1259,7 +1259,7 @@ function StickyProveedorTable() {
                               onMouseEnter={e => e.currentTarget.style.opacity = '1'}
                               onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
                             >
-                              <MoreVertical size={16} style={{ color: '#6b7280' }} />
+                              <MoreVertical size={16} style={{ color: '#2563eb' }} />
                             </button>
                           </span>
                           {/* Menú contextual de columna, solo para la columna activa */}
