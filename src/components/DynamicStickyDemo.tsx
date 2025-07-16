@@ -1210,8 +1210,6 @@ function StickyProveedorTable() {
           maxWidth: "none",
           border: "1px solid #e5e7eb",
           borderTop: "none",
-          borderBottomLeftRadius: 8,
-          borderBottomRightRadius: 8,
           background: "#fff",
           margin: 0,
           padding: 0,
@@ -1556,8 +1554,8 @@ function StickyProveedorTable() {
         borderRight: "1px solid #e5e7eb",
         borderBottom: "1px solid #e5e7eb",
         background: "#f9fafb",
-        borderBottomLeftRadius: 4,
-        borderBottomRightRadius: 4
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span>Filas por página:</span>
