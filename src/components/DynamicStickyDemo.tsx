@@ -1181,6 +1181,18 @@ function StickyProveedorTable() {
                               zIndex: 2
                             }}>{filtersByColumn[col.key]}</span>
                           )}
+                          {/* Flechas de ordenamiento */}
+                          {(() => {
+                            const sortRule = sortRules.find(r => r.column === col.key);
+                            if (sortRule) {
+                              return sortRule.direction === 'asc' ? (
+                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                              ) : (
+                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                              );
+                            }
+                            return null;
+                          })()}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
                           <button
