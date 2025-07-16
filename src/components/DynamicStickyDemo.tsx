@@ -1156,87 +1156,179 @@ function StickyProveedorTable() {
             margin: 0,
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
+            position: "relative", // <-- agregado para sticky
           }}
         >
-          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, height: "100%" }}>
+          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900 }}>
             <thead>
               <tr>
-                {tableLayout.orderedColumns.map(col => (
-                  <th key={col.key}>{col.label}</th>
-                ))}
+                {tableLayout.orderedColumns.map((col) => {
+                  const position = tableLayout.positions[col.key];
+                  const style: React.CSSProperties = {
+                    minWidth: col.width,
+                    width: col.width,
+                    position: 'sticky', // SIEMPRE sticky
+                    top: 0,             // SIEMPRE top 0
+                    background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : '#fff',
+                    zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : 200,
+                    ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left, boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', borderRight: '2px solid #3b82f6' } : {}),
+                    ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right, boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', borderLeft: '2px solid #8b5cf6' } : {}),
+                  };
+                  return (
+                    <th key={col.key} style={style}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                          {col.label}
+                          {/* Badge de filtros activos por columna */}
+                          {filtersByColumn[col.key] > 0 && (
+                            <span style={{
+                              marginLeft: 6,
+                              background: '#22c55e',
+                              color: '#fff',
+                              borderRadius: '50%',
+                              fontSize: 10,
+                              minWidth: 15,
+                              height: 15,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 600,
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                              zIndex: 2
+                            }}>{filtersByColumn[col.key]}</span>
+                          )}
+                          {/* Flechas de ordenamiento */}
+                          {(() => {
+                            const sortRule = sortRules.find(r => r.column === col.key);
+                            if (sortRule) {
+                              return sortRule.direction === 'asc' ? (
+                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                              ) : (
+                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                              );
+                            }
+                            return null;
+                          })()}
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8 }}>
+                          <button
+                            ref={columnMenuKey === col.key ? buttonRef : undefined}
+                            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                            onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
+                            title='Opciones de columna'
+                          >
+                            <MoreVertical size={18} style={{ color: '#2563eb' }} />
+                          </button>
+                          {/* Menú contextual de columna, solo para la columna activa */}
+                          {columnMenuAnchor && columnMenuKey === col.key && (
+                            <div
+                              ref={menuRef}
+                              style={{
+                                position: 'absolute',
+                                top: 32,
+                                right: 0,
+                                minWidth: 170,
+                                background: '#fff',
+                                border: '1.5px solid #e5e7eb',
+                                borderRadius: 8,
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                zIndex: 10000,
+                                fontSize: 14,
+                                padding: 4,
+                              }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              {/* Opciones de pin */}
+                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Pin size={16} /> Fijar a la izquierda
+                                </div>
+                              )}
+                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <PinOff size={16} /> Desfijar izquierda
+                                </div>
+                              )}
+                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                </div>
+                              )}
+                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                <div
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <PinOff size={16} /> Desfijar derecha
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <button style={{ padding: 4, cursor: 'col-resize', borderRadius: 4, border: 'none', backgroundColor: 'transparent' }} onMouseDown={(e) => handleResizeStart(col.key, e)}>
+                            <GripVertical size={12} style={{ color: '#6b7280' }} />
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ position: 'absolute', top: 0, right: 0, width: 8, height: '100%', cursor: 'col-resize', backgroundColor: 'transparent', zIndex: 1000 }} onMouseDown={(e) => handleResizeStart(col.key, e)} />
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: "center", padding: 24 }}>Cargando...</td></tr>
+                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', padding: 24 }}>Cargando...</td></tr>
               )}
               {error && (
-                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: "center", color: "#dc2626", padding: 24 }}>{error}</td></tr>
+                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', color: '#dc2626', padding: 24 }}>{error}</td></tr>
               )}
               {!loading && !error && paginatedData.map((row, i) => (
-                <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                  {tableLayout.orderedColumns.map(col => (
-                    <td key={col.key}>{row[col.key]}</td>
-                  ))}
+                <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
+                  {tableLayout.orderedColumns.map(col => {
+                    const position = tableLayout.positions[col.key];
+                    const style: React.CSSProperties = {
+                      minWidth: col.width,
+                      width: col.width,
+                      position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                      ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
+                      ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
+                      background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
+                      zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
+                      boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
+                      borderRight: col.isPinnedLeft ? '2px solid #3b82f6' : undefined,
+                      borderLeft: col.isPinnedRight ? '2px solid #8b5cf6' : undefined,
+                    };
+                    return (
+                      <td key={col.key} style={style}>
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[col.key]}</div>
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-      {/* PAGINACIÓN */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0 0 0", fontSize: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span>Filas por página:</span>
-          <select
-            value={rowsPerPage}
-            onChange={e => {
-              setRowsPerPage(Number(e.target.value));
-              setPage(0);
-            }}
-            style={{ border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 8px", background: "#fff", fontSize: 14 }}
-          >
-            {rowsPerPageOptions.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span>{totalRows === 0 ? 0 : page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, totalRows)} de {totalRows}</span>
-          <button
-            onClick={() => setPage(0)}
-            disabled={page === 0}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
-            title="Primera página"
-          >{'|<'}</button>
-          <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1 }}
-            title="Página anterior"
-          >{'<'}</button>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
-            title="Página siguiente"
-          >{'>'}</button>
-          <button
-            onClick={() => setPage(totalPages - 1)}
-            disabled={page >= totalPages - 1}
-            style={{ border: "1px solid #e5e7eb", background: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: page >= totalPages - 1 ? "not-allowed" : "pointer", opacity: page >= totalPages - 1 ? 0.5 : 1 }}
-            title="Última página"
-          >{'>|'}</button>
-        </div>
-      </div>
     </div>
   );
 }
 
-export default function DynamicStickyDemo() {
-  return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
-      <StickyProveedorTable />
-    </div>
-  );
-} 
+export default StickyProveedorTable;
