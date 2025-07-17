@@ -1362,7 +1362,7 @@ function StickyProveedorTable() {
           margin: 0,
           padding: 0,
           minHeight: verticalLayout.showVerticalBackground ?
-            `${verticalLayout.totalContentHeight + 100}px` : "auto",
+            `${verticalLayout.totalContentHeight}px` : "auto",
           transition: "min-height 0.3s ease"
         }}
       >
@@ -1748,14 +1748,6 @@ function StickyProveedorTable() {
               </tbody>
             </table>
           </div>
-          {/* Espacio restante */}
-          {verticalLayout.showVerticalBackground && (
-            <div style={{
-              flex: "1 1 auto",
-              background: "transparent",
-              minHeight: "20px"
-            }} />
-          )}
         </div>
       </div>
       {/* PAGINACIÓN */}
