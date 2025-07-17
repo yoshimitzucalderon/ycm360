@@ -1243,7 +1243,7 @@ function StickyProveedorTable() {
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
             position: "relative", // <-- agregado para sticky
-            background: visibleColumns.length === 1 ? "#f3f4f6" : "transparent",
+            background: visibleColumns.length <= 3 ? "#f3f4f6" : "transparent",
           }}
         >
           <table style={{ 
@@ -1275,7 +1275,7 @@ function StickyProveedorTable() {
                     borderBottom: '1px solid #e5e7eb',
                     // Borde derecho para separar columnas o delimitar área de datos
                     ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : 
-                        visibleColumns.length === 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                        visibleColumns.length <= 3 ? { borderRight: '1px solid #e5e7eb' } : {}),
                     // Estilos específicos para columnas fijadas (mantienen prioridad)
                     ...(col.isPinnedLeft && position?.left !== undefined ? { 
                       left: position.left, 
@@ -1526,7 +1526,7 @@ function StickyProveedorTable() {
                     borderBottom: '1px solid #e5e7eb',
                     // Borde derecho para separar columnas o delimitar área de datos
                     ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : 
-                        visibleColumns.length === 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                        visibleColumns.length <= 3 ? { borderRight: '1px solid #e5e7eb' } : {}),
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
                       background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
