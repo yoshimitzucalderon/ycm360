@@ -1371,7 +1371,7 @@ function StickyProveedorTable() {
           style={{
             flex: "1 1 auto",
             overflowX: harmoniousLayout.useHarmonious ? "visible" : "auto",
-            overflowY: rowsPerPage > maxVisibleRows ? "auto" : "visible",
+            overflowY: "auto", // Siempre auto para mantener scrollbar en posición fija
             maxHeight: maxTableHeight,
             transition: "max-height 0.2s, background-color 0.3s",
             width: "100%",
@@ -1660,144 +1660,93 @@ function StickyProveedorTable() {
                 {error && (
                   <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', color: '#dc2626', padding: 24 }}>{error}</td></tr>
                 )}
-                {!loading && !error && paginatedData.map((row, i) => (
-                  <tr 
-                    key={i} 
-                    style={{ 
-                      background: hoveredRow === i ? '#dbeafe' : (i % 2 === 0 ? '#fff' : '#f9fafb'),
-                      transition: 'background-color 0.15s ease'
-                    }}
-                    onMouseEnter={() => handleRowMouseEnter(i)}
-                    onMouseLeave={handleRowMouseLeave}
-                  >
-                    {tableLayout.orderedColumns.map(col => {
-                      const position = tableLayout.positions[col.key];
-                      const style: React.CSSProperties = {
-                        minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
-                        width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
-                        // Solo las celdas pinned son sticky horizontalmente
-                        position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                        // Bordes base para todas las celdas
-                        borderBottom: '1px solid #e5e7eb',
-                        // Borde derecho para separar columnas o delimitar área de datos
-                        ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? 
-                            { borderRight: '1px solid #e5e7eb' } : 
-                            (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
-                        ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
-                        ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
-                        background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
-                        zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
-                        boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
-                        // Estilos específicos para columnas fijadas (mantienen prioridad)
-                        ...(col.isPinnedLeft ? { 
-                          borderRight: '2px solid #3b82f6',
-                          borderLeft: tableLayout.orderedColumns.indexOf(col) > 0 ? '1px solid #e5e7eb' : 'none'
-                        } : {}),
-                        ...(col.isPinnedRight ? { 
-                          borderLeft: '2px solid #8b5cf6',
-                          borderRight: tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? '1px solid #e5e7eb' : 'none'
-                        } : {}),
-                      };
-                      const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
-                      return (
-                        <td 
-                          key={col.key} 
-                          style={{ 
-                            ...style, 
-                            paddingLeft: '2px',
-                            cursor: 'pointer',
-                            outline: isSelected ? '2px solid #2563eb' : 'none',
-                            outlineOffset: '-2px',
-                            minHeight: '14px',
-                            verticalAlign: 'middle'
-                          }}
-                          onClick={() => handleCellClick(i, col.key)}
-                        >
-                          <div style={{ 
-                            overflow: 'hidden', 
-                            textOverflow: 'ellipsis', 
-                            whiteSpace: 'nowrap',
-                            minHeight: '10px',
-                            padding: '2px 4px'
-                          }}>
-                            {row[col.key] || '\u00A0'}
-                          </div>
-                        </td>
-                      );
-                    })}
+                {!loading && !error && paginatedData.length > 0 ? (
+                  paginatedData.map((row, i) => (
+                    <tr 
+                      key={i} 
+                      style={{ 
+                        background: hoveredRow === i ? '#dbeafe' : (i % 2 === 0 ? '#fff' : '#f9fafb'),
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={() => handleRowMouseEnter(i)}
+                      onMouseLeave={handleRowMouseLeave}
+                    >
+                      {tableLayout.orderedColumns.map(col => {
+                        const position = tableLayout.positions[col.key];
+                        const style: React.CSSProperties = {
+                          minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                          width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                          // Solo las celdas pinned son sticky horizontalmente
+                          position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                          // Bordes base para todas las celdas
+                          borderBottom: '1px solid #e5e7eb',
+                          // Borde derecho para separar columnas o delimitar área de datos
+                          ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? 
+                              { borderRight: '1px solid #e5e7eb' } : 
+                              (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
+                          ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
+                          ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
+                          background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
+                          zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
+                          boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
+                          // Estilos específicos para columnas fijadas (mantienen prioridad)
+                          ...(col.isPinnedLeft ? { 
+                            borderRight: '2px solid #3b82f6',
+                            borderLeft: tableLayout.orderedColumns.indexOf(col) > 0 ? '1px solid #e5e7eb' : 'none'
+                          } : {}),
+                          ...(col.isPinnedRight ? { 
+                            borderLeft: '2px solid #8b5cf6',
+                            borderRight: tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? '1px solid #e5e7eb' : 'none'
+                          } : {}),
+                        };
+                        const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
+                        return (
+                          <td 
+                            key={col.key} 
+                            style={{ 
+                              ...style, 
+                              paddingLeft: '2px',
+                              cursor: 'pointer',
+                              outline: isSelected ? '2px solid #2563eb' : 'none',
+                              outlineOffset: '-2px',
+                              minHeight: '14px',
+                              verticalAlign: 'middle'
+                            }}
+                            onClick={() => handleCellClick(i, col.key)}
+                          >
+                            <div style={{ 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis', 
+                              whiteSpace: 'nowrap',
+                              minHeight: '10px',
+                              padding: '2px 4px'
+                            }}>
+                              {row[col.key] || '\u00A0'}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={tableLayout.orderedColumns.length} style={{
+                      background: '#f3f4f6',
+                      border: 'none',
+                      textAlign: 'center',
+                      padding: '48px 0',
+                      color: '#9ca3af',
+                      fontSize: 16,
+                      fontStyle: 'italic',
+                      letterSpacing: 0.5,
+                      opacity: 0.8
+                    }}>
+                      Sin resultados
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
-            {/* Fondo gris vertical */}
-            {verticalLayout.showVerticalBackground && verticalLayout.fillerHeight > 0 && (
-              <div 
-                style={{
-                  height: `${verticalLayout.fillerHeight}px`,
-                  background: "#f3f4f6",
-                  position: "relative",
-                  width: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "100%",
-                  ...(harmoniousLayout.showBackground ? {
-                    borderRight: "2px solid #d1d5db",
-                    boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
-                  } : {}),
-                  backgroundImage: `
-                    linear-gradient(45deg, transparent 40%, rgba(156, 163, 175, 0.1) 50%, transparent 60%),
-                    linear-gradient(-45deg, transparent 40%, rgba(156, 163, 175, 0.1) 50%, transparent 60%)
-                  `,
-                  backgroundSize: "20px 20px",
-                  backgroundPosition: "0 0, 10px 10px"
-                }}
-              >
-                {/* Replicas de columnas para mantener estructura */}
-                <div style={{ display: "flex", height: "100%", width: "100%" }}>
-                  {tableLayout.orderedColumns.map((col, index) => {
-                    const position = tableLayout.positions[col.key];
-                    const isLastColumn = index === tableLayout.orderedColumns.length - 1;
-                    return (
-                      <div
-                        key={`filler-${col.key}`}
-                        style={{
-                          width: harmoniousLayout.useHarmonious ? 
-                            (harmoniousLayout.columnWidths[col.key] || col.width) : col.width,
-                          height: "100%",
-                          borderRight: !isLastColumn || harmoniousLayout.showBackground ? 
-                            "1px solid #d1d5db" : "none",
-                          position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                          ...(col.isPinnedLeft && position?.left !== undefined ? { 
-                            left: position.left,
-                            background: '#e5e7eb',
-                            borderRight: '2px solid #3b82f6',
-                            zIndex: position.zIndex
-                          } : {}),
-                          ...(col.isPinnedRight && position?.right !== undefined ? { 
-                            right: position.right,
-                            background: '#e5e7eb',
-                            borderLeft: '2px solid #8b5cf6',
-                            zIndex: position.zIndex
-                          } : {}),
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-                {/* Indicador de estado */}
-                <div style={{
-                  position: "absolute",
-                  bottom: "10px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  color: "#9ca3af",
-                  fontSize: "12px",
-                  fontStyle: "italic",
-                  opacity: 0.6,
-                  pointerEvents: "none",
-                  textAlign: "center"
-                }}>
-                  {paginatedData.length === 0 ? "Sin resultados" : `${paginatedData.length} ${paginatedData.length === 1 ? 'fila' : 'filas'}`}
-                </div>
-              </div>
-            )}
           </div>
           {/* Espacio restante */}
           {verticalLayout.showVerticalBackground && (
