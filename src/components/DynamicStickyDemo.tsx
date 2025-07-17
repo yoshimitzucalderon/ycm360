@@ -969,9 +969,28 @@ function StickyProveedorTable() {
                 onClick={() => setShowSearch(s => !s)}
                 title="Buscar"
                 aria-label="Buscar"
-                style={{ zIndex: 2 }}
+                style={{ position: 'relative', zIndex: 2 }}
               >
                 <Search className="action-icon" />
+                {search.trim().length > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    background: '#f59e0b',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    fontSize: 10,
+                    minWidth: 15,
+                    height: 15,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 600,
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                    zIndex: 2
+                  }}>•</span>
+                )}
               </button>
             )}
             {/* Botón Seleccionar Columnas */}
@@ -1379,7 +1398,7 @@ function StickyProveedorTable() {
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
             position: "relative",
-            background: harmoniousLayout.showBackground ? "#f3f4f6" : "transparent",
+            background: harmoniousLayout.showBackground ? "#f9fafb" : "transparent",
             display: "flex",
             justifyContent: harmoniousLayout.useHarmonious ? "flex-start" : "stretch",
             flexDirection: "column",
