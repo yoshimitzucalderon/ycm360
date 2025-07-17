@@ -1750,34 +1750,43 @@ function StickyProveedorTable() {
                   ))
                 ) : null}
               </tbody>
+              {/* Mensaje "Sin resultados" centrado en el cuerpo de la tabla */}
+              {!loading && !error && paginatedData.length === 0 && (
+                <tfoot>
+                  <tr>
+                    <td colSpan={tableLayout.orderedColumns.length} style={{
+                      position: 'relative',
+                      height: '200px',
+                      border: 'none',
+                      background: 'transparent'
+                    }}>
+                      <div style={{
+                        position: 'fixed',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        background: 'transparent',
+                        padding: '48px 24px',
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                        border: 'none',
+                        zIndex: 10,
+                        pointerEvents: 'none',
+                        color: '#374151',
+                        fontSize: 16,
+                        fontStyle: 'italic',
+                        letterSpacing: 0.5,
+                        opacity: 1,
+                        textAlign: 'center',
+                        minWidth: 200
+                      }}>
+                        Sin resultados
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
-            {/* Mensaje "Sin resultados" centrado en pantalla */}
-            {!loading && !error && paginatedData.length === 0 && (
-              <div
-                style={{
-                  position: 'fixed',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  background: '#fff',
-                  padding: '48px 24px',
-                  borderRadius: 8,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  border: '1px solid #e5e7eb',
-                  zIndex: 2000,
-                  pointerEvents: 'none',
-                  color: '#9ca3af',
-                  fontSize: 16,
-                  fontStyle: 'italic',
-                  letterSpacing: 0.5,
-                  opacity: 0.85,
-                  textAlign: 'center',
-                  minWidth: 200
-                }}
-              >
-                Sin resultados
-              </div>
-            )}
           </div>
         </div>
       </div>
