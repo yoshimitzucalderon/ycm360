@@ -340,6 +340,20 @@ function StickyProveedorTable() {
   // Estado para hover de fila
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
+  // Estado para layout armónico
+  const [harmoniousLayout, setHarmoniousLayout] = useState<{
+    useHarmonious: boolean;
+    tableWidth: string;
+    columnWidths: { [key: string]: number };
+    showBackground: boolean;
+    totalWidth?: number;
+  }>({
+    useHarmonious: false,
+    tableWidth: "100%",
+    columnWidths: {},
+    showBackground: false
+  });
+
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
     setColumnMenuKey(colKey);
@@ -438,12 +452,85 @@ function StickyProveedorTable() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Detectar columna única y ajustar ancho dinámicamente
+  // Función de cálculo armónico para pocas columnas
+  const calculateHarmoniousLayout = (visibleCols: ProveedorColumn[], containerWidth: number) => {
+    const maxHarmoniousColumns = 5; // Máximo número de columnas para aplicar ancho armónico
+    const minColumnWidth = 180; // Ancho mínimo por columna
+    const maxColumnWidth = 400; // Ancho máximo por columna
+    const idealTableWidth = Math.min(containerWidth * 0.75, 1200); // 75% del contenedor o máximo 1200px
+    
+    if (visibleCols.length === 0 || visibleCols.length > maxHarmoniousColumns) {
+      return {
+        useHarmonious: false,
+        tableWidth: "100%",
+        columnWidths: {} as { [key: string]: number },
+        showBackground: false
+      };
+    }
+    
+    // Calcular ancho base armónico
+    const baseWidth = Math.floor(idealTableWidth / visibleCols.length);
+    const adjustedWidth = Math.min(Math.max(baseWidth, minColumnWidth), maxColumnWidth);
+    
+    // Calcular ancho total real de la tabla
+    const totalTableWidth = adjustedWidth * visibleCols.length;
+    
+    // Si la tabla es significativamente menor al contenedor, aplicar ancho armónico
+    const shouldUseHarmonious = totalTableWidth < containerWidth * 0.85;
+    
+    if (!shouldUseHarmonious) {
+      return {
+        useHarmonious: false,
+        tableWidth: "100%",
+        columnWidths: {} as { [key: string]: number },
+        showBackground: false
+      };
+    }
+    
+    // Crear mapeo de anchos por columna
+    const columnWidths: { [key: string]: number } = {};
+    visibleCols.forEach(col => {
+      // Para columnas con mucho contenido, dar un poco más de espacio
+      const contentFactor = col.label.length > 20 ? 1.2 : 1.0;
+      const finalWidth = Math.min(Math.floor(adjustedWidth * contentFactor), maxColumnWidth);
+      columnWidths[col.key] = finalWidth;
+    });
+    
+    // Recalcular ancho total con los ajustes
+    const finalTableWidth = Object.values(columnWidths).reduce((sum, width) => sum + width, 0);
+    
+    return {
+      useHarmonious: true,
+      tableWidth: `${finalTableWidth}px`,
+      columnWidths,
+      showBackground: true,
+      totalWidth: finalTableWidth
+    };
+  };
+
+  // Filtrar columnas visibles (mover antes del useEffect)
+  const visibleColumnsData = useMemo(() => {
+    return columns.filter(col => visibleColumns.includes(col.key));
+  }, [columns, visibleColumns]);
+
+  // Detectar layout armónico y ajustar anchos dinámicamente
   useEffect(() => {
-    if (visibleColumns.length === 1) {
+    const layout = calculateHarmoniousLayout(visibleColumnsData, containerWidth);
+    setHarmoniousLayout(layout);
+    
+    if (layout.useHarmonious) {
+      // Aplicar anchos armónicos
+      setColumns(prev => prev.map(col => {
+        const columnWidth = layout.columnWidths[col.key];
+        if (columnWidth !== undefined) {
+          return { ...col, width: columnWidth };
+        }
+        return col;
+      }));
+    } else if (visibleColumns.length === 1) {
+      // Mantener lógica especial para una sola columna
       const singleColumn = columns.find(col => col.key === visibleColumns[0]);
       if (singleColumn) {
-        // Calcular ancho óptimo basado en el contenido del header
         const headerText = singleColumn.label;
         const estimatedWidth = Math.max(220, Math.min(500, headerText.length * 12 + 100));
         setColumns(prev => prev.map(col => 
@@ -451,7 +538,7 @@ function StickyProveedorTable() {
         ));
       }
     }
-  }, [visibleColumns]);
+  }, [visibleColumns, visibleColumnsData, containerWidth]);
 
   // Pinning
   const canPinLeft = (colKey: string): boolean => {
@@ -682,10 +769,7 @@ function StickyProveedorTable() {
   const totalRows = filteredAndSortedData.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
-  // Filtrar columnas visibles
-  const visibleColumnsData = useMemo(() => {
-    return columns.filter(col => visibleColumns.includes(col.key));
-  }, [columns, visibleColumns]);
+
 
   // Actualizar layout con columnas visibles
   const tableLayout: TableLayout = useMemo(() => {
@@ -1234,29 +1318,36 @@ function StickyProveedorTable() {
           ref={containerRef}
           style={{
             flex: "1 1 auto",
-            overflowX: "auto",
+            overflowX: harmoniousLayout.useHarmonious ? "visible" : "auto",
             overflowY: rowsPerPage > maxVisibleRows ? "auto" : "visible",
             maxHeight: maxTableHeight,
-            transition: "max-height 0.2s",
+            transition: "max-height 0.2s, background-color 0.3s",
             width: "100%",
             margin: 0,
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
             position: "relative", // <-- agregado para sticky
-            background: visibleColumns.length <= 3 ? "#f3f4f6" : "transparent",
+            background: harmoniousLayout.showBackground ? "#f3f4f6" : "transparent",
+            display: "flex",
+            justifyContent: harmoniousLayout.useHarmonious ? "flex-start" : "stretch",
           }}
         >
           <table style={{ 
             borderCollapse: "separate", 
             borderSpacing: 0, 
-            width: visibleColumns.length === 1 ? "auto" : "100%", 
-            tableLayout: visibleColumns.length === 1 ? "auto" : "fixed", 
-            minWidth: visibleColumns.length === 1 ? 220 : 900, 
-            maxWidth: visibleColumns.length === 1 ? 500 : "none",
+            width: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "100%", 
+            tableLayout: "fixed", 
+            minWidth: harmoniousLayout.useHarmonious ? "auto" : 900, 
+            maxWidth: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "none",
             fontFamily: 'Roboto, Helvetica, Arial, sans-serif', 
             fontSize: '14px',
             transition: "width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease",
-            margin: "0"
+            margin: "0",
+            background: "#fff",
+            ...(harmoniousLayout.showBackground ? {
+              borderRight: "2px solid #d1d5db",
+              boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
+            } : {})
           }}>
             <thead>
               <tr>
@@ -1264,8 +1355,8 @@ function StickyProveedorTable() {
                   const position = tableLayout.positions[col.key];
                   const isLastColumn = index === tableLayout.orderedColumns.length - 1;
                   const style: React.CSSProperties = {
-                    minWidth: col.width,
-                    width: col.width,
+                    minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                    width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
                     position: 'sticky', // SIEMPRE sticky
                     top: 0,             // SIEMPRE top 0
                     background: '#f3f4f6', // Light gray background for all headers
@@ -1275,7 +1366,7 @@ function StickyProveedorTable() {
                     borderBottom: '1px solid #e5e7eb',
                     // Borde derecho para separar columnas o delimitar área de datos
                     ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : 
-                        visibleColumns.length <= 3 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                        (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
                     // Estilos específicos para columnas fijadas (mantienen prioridad)
                     ...(col.isPinnedLeft && position?.left !== undefined ? { 
                       left: position.left, 
@@ -1518,15 +1609,16 @@ function StickyProveedorTable() {
                   {tableLayout.orderedColumns.map(col => {
                     const position = tableLayout.positions[col.key];
                     const style: React.CSSProperties = {
-                      minWidth: col.width,
-                      width: col.width,
+                      minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                      width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
                       // Solo las celdas pinned son sticky horizontalmente
                       position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                                          // Bordes base para todas las celdas
-                    borderBottom: '1px solid #e5e7eb',
-                    // Borde derecho para separar columnas o delimitar área de datos
-                    ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : 
-                        visibleColumns.length <= 3 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                      // Bordes base para todas las celdas
+                      borderBottom: '1px solid #e5e7eb',
+                      // Borde derecho para separar columnas o delimitar área de datos
+                      ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? 
+                          { borderRight: '1px solid #e5e7eb' } : 
+                          (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
                       background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
