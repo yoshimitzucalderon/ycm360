@@ -438,6 +438,21 @@ function StickyProveedorTable() {
     return () => resizeObserver.disconnect();
   }, []);
 
+  // Detectar columna única y ajustar ancho dinámicamente
+  useEffect(() => {
+    if (visibleColumns.length === 1) {
+      const singleColumn = columns.find(col => col.key === visibleColumns[0]);
+      if (singleColumn) {
+        // Calcular ancho óptimo basado en el contenido del header
+        const headerText = singleColumn.label;
+        const estimatedWidth = Math.max(220, Math.min(500, headerText.length * 12 + 100));
+        setColumns(prev => prev.map(col => 
+          col.key === visibleColumns[0] ? { ...col, width: estimatedWidth } : col
+        ));
+      }
+    }
+  }, [visibleColumns]);
+
   // Pinning
   const canPinLeft = (colKey: string): boolean => {
     const col = visibleColumnsData.find((c) => c.key === colKey);
@@ -781,7 +796,7 @@ function StickyProveedorTable() {
       <div className="table-container">
         <div className="user-table-header table-controls" style={{ 
           border: "1px solid #e5e7eb", 
-          borderBottom: "none",
+          borderBottom: "1px solid #e5e7eb",
           borderTopLeftRadius: 8, 
           borderTopRightRadius: 8,
           background: "#f9fafb",
@@ -1207,7 +1222,6 @@ function StickyProveedorTable() {
           display: "flex",
           flexDirection: "column",
           width: "100%",
-          maxWidth: "none",
           borderLeft: "1px solid #e5e7eb",
           borderRight: "1px solid #e5e7eb",
           borderBottom: "1px solid #e5e7eb",
@@ -1225,14 +1239,25 @@ function StickyProveedorTable() {
             maxHeight: maxTableHeight,
             transition: "max-height 0.2s",
             width: "100%",
-            maxWidth: "none",
             margin: 0,
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
             position: "relative", // <-- agregado para sticky
+            background: visibleColumns.length === 1 ? "#f3f4f6" : "transparent",
           }}
         >
-          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", tableLayout: "fixed", minWidth: 900, fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '14px' }}>
+          <table style={{ 
+            borderCollapse: "separate", 
+            borderSpacing: 0, 
+            width: visibleColumns.length === 1 ? "auto" : "100%", 
+            tableLayout: visibleColumns.length === 1 ? "auto" : "fixed", 
+            minWidth: visibleColumns.length === 1 ? 220 : 900, 
+            maxWidth: visibleColumns.length === 1 ? 500 : "none",
+            fontFamily: 'Roboto, Helvetica, Arial, sans-serif', 
+            fontSize: '14px',
+            transition: "width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease",
+            margin: "0"
+          }}>
             <thead>
               <tr>
                 {tableLayout.orderedColumns.map((col, index) => {
@@ -1247,10 +1272,10 @@ function StickyProveedorTable() {
                     color: '#000000', // Black text for better contrast
                     zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
                     // Bordes base para todos los headers
-                    borderTop: '1px solid #e5e7eb',
                     borderBottom: '1px solid #e5e7eb',
-                    // Solo borde derecho para separar columnas (evita empalmes)
-                    ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : {}),
+                    // Borde derecho para separar columnas o delimitar área de datos
+                    ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : 
+                        visibleColumns.length === 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
                     // Estilos específicos para columnas fijadas (mantienen prioridad)
                     ...(col.isPinnedLeft && position?.left !== undefined ? { 
                       left: position.left, 
@@ -1499,8 +1524,9 @@ function StickyProveedorTable() {
                       position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
                                           // Bordes base para todas las celdas
                     borderBottom: '1px solid #e5e7eb',
-                    // Solo borde derecho para separar columnas (evita empalmes)
-                    ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
+                    // Borde derecho para separar columnas o delimitar área de datos
+                    ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? { borderRight: '1px solid #e5e7eb' } : 
+                        visibleColumns.length === 1 ? { borderRight: '1px solid #e5e7eb' } : {}),
                       ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
                       ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
                       background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
@@ -1525,11 +1551,21 @@ function StickyProveedorTable() {
                           paddingLeft: '2px',
                           cursor: 'pointer',
                           outline: isSelected ? '2px solid #2563eb' : 'none',
-                          outlineOffset: '-2px'
+                          outlineOffset: '-2px',
+                          minHeight: '14px',
+                          verticalAlign: 'middle'
                         }}
                         onClick={() => handleCellClick(i, col.key)}
                       >
-                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[col.key]}</div>
+                        <div style={{ 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          minHeight: '10px',
+                          padding: '2px 4px'
+                        }}>
+                          {row[col.key] || '\u00A0'}
+                        </div>
                       </td>
                     );
                   })}
@@ -1699,6 +1735,27 @@ function StickyProveedorTable() {
 export default function DynamicStickyDemo() {
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
+      <style>
+        {`
+          .sticky-table tbody tr {
+            min-height: 14px;
+          }
+          
+          .sticky-table tbody tr td {
+            min-height: 14px;
+          }
+          
+          .sticky-table tbody tr td:empty::before {
+            content: "\\00A0";
+            min-height: 10px;
+          }
+          
+          .sticky-table.single-column {
+            width: auto !important;
+            max-width: 500px !important;
+          }
+        `}
+      </style>
       <StickyProveedorTable />
     </div>
   );
