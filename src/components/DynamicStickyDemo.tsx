@@ -1785,7 +1785,7 @@ function StickyProveedorTable() {
         borderBottomRightRadius: 8
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span>Filas por página:</span>
+          <span style={{ color: '#6b7280' }}>Filas por página:</span>
           <select
             value={rowsPerPage}
             onChange={e => {
@@ -1800,7 +1800,7 @@ function StickyProveedorTable() {
           </select>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span>{totalRows === 0 ? 0 : page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, totalRows)} de {totalRows}</span>
+          <span style={{ color: '#6b7280' }}>{totalRows === 0 ? 0 : page * rowsPerPage + 1}–{Math.min((page + 1) * rowsPerPage, totalRows)} de {totalRows}</span>
           <button
             onClick={() => setPage(0)}
             disabled={page === 0}
