@@ -68,7 +68,7 @@ const menuProps = {
   PaperProps: {
     style: {
       maxHeight: 240,
-      minWidth: 120,
+      minWidth: 200,
       boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       borderRadius: 8,
       padding: 0,
@@ -345,8 +345,8 @@ const TableFilterPopover: React.FC<Props> = ({
                   PaperProps: {
                     style: {
                       maxHeight: 240,
-                      minWidth: 70,
-                      width: 110,
+                      minWidth: 200,
+                      width: 200,
                       boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                       borderRadius: 8,
                       padding: 0,
