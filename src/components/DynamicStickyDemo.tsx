@@ -306,7 +306,7 @@ function StickyProveedorTable() {
   // Altura estimada de fila (ajustar si tu fila es más alta/baja)
   const rowHeight = 44; // px
   const headerHeight = 48; // px (aprox)
-  const maxVisibleRows = 10;
+  const maxVisibleRows = 5; // Cambiado a 5 para el fondo gris vertical
   const maxTableHeight = rowsPerPage > maxVisibleRows ? headerHeight + rowHeight * maxVisibleRows : undefined;
 
   // Estado para menú contextual de columna
@@ -353,6 +353,8 @@ function StickyProveedorTable() {
     columnWidths: {},
     showBackground: false
   });
+
+
 
   const handleOpenColumnMenu = (event: React.MouseEvent<HTMLElement>, colKey: string) => {
     setColumnMenuAnchor(event.currentTarget as HTMLElement);
@@ -505,6 +507,39 @@ function StickyProveedorTable() {
       columnWidths,
       showBackground: true,
       totalWidth: finalTableWidth
+    };
+  };
+
+  // Calcular layout vertical para fondo gris cuando hay pocas filas
+  const calculateVerticalLayout = (
+    currentRows: number, 
+    maxVisibleRows: number, 
+    rowHeight: number, 
+    headerHeight: number
+  ) => {
+    const minRowsForBackground = 5; // Mínimo de filas para mostrar fondo
+    if (currentRows >= minRowsForBackground) {
+      return {
+        showVerticalBackground: false,
+        fillerHeight: 0,
+        totalContentHeight: headerHeight + (currentRows * rowHeight)
+      };
+    }
+    const currentContentHeight = headerHeight + (currentRows * rowHeight);
+    const minDesiredHeight = headerHeight + (minRowsForBackground * rowHeight);
+    const needsFillerHeight = currentContentHeight < minDesiredHeight;
+    if (needsFillerHeight) {
+      const fillerHeight = minDesiredHeight - currentContentHeight;
+      return {
+        showVerticalBackground: true,
+        fillerHeight,
+        totalContentHeight: minDesiredHeight
+      };
+    }
+    return {
+      showVerticalBackground: false,
+      fillerHeight: 0,
+      totalContentHeight: currentContentHeight
     };
   };
 
@@ -769,7 +804,21 @@ function StickyProveedorTable() {
   const totalRows = filteredAndSortedData.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
+  // Estado para layout vertical
+  const [verticalLayout, setVerticalLayout] = useState(
+    calculateVerticalLayout(0, maxVisibleRows, 40, 48)
+  );
 
+  // Actualizar layout vertical cuando cambian los datos paginados
+  useEffect(() => {
+    const layout = calculateVerticalLayout(
+      paginatedData.length,
+      maxVisibleRows,
+      40, // altura de fila
+      48  // altura de header
+    );
+    setVerticalLayout(layout);
+  }, [paginatedData.length, maxVisibleRows]);
 
   // Actualizar layout con columnas visibles
   const tableLayout: TableLayout = useMemo(() => {
@@ -1312,6 +1361,9 @@ function StickyProveedorTable() {
           background: "#fff",
           margin: 0,
           padding: 0,
+          minHeight: verticalLayout.showVerticalBackground ?
+            `${verticalLayout.totalContentHeight + 100}px` : "auto",
+          transition: "min-height 0.3s ease"
         }}
       >
         <div
@@ -1326,345 +1378,435 @@ function StickyProveedorTable() {
             margin: 0,
             padding: 0,
             height: maxTableHeight ? maxTableHeight : undefined,
-            position: "relative", // <-- agregado para sticky
+            position: "relative",
             background: harmoniousLayout.showBackground ? "#f3f4f6" : "transparent",
             display: "flex",
             justifyContent: harmoniousLayout.useHarmonious ? "flex-start" : "stretch",
+            flexDirection: "column",
           }}
         >
-          <table style={{ 
-            borderCollapse: "separate", 
-            borderSpacing: 0, 
-            width: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "100%", 
-            tableLayout: "fixed", 
-            minWidth: harmoniousLayout.useHarmonious ? "auto" : 900, 
-            maxWidth: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "none",
-            fontFamily: 'Roboto, Helvetica, Arial, sans-serif', 
-            fontSize: '14px',
-            transition: "width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease",
-            margin: "0",
-            background: "#fff",
-            ...(harmoniousLayout.showBackground ? {
-              borderRight: "2px solid #d1d5db",
-              boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
-            } : {})
+          {/* Contenedor de tabla con fondo vertical */}
+          <div style={{ 
+            position: "relative", 
+            flex: verticalLayout.showVerticalBackground ? "0 0 auto" : "1 1 auto",
+            display: "flex",
+            flexDirection: "column"
           }}>
-            <thead>
-              <tr>
-                {tableLayout.orderedColumns.map((col, index) => {
-                  const position = tableLayout.positions[col.key];
-                  const isLastColumn = index === tableLayout.orderedColumns.length - 1;
-                  const style: React.CSSProperties = {
-                    minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
-                    width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
-                    position: 'sticky', // SIEMPRE sticky
-                    top: 0,             // SIEMPRE top 0
-                    background: '#f3f4f6', // Light gray background for all headers
-                    color: '#000000', // Black text for better contrast
-                    zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
-                    // Bordes base para todos los headers
-                    borderBottom: '1px solid #e5e7eb',
-                    // Borde derecho para separar columnas o delimitar área de datos
-                    ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : 
-                        (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
-                    // Estilos específicos para columnas fijadas (mantienen prioridad)
-                    ...(col.isPinnedLeft && position?.left !== undefined ? { 
-                      left: position.left, 
-                      boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', 
-                      borderRight: '2px solid #3b82f6',
-                      borderLeft: index > 0 ? '1px solid #e5e7eb' : 'none'
-                    } : {}),
-                    ...(col.isPinnedRight && position?.right !== undefined ? { 
-                      right: position.right, 
-                      boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', 
-                      borderLeft: '2px solid #8b5cf6',
-                      borderRight: !isLastColumn ? '1px solid #e5e7eb' : 'none'
-                    } : {}),
-                    paddingLeft: '2px', // Add 2px gap from left border
-                  };
-                  return (
-                    <th key={col.key} style={style}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                          {col.label}
-                          {/* Badge de filtros activos por columna */}
-                          {filtersByColumn[col.key] > 0 && (
-                            <span style={{
-                              marginLeft: 6,
-                              background: '#22c55e',
-                              color: '#fff',
-                              borderRadius: '50%',
-                              fontSize: 10,
-                              minWidth: 15,
-                              height: 15,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                              zIndex: 2
-                            }}>{filtersByColumn[col.key]}</span>
-                          )}
-                          {/* Flechas de ordenamiento */}
-                          {(() => {
-                            const sortRule = sortRules.find(r => r.column === col.key);
-                            if (sortRule) {
-                              return sortRule.direction === 'asc' ? (
-                                <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
-                              ) : (
-                                <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
-                              );
-                            }
-                            return null;
-                          })()}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, position: 'relative' }}>
-                          <span
-                            className="header-menu-trigger"
-                            style={{
-                              position: 'relative',
-                              opacity: 0,
-                              transition: 'opacity 0.15s',
-                              zIndex: 3,
-                              display: 'inline-flex',
-                            }}
-                          >
-                            <button
-                              ref={columnMenuKey === col.key ? buttonRef : undefined}
-                              style={{ 
-                                background: 'none', 
-                                border: 'none', 
-                                padding: 4, 
-                                cursor: 'pointer', 
-                                borderRadius: 4, 
-                                display: 'flex', 
-                                alignItems: 'center',
-                                opacity: 0.6,
-                                transition: 'opacity 0.15s'
-                              }}
-                              onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
-                              title='Opciones de columna'
-                              onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                              onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
-                            >
-                              <MoreVertical size={16} style={{ color: '#2563eb' }} />
-                            </button>
-                          </span>
-                          {/* Menú contextual de columna, solo para la columna activa */}
-                          {columnMenuAnchor && columnMenuKey === col.key && (
-                            <div
-                              ref={menuRef}
-                              style={{
-                                position: 'absolute',
-                                top: 32,
-                                right: 0,
-                                minWidth: 170,
-                                background: '#fff',
-                                border: '1.5px solid #e5e7eb',
-                                borderRadius: 8,
-                                boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                zIndex: 10000,
-                                fontSize: 14,
-                                padding: 4,
-                              }}
-                              onClick={e => e.stopPropagation()}
-                            >
-                              {/* Ordenar ascendente */}
-                              <div
-                                className="column-menu-item"
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 8,
-                                  padding: '7px 12px',
-                                  cursor: 'pointer',
-                                  borderRadius: 5,
-                                  color: '#555',
-                                  fontWeight: 400
-                                }}
-                                onClick={() => { handleSortOption(columnMenuKey, 'asc'); handleCloseColumnMenu(); }}
-                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                              >
-                                <ArrowUp size={16} /> Ordenar ascendente
-                              </div>
-                              {/* Ordenar descendente */}
-                              <div
-                                className="column-menu-item"
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 8,
-                                  padding: '7px 12px',
-                                  cursor: 'pointer',
-                                  borderRadius: 5,
-                                  color: '#555',
-                                  fontWeight: 400
-                                }}
-                                onClick={() => { handleSortOption(columnMenuKey, 'desc'); handleCloseColumnMenu(); }}
-                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                              >
-                                <ArrowDown size={16} /> Ordenar descendente
-                              </div>
-                              <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                              {/* Pin/unpin options (existing) */}
-                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <Pin size={16} /> Fijar a la izquierda
-                                </div>
-                              )}
-                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <PinOff size={16} /> Desfijar izquierda
-                                </div>
-                              )}
-                              {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
-                                </div>
-                              )}
-                              {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
-                                <div
-                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                  onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
-                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                  <PinOff size={16} /> Desfijar derecha
-                                </div>
-                              )}
-                              <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-                              {/* Ocultar columna */}
-                              <div
-                                className="column-menu-item column-menu-hide"
-                                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
-                                onClick={() => { toggleColumn(columnMenuKey); handleCloseColumnMenu(); }}
-                                onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
-                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                              >
-                                <EyeOff size={16} /> Ocultar columna
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div 
-                        style={{ 
-                          position: 'absolute', 
-                          top: 0, 
-                          right: 0, 
-                          width: 8, 
-                          height: '100%', 
-                          cursor: 'col-resize', 
-                          backgroundColor: 'transparent', 
-                          zIndex: 1000,
-                          transition: 'background-color 0.15s ease'
-                        }} 
-                        onMouseDown={(e) => handleResizeStart(col.key, e)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.08)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                      />
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', padding: 24 }}>Cargando...</td></tr>
-              )}
-              {error && (
-                <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', color: '#dc2626', padding: 24 }}>{error}</td></tr>
-              )}
-              {!loading && !error && paginatedData.map((row, i) => (
-                <tr 
-                  key={i} 
-                  style={{ 
-                    background: hoveredRow === i ? '#dbeafe' : (i % 2 === 0 ? '#fff' : '#f9fafb'),
-                    transition: 'background-color 0.15s ease'
-                  }}
-                  onMouseEnter={() => handleRowMouseEnter(i)}
-                  onMouseLeave={handleRowMouseLeave}
-                >
-                  {tableLayout.orderedColumns.map(col => {
+            {/* TABLA EXISTENTE AQUÍ */}
+            <table style={{ 
+              borderCollapse: "separate", 
+              borderSpacing: 0, 
+              width: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "100%", 
+              tableLayout: "fixed", 
+              minWidth: harmoniousLayout.useHarmonious ? "auto" : 900, 
+              maxWidth: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "none",
+              fontFamily: 'Roboto, Helvetica, Arial, sans-serif', 
+              fontSize: '14px',
+              transition: "width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease",
+              margin: "0",
+              background: "#fff",
+              ...(harmoniousLayout.showBackground ? {
+                borderRight: "2px solid #d1d5db",
+                boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
+              } : {}),
+              ...(verticalLayout.showVerticalBackground ? {
+                borderBottom: "2px solid #d1d5db"
+              } : {})
+            }}>
+              <thead>
+                <tr>
+                  {tableLayout.orderedColumns.map((col, index) => {
                     const position = tableLayout.positions[col.key];
+                    const isLastColumn = index === tableLayout.orderedColumns.length - 1;
                     const style: React.CSSProperties = {
                       minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
                       width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
-                      // Solo las celdas pinned son sticky horizontalmente
-                      position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
-                      // Bordes base para todas las celdas
+                      position: 'sticky', // SIEMPRE sticky
+                      top: 0,             // SIEMPRE top 0
+                      background: '#f3f4f6', // Light gray background for all headers
+                      color: '#000000', // Black text for better contrast
+                      zIndex: col.isPinnedLeft || col.isPinnedRight ? (1000 + (position?.zIndex || 0)) : 500,
+                      // Bordes base para todos los headers
                       borderBottom: '1px solid #e5e7eb',
                       // Borde derecho para separar columnas o delimitar área de datos
-                      ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? 
-                          { borderRight: '1px solid #e5e7eb' } : 
+                      ...(!isLastColumn ? { borderRight: '1px solid #e5e7eb' } : 
                           (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
-                      ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
-                      ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
-                      background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
-                      zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
-                      boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
                       // Estilos específicos para columnas fijadas (mantienen prioridad)
-                      ...(col.isPinnedLeft ? { 
+                      ...(col.isPinnedLeft && position?.left !== undefined ? { 
+                        left: position.left, 
+                        boxShadow: '2px 0 4px -1px rgba(0,0,0,0.1)', 
                         borderRight: '2px solid #3b82f6',
-                        borderLeft: tableLayout.orderedColumns.indexOf(col) > 0 ? '1px solid #e5e7eb' : 'none'
+                        borderLeft: index > 0 ? '1px solid #e5e7eb' : 'none'
                       } : {}),
-                      ...(col.isPinnedRight ? { 
+                      ...(col.isPinnedRight && position?.right !== undefined ? { 
+                        right: position.right, 
+                        boxShadow: '-2px 0 4px -1px rgba(0,0,0,0.1)', 
                         borderLeft: '2px solid #8b5cf6',
-                        borderRight: tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? '1px solid #e5e7eb' : 'none'
+                        borderRight: !isLastColumn ? '1px solid #e5e7eb' : 'none'
                       } : {}),
+                      paddingLeft: '2px', // Add 2px gap from left border
                     };
-                    const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
                     return (
-                      <td 
-                        key={col.key} 
-                        style={{ 
-                          ...style, 
-                          paddingLeft: '2px',
-                          cursor: 'pointer',
-                          outline: isSelected ? '2px solid #2563eb' : 'none',
-                          outlineOffset: '-2px',
-                          minHeight: '14px',
-                          verticalAlign: 'middle'
-                        }}
-                        onClick={() => handleCellClick(i, col.key)}
-                      >
-                        <div style={{ 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          whiteSpace: 'nowrap',
-                          minHeight: '10px',
-                          padding: '2px 4px'
-                        }}>
-                          {row[col.key] || '\u00A0'}
+                      <th key={col.key} style={style}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', position: 'relative' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                            {col.label}
+                            {/* Badge de filtros activos por columna */}
+                            {filtersByColumn[col.key] > 0 && (
+                              <span style={{
+                                marginLeft: 6,
+                                background: '#22c55e',
+                                color: '#fff',
+                                borderRadius: '50%',
+                                fontSize: 10,
+                                minWidth: 15,
+                                height: 15,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 600,
+                                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                                zIndex: 2
+                              }}>{filtersByColumn[col.key]}</span>
+                            )}
+                            {/* Flechas de ordenamiento */}
+                            {(() => {
+                              const sortRule = sortRules.find(r => r.column === col.key);
+                              if (sortRule) {
+                                return sortRule.direction === 'asc' ? (
+                                  <ArrowUp size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                                ) : (
+                                  <ArrowDown size={16} style={{ color: '#2563eb', marginLeft: 4 }} />
+                                );
+                              }
+                              return null;
+                            })()}
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, position: 'relative' }}>
+                            <span
+                              className="header-menu-trigger"
+                              style={{
+                                position: 'relative',
+                                opacity: 0,
+                                transition: 'opacity 0.15s',
+                                zIndex: 3,
+                                display: 'inline-flex',
+                              }}
+                            >
+                              <button
+                                ref={columnMenuKey === col.key ? buttonRef : undefined}
+                                style={{ 
+                                  background: 'none', 
+                                  border: 'none', 
+                                  padding: 4, 
+                                  cursor: 'pointer', 
+                                  borderRadius: 4, 
+                                  display: 'flex', 
+                                  alignItems: 'center',
+                                  opacity: 0.6,
+                                  transition: 'opacity 0.15s'
+                                }}
+                                onClick={e => { e.stopPropagation(); handleOpenColumnMenu(e, col.key); }}
+                                title='Opciones de columna'
+                                onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                                onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                              >
+                                <MoreVertical size={16} style={{ color: '#2563eb' }} />
+                              </button>
+                            </span>
+                            {/* Menú contextual de columna, solo para la columna activa */}
+                            {columnMenuAnchor && columnMenuKey === col.key && (
+                              <div
+                                ref={menuRef}
+                                style={{
+                                  position: 'absolute',
+                                  top: 32,
+                                  right: 0,
+                                  minWidth: 170,
+                                  background: '#fff',
+                                  border: '1.5px solid #e5e7eb',
+                                  borderRadius: 8,
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                  zIndex: 10000,
+                                  fontSize: 14,
+                                  padding: 4,
+                                }}
+                                onClick={e => e.stopPropagation()}
+                              >
+                                {/* Ordenar ascendente */}
+                                <div
+                                  className="column-menu-item"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '7px 12px',
+                                    cursor: 'pointer',
+                                    borderRadius: 5,
+                                    color: '#555',
+                                    fontWeight: 400
+                                  }}
+                                  onClick={() => { handleSortOption(columnMenuKey, 'asc'); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <ArrowUp size={16} /> Ordenar ascendente
+                                </div>
+                                {/* Ordenar descendente */}
+                                <div
+                                  className="column-menu-item"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    padding: '7px 12px',
+                                    cursor: 'pointer',
+                                    borderRadius: 5,
+                                    color: '#555',
+                                    fontWeight: 400
+                                  }}
+                                  onClick={() => { handleSortOption(columnMenuKey, 'desc'); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <ArrowDown size={16} /> Ordenar descendente
+                                </div>
+                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                {/* Pin/unpin options (existing) */}
+                                {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                  <div
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                    onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                  >
+                                    <Pin size={16} /> Fijar a la izquierda
+                                  </div>
+                                )}
+                                {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                  <div
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                    onClick={() => { pinLeft(columnMenuKey); handleCloseColumnMenu(); }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                  >
+                                    <PinOff size={16} /> Desfijar izquierda
+                                  </div>
+                                )}
+                                {!visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && !visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedLeft && (
+                                  <div
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                    onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                  >
+                                    <Pin size={16} style={{ transform: 'scaleX(-1)' }} /> Fijar a la derecha
+                                  </div>
+                                )}
+                                {visibleColumnsData.find(c => c.key === columnMenuKey)?.isPinnedRight && (
+                                  <div
+                                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                    onClick={() => { pinRight(columnMenuKey); handleCloseColumnMenu(); }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                  >
+                                    <PinOff size={16} /> Desfijar derecha
+                                  </div>
+                                )}
+                                <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
+                                {/* Ocultar columna */}
+                                <div
+                                  className="column-menu-item column-menu-hide"
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', cursor: 'pointer', borderRadius: 5, color: '#555', fontWeight: 400 }}
+                                  onClick={() => { toggleColumn(columnMenuKey); handleCloseColumnMenu(); }}
+                                  onMouseEnter={e => (e.currentTarget.style.background = '#e5e7eb')}
+                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <EyeOff size={16} /> Ocultar columna
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </td>
+                        <div 
+                          style={{ 
+                            position: 'absolute', 
+                            top: 0, 
+                            right: 0, 
+                            width: 8, 
+                            height: '100%', 
+                            cursor: 'col-resize', 
+                            backgroundColor: 'transparent', 
+                            zIndex: 1000,
+                            transition: 'background-color 0.15s ease'
+                          }} 
+                          onMouseDown={(e) => handleResizeStart(col.key, e)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.08)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
+                        />
+                      </th>
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', padding: 24 }}>Cargando...</td></tr>
+                )}
+                {error && (
+                  <tr><td colSpan={tableLayout.orderedColumns.length} style={{ textAlign: 'center', color: '#dc2626', padding: 24 }}>{error}</td></tr>
+                )}
+                {!loading && !error && paginatedData.map((row, i) => (
+                  <tr 
+                    key={i} 
+                    style={{ 
+                      background: hoveredRow === i ? '#dbeafe' : (i % 2 === 0 ? '#fff' : '#f9fafb'),
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={() => handleRowMouseEnter(i)}
+                    onMouseLeave={handleRowMouseLeave}
+                  >
+                    {tableLayout.orderedColumns.map(col => {
+                      const position = tableLayout.positions[col.key];
+                      const style: React.CSSProperties = {
+                        minWidth: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                        width: harmoniousLayout.useHarmonious ? (harmoniousLayout.columnWidths[col.key] ?? col.width) : col.width,
+                        // Solo las celdas pinned son sticky horizontalmente
+                        position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                        // Bordes base para todas las celdas
+                        borderBottom: '1px solid #e5e7eb',
+                        // Borde derecho para separar columnas o delimitar área de datos
+                        ...(tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? 
+                            { borderRight: '1px solid #e5e7eb' } : 
+                            (harmoniousLayout.showBackground || visibleColumns.length <= 5) ? { borderRight: '1px solid #d1d5db' } : {}),
+                        ...(col.isPinnedLeft && position?.left !== undefined ? { left: position.left } : {}),
+                        ...(col.isPinnedRight && position?.right !== undefined ? { right: position.right } : {}),
+                        background: col.isPinnedLeft ? '#f8fafc' : col.isPinnedRight ? '#faf5ff' : undefined,
+                        zIndex: (col.isPinnedLeft || col.isPinnedRight) && position ? position.zIndex : undefined,
+                        boxShadow: col.isPinnedLeft ? '2px 0 4px -1px rgba(0,0,0,0.1)' : col.isPinnedRight ? '-2px 0 4px -1px rgba(0,0,0,0.1)' : undefined,
+                        // Estilos específicos para columnas fijadas (mantienen prioridad)
+                        ...(col.isPinnedLeft ? { 
+                          borderRight: '2px solid #3b82f6',
+                          borderLeft: tableLayout.orderedColumns.indexOf(col) > 0 ? '1px solid #e5e7eb' : 'none'
+                        } : {}),
+                        ...(col.isPinnedRight ? { 
+                          borderLeft: '2px solid #8b5cf6',
+                          borderRight: tableLayout.orderedColumns.indexOf(col) < tableLayout.orderedColumns.length - 1 ? '1px solid #e5e7eb' : 'none'
+                        } : {}),
+                      };
+                      const isSelected = selectedCell?.rowIndex === i && selectedCell?.colKey === col.key;
+                      return (
+                        <td 
+                          key={col.key} 
+                          style={{ 
+                            ...style, 
+                            paddingLeft: '2px',
+                            cursor: 'pointer',
+                            outline: isSelected ? '2px solid #2563eb' : 'none',
+                            outlineOffset: '-2px',
+                            minHeight: '14px',
+                            verticalAlign: 'middle'
+                          }}
+                          onClick={() => handleCellClick(i, col.key)}
+                        >
+                          <div style={{ 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis', 
+                            whiteSpace: 'nowrap',
+                            minHeight: '10px',
+                            padding: '2px 4px'
+                          }}>
+                            {row[col.key] || '\u00A0'}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Fondo gris vertical */}
+            {verticalLayout.showVerticalBackground && verticalLayout.fillerHeight > 0 && (
+              <div 
+                style={{
+                  height: `${verticalLayout.fillerHeight}px`,
+                  background: "#f3f4f6",
+                  position: "relative",
+                  width: harmoniousLayout.useHarmonious ? harmoniousLayout.tableWidth : "100%",
+                  ...(harmoniousLayout.showBackground ? {
+                    borderRight: "2px solid #d1d5db",
+                    boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
+                  } : {}),
+                  backgroundImage: `
+                    linear-gradient(45deg, transparent 40%, rgba(156, 163, 175, 0.1) 50%, transparent 60%),
+                    linear-gradient(-45deg, transparent 40%, rgba(156, 163, 175, 0.1) 50%, transparent 60%)
+                  `,
+                  backgroundSize: "20px 20px",
+                  backgroundPosition: "0 0, 10px 10px"
+                }}
+              >
+                {/* Replicas de columnas para mantener estructura */}
+                <div style={{ display: "flex", height: "100%", width: "100%" }}>
+                  {tableLayout.orderedColumns.map((col, index) => {
+                    const position = tableLayout.positions[col.key];
+                    const isLastColumn = index === tableLayout.orderedColumns.length - 1;
+                    return (
+                      <div
+                        key={`filler-${col.key}`}
+                        style={{
+                          width: harmoniousLayout.useHarmonious ? 
+                            (harmoniousLayout.columnWidths[col.key] || col.width) : col.width,
+                          height: "100%",
+                          borderRight: !isLastColumn || harmoniousLayout.showBackground ? 
+                            "1px solid #d1d5db" : "none",
+                          position: col.isPinnedLeft || col.isPinnedRight ? 'sticky' : 'relative',
+                          ...(col.isPinnedLeft && position?.left !== undefined ? { 
+                            left: position.left,
+                            background: '#e5e7eb',
+                            borderRight: '2px solid #3b82f6',
+                            zIndex: position.zIndex
+                          } : {}),
+                          ...(col.isPinnedRight && position?.right !== undefined ? { 
+                            right: position.right,
+                            background: '#e5e7eb',
+                            borderLeft: '2px solid #8b5cf6',
+                            zIndex: position.zIndex
+                          } : {}),
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                {/* Indicador de estado */}
+                <div style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  color: "#9ca3af",
+                  fontSize: "12px",
+                  fontStyle: "italic",
+                  opacity: 0.6,
+                  pointerEvents: "none",
+                  textAlign: "center"
+                }}>
+                  {paginatedData.length === 0 ? "Sin resultados" : `${paginatedData.length} ${paginatedData.length === 1 ? 'fila' : 'filas'}`}
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Espacio restante */}
+          {verticalLayout.showVerticalBackground && (
+            <div style={{
+              flex: "1 1 auto",
+              background: "transparent",
+              minHeight: "20px"
+            }} />
+          )}
         </div>
       </div>
       {/* PAGINACIÓN */}
