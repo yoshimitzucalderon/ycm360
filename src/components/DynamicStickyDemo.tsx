@@ -1748,25 +1748,36 @@ function StickyProveedorTable() {
                       })}
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={tableLayout.orderedColumns.length} style={{
-                      background: '#fff',
-                      border: 'none',
-                      textAlign: 'center',
-                      padding: '48px 0',
-                      color: '#9ca3af',
-                      fontSize: 16,
-                      fontStyle: 'italic',
-                      letterSpacing: 0.5,
-                      opacity: 0.8
-                    }}>
-                      Sin resultados
-                    </td>
-                  </tr>
-                )}
+                ) : null}
               </tbody>
             </table>
+            {/* Mensaje "Sin resultados" centrado en pantalla */}
+            {!loading && !error && paginatedData.length === 0 && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  background: '#fff',
+                  padding: '48px 24px',
+                  borderRadius: 8,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  border: '1px solid #e5e7eb',
+                  zIndex: 2000,
+                  pointerEvents: 'none',
+                  color: '#9ca3af',
+                  fontSize: 16,
+                  fontStyle: 'italic',
+                  letterSpacing: 0.5,
+                  opacity: 0.85,
+                  textAlign: 'center',
+                  minWidth: 200
+                }}
+              >
+                Sin resultados
+              </div>
+            )}
           </div>
         </div>
       </div>
