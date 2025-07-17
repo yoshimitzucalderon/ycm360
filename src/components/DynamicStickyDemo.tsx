@@ -1424,12 +1424,13 @@ function StickyProveedorTable() {
               transition: "width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease",
               margin: "0",
               background: "#fff",
+              borderBottom: 'none', // Elimina la línea divisoria inferior
               ...(harmoniousLayout.showBackground ? {
                 borderRight: "2px solid #d1d5db",
                 boxShadow: "2px 0 8px -2px rgba(0,0,0,0.1)"
               } : {}),
               ...(verticalLayout.showVerticalBackground ? {
-                borderBottom: "2px solid #d1d5db"
+                // borderBottom: "2px solid #d1d5db" // Quitado para que no se muestre
               } : {})
             }}>
               <thead>
@@ -1750,7 +1751,7 @@ function StickyProveedorTable() {
                 ) : (
                   <tr>
                     <td colSpan={tableLayout.orderedColumns.length} style={{
-                      background: '#f3f4f6',
+                      background: '#fff',
                       border: 'none',
                       textAlign: 'center',
                       padding: '48px 0',

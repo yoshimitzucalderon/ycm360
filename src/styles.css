@@ -217,7 +217,6 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #f7f8fa;
 }
 
 .logo-link {
